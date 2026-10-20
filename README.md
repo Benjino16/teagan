@@ -1,5 +1,7 @@
 # Teagan
 
+[![CI](https://github.com/Benjino16/teagan/actions/workflows/ci.yml/badge.svg)](https://github.com/Benjino16/teagan/actions/workflows/ci.yml)
+
 A simple, self-hosted personal relationship manager: people, groups, facts, activities and open points.
 Mobile-first, with a clean, modern UI.
 Rust backend (axum, SQLite) with an embedded React frontend. One binary, one database file.
