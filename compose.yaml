@@ -1,0 +1,15 @@
+name: teagan
+
+services:
+  teagan:
+    image: ghcr.io/benjino16/teagan:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - data:/data
+    environment:
+      SECURE_COOKIES: "false"   # "true" when served via HTTPS only
+
+volumes:
+  data:

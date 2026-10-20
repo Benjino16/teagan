@@ -1,0 +1,6 @@
+# Build locally instead of pulling: COMPOSE_FILE=compose.yaml:compose.build.yaml
+services:
+  teagan:
+    image: teagan:local
+    build: .
+    pull_policy: build

@@ -1,0 +1,395 @@
+@base = http://localhost:3000/api
+
+### Health
+GET {{base}}/health
+
+### About
+GET {{base}}/about
+
+### List people
+GET {{base}}/people
+
+### Get person
+GET {{base}}/people/2
+
+### Create person
+POST {{base}}/people
+Content-Type: application/json
+
+{
+  "name": "  Mira ",
+  "nickname": "Mi",
+  "birthday": "--02-29",
+  "birthdayNote": "Likes books",
+  "reconnectDays": 14,
+  "impact": 3,
+  "focus": true
+}
+
+### Invalid person (expect 400)
+POST {{base}}/people
+Content-Type: application/json
+
+{ "name": "", "birthday": "2001-02-30", "impact": 7 }
+
+### Update person (no birthday → note is dropped too)
+PUT {{base}}/people/2
+Content-Type: application/json
+
+{
+  "name": "Lena",
+  "birthdayNote": "ignored",
+  "impact": 4
+}
+
+### Focus on yourself (expect 400)
+PUT {{base}}/people/1
+Content-Type: application/json
+
+{ "name": "Ben", "impact": 5, "focus": true }
+
+### Mark as deceased (date optional, full date only, not before the birthday)
+PUT {{base}}/people/2
+Content-Type: application/json
+
+{ "name": "Lena", "birthday": "1945-05-01", "impact": 4, "deceased": true, "diedOn": "2019-03-03" }
+
+### Date of death before the birthday (expect 400)
+PUT {{base}}/people/2
+Content-Type: application/json
+
+{ "name": "Lena", "birthday": "1945-05-01", "impact": 4, "deceased": true, "diedOn": "1944-12-31" }
+
+### Mark yourself as deceased (expect 400)
+PUT {{base}}/people/1
+Content-Type: application/json
+
+{ "name": "Ben", "impact": 5, "deceased": true }
+
+### Archive person (idempotent: keeps the first archivedAt)
+PUT {{base}}/people/2/archived
+Content-Type: application/json
+
+{ "archived": true }
+
+### Bring back from the archive
+PUT {{base}}/people/2/archived
+Content-Type: application/json
+
+{ "archived": false }
+
+### Archive yourself (expect 400)
+PUT {{base}}/people/1/archived
+Content-Type: application/json
+
+{ "archived": true }
+
+### Delete yourself (expect 400)
+DELETE {{base}}/people/1
+
+### Delete person (expect 204; facts and events only with them go too)
+DELETE {{base}}/people/3
+
+### Unknown person (expect 404)
+GET {{base}}/people/9999
+
+### Set photo (JPEG/PNG/WebP next to this file; max 512 × 512 px and 1 MB)
+PUT {{base}}/people/2/photo
+Content-Type: image/jpeg
+
+< ./photo.jpg
+
+### Photo thumb (128 px) – the `v` from the person's `photo` URL
+GET {{base}}/people/2/photo/thumb?v=any
+
+### Photo large (256 px)
+GET {{base}}/people/2/photo/large?v=any
+
+### Not an image (expect 400)
+PUT {{base}}/people/2/photo
+
+hello
+
+### Remove photo (expect 204, also without a photo)
+DELETE {{base}}/people/2/photo
+
+### List facts
+GET {{base}}/people/1/facts
+
+### Create fact
+POST {{base}}/people/1/facts
+Content-Type: application/json
+
+{
+  "label": "  Birthday ",
+  "value": "12.03."
+}
+
+### Validation error (expect 400)
+POST {{base}}/people/1/facts
+Content-Type: application/json
+
+{ "label": "", "value": "x" }
+
+### Unknown person (expect 404)
+GET {{base}}/people/9999/facts
+
+### Update fact
+PUT {{base}}/facts/1
+Content-Type: application/json
+
+{
+  "label": "Birthday",
+  "value": "13.03."
+}
+
+### Update unknown fact (expect 404)
+PUT {{base}}/facts/9999
+Content-Type: application/json
+
+{ "label": "x", "value": "y" }
+
+### Delete fact (expect 204)
+DELETE {{base}}/facts/1
+
+### Delete unknown fact (expect 404)
+DELETE {{base}}/facts/9999
+
+### List activities (newest first)
+GET {{base}}/activities
+
+### List activities of a person
+GET {{base}}/people/2/activities
+
+### List activities of a group (incl. its subgroups)
+GET {{base}}/groups/1/activities
+
+### Get activity
+GET {{base}}/activities/1
+
+### Create activity (point event with time)
+POST {{base}}/activities
+Content-Type: application/json
+
+{
+  "name": "Coffee",
+  "icon": "coffee",
+  "startDate": "2026-10-13T09:00",
+  "description": "Talked about her **new job**",
+  "location": "Café Fritz",
+  "impact": 2,
+  "reminder": false,
+  "participants": [
+    { "personId": 1 },
+    { "personId": 2, "impact": 3, "note": "Owes me a book" }
+  ]
+}
+
+### Create activity (range)
+POST {{base}}/activities
+Content-Type: application/json
+
+{
+  "name": "Interrail",
+  "icon": "train-front",
+  "startDate": "2026-07",
+  "endDate": "2026-08",
+  "impact": 4,
+  "participants": [{ "personId": 2 }]
+}
+
+### Create group activity (no people, own impact for the group)
+POST {{base}}/activities
+Content-Type: application/json
+
+{
+  "name": "Family gathering",
+  "icon": "people",
+  "startDate": "2026-12-25",
+  "impact": 3,
+  "participants": [],
+  "groups": [{ "groupId": 1, "impact": 4, "note": "Grandma's 90th" }]
+}
+
+### Validation errors (expect 400)
+POST {{base}}/activities
+Content-Type: application/json
+
+{
+  "name": "",
+  "startDate": "2026-13",
+  "impact": 2,
+  "participants": [{ "personId": 2, "impact": 9 }]
+}
+
+### End before start (expect 400)
+POST {{base}}/activities
+Content-Type: application/json
+
+{
+  "name": "x",
+  "startDate": "2026-10-13",
+  "endDate": "2026-10-01",
+  "impact": 2,
+  "participants": [{ "personId": 2 }]
+}
+
+### Unknown participant (expect 400)
+POST {{base}}/activities
+Content-Type: application/json
+
+{
+  "name": "x",
+  "startDate": "2026-10-13",
+  "impact": 2,
+  "participants": [{ "personId": 9999 }]
+}
+
+### Update activity (replaces fields and participants)
+PUT {{base}}/activities/1
+Content-Type: application/json
+
+{
+  "name": "Coffee",
+  "startDate": "2026-10-13",
+  "impact": 3,
+  "participants": [{ "personId": 1 }, { "personId": 3 }]
+}
+
+### Delete activity (expect 204; open points stay without source)
+DELETE {{base}}/activities/1
+
+### Unknown activity (expect 404)
+GET {{base}}/activities/9999
+
+### List open points of a person (done ones included)
+GET {{base}}/people/2/open-points
+
+### List open points of an activity
+GET {{base}}/activities/1/open-points
+
+### Get open point
+GET {{base}}/open-points/1
+
+### Create open point (no source)
+POST {{base}}/people/2/open-points
+Content-Type: application/json
+
+{ "text": "Ask how the exam went" }
+
+### Create open point from an activity (person must be a participant)
+POST {{base}}/people/2/open-points
+Content-Type: application/json
+
+{ "text": "Owes me a coffee", "activityId": 1 }
+
+### Person not a participant (expect 400)
+POST {{base}}/people/3/open-points
+Content-Type: application/json
+
+{ "text": "x", "activityId": 1 }
+
+### Update text (source and done state stay)
+PUT {{base}}/open-points/1
+Content-Type: application/json
+
+{ "text": "Ask how the exam went – and the results" }
+
+### Check off (idempotent: keeps the first doneAt)
+PUT {{base}}/open-points/1/done
+Content-Type: application/json
+
+{ "done": true }
+
+### Check back on
+PUT {{base}}/open-points/1/done
+Content-Type: application/json
+
+{ "done": false }
+
+### Delete open point (expect 204)
+DELETE {{base}}/open-points/1
+
+### Unknown open point (expect 404)
+GET {{base}}/open-points/9999
+
+### List groups (flat, main groups and subgroups)
+GET {{base}}/groups
+
+### Get group
+GET {{base}}/groups/1
+
+### Create main group
+POST {{base}}/groups
+Content-Type: application/json
+
+{ "name": "  University " }
+
+### Create subgroup
+POST {{base}}/groups
+Content-Type: application/json
+
+{ "name": "Freshers 2021", "parentId": 1 }
+
+### Subgroup of a subgroup (expect 400)
+POST {{base}}/groups
+Content-Type: application/json
+
+{ "name": "x", "parentId": 2 }
+
+### Rename / move group (members of a moved subgroup join the new main group)
+PUT {{base}}/groups/2
+Content-Type: application/json
+
+{ "name": "Freshers 2021", "parentId": 1 }
+
+### Group with subgroups becomes subgroup (expect 400)
+PUT {{base}}/groups/1
+Content-Type: application/json
+
+{ "name": "University", "parentId": 3 }
+
+### Archive group (idempotent; subgroups keep their own state and follow in the client)
+PUT {{base}}/groups/1/archived
+Content-Type: application/json
+
+{ "archived": true }
+
+### Bring group back from the archive
+PUT {{base}}/groups/1/archived
+Content-Type: application/json
+
+{ "archived": false }
+
+### Delete group (expect 204; subgroups and memberships go with it, people stay)
+DELETE {{base}}/groups/1
+
+### Unknown group (expect 404)
+GET {{base}}/groups/9999
+
+### List all memberships (group overview: counts, avatar stacks)
+GET {{base}}/memberships
+
+### List groups of a person
+GET {{base}}/people/2/groups
+
+### Add person to group (idempotent; a subgroup also adds its main group)
+PUT {{base}}/people/2/groups/2
+
+### Add yourself (expect 400)
+PUT {{base}}/people/1/groups/1
+
+### Remove person from group (idempotent; a main group also removes its subgroups)
+DELETE {{base}}/people/2/groups/1
+
+### Your own person
+GET {{base}}/people/self
+
+### Fact labels across all people, most used first (spelling as entered)
+GET {{base}}/facts/labels
+
+### Reorder facts (must list each of the person's facts once)
+PUT {{base}}/people/2/facts/order
+Content-Type: application/json
+
+{ "factIds": [3, 1, 2] }

@@ -1,0 +1,886 @@
+{
+  "_meta": {
+    "today": "2026-10-13",
+    "note": "Sample data for the prototype, aligned with the DB schema (groups without a time span)."
+  },
+  "people": [
+    {
+      "id": 1,
+      "name": "Me",
+      "isSelf": true
+    },
+    {
+      "id": 2,
+      "name": "Lena Hoffmann",
+      "nickname": "Lena",
+      "birthday": "2000-10-25",
+      "birthdayNote": "Wants a Polaroid photo album.\nFavorite flowers: ranunculus",
+      "reconnectDays": 28,
+      "impact": 5
+    },
+    {
+      "id": 3,
+      "name": "Jonas Weber",
+      "nickname": "Jonas",
+      "birthday": "--03-02",
+      "reconnectDays": 42,
+      "impact": 4,
+      "focus": true
+    },
+    {
+      "id": 4,
+      "name": "Mira Schulz",
+      "nickname": "Mira",
+      "reconnectDays": 14,
+      "impact": 3
+    },
+    {
+      "id": 5,
+      "name": "Tim Krause",
+      "nickname": "Tim",
+      "birthday": "1999-12-04",
+      "impact": 4
+    }
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "name": "University"
+    },
+    {
+      "id": 3,
+      "name": "Freshers 2021",
+      "parentId": 1
+    },
+    {
+      "id": 4,
+      "name": "Sports"
+    },
+    {
+      "id": 5,
+      "name": "Bouldering",
+      "parentId": 4
+    },
+    {
+      "id": 6,
+      "name": "Family"
+    }
+  ],
+  "memberships": [
+    {
+      "personId": 2,
+      "groupId": 1
+    },
+    {
+      "personId": 2,
+      "groupId": 3
+    },
+    {
+      "personId": 2,
+      "groupId": 4
+    },
+    {
+      "personId": 2,
+      "groupId": 5
+    },
+    {
+      "personId": 3,
+      "groupId": 4
+    },
+    {
+      "personId": 3,
+      "groupId": 5
+    },
+    {
+      "personId": 4,
+      "groupId": 1
+    },
+    {
+      "personId": 4,
+      "groupId": 3
+    },
+    {
+      "personId": 5,
+      "groupId": 1
+    },
+    {
+      "personId": 5,
+      "groupId": 3
+    }
+  ],
+  "activities": [
+    {
+      "id": 1,
+      "name": "Vacation in Lisbon",
+      "icon": "plane",
+      "startDate": "2026-10-17",
+      "endDate": "2026-10-24",
+      "impact": 3,
+      "reminder": true,
+      "description": "Wish them a good trip.",
+      "people": [
+        {
+          "personId": 2
+        },
+        {
+          "personId": 3,
+          "note": "Asked me on the way up for ideas for Lena's birthday present."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Photography class at the community college",
+      "icon": "camera",
+      "startDate": "2026-09-08",
+      "endDate": "2026-12",
+      "impact": 2,
+      "reminder": false,
+      "description": "Tuesdays, focus on darkroom work.",
+      "people": [
+        {
+          "personId": 2
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Coffee at Café Kollektiv",
+      "icon": "coffee",
+      "startDate": "2026-09-22",
+      "impact": 1,
+      "reminder": false,
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Phone call",
+      "icon": "phone",
+      "startDate": "2026-09-21",
+      "impact": 2,
+      "reminder": false,
+      "description": "Told me about her application to a UX agency. The interview is in early October.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Bouldering at Kletterwerk",
+      "icon": "trip",
+      "startDate": "2026-09-02",
+      "impact": 1,
+      "reminder": false,
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        },
+        {
+          "personId": 3
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Hiking weekend in the Harz",
+      "icon": "trip",
+      "startDate": "2026-08-08",
+      "endDate": "2026-08-10",
+      "impact": 4,
+      "reminder": false,
+      "description": "Brocken at sunrise, Jonas twisted his ankle.",
+      "location": "Harz",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        },
+        {
+          "personId": 3
+        },
+        {
+          "personId": 4
+        },
+        {
+          "personId": 5
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Game night at Mira's",
+      "icon": "people",
+      "startDate": "2026-06-14",
+      "impact": 2,
+      "reminder": false,
+      "description": "Lena won every round and didn't let anyone forget it.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        },
+        {
+          "personId": 3
+        },
+        {
+          "personId": 4,
+          "note": "Told me in the kitchen she's thinking about switching majors \u2013 nobody else knows yet."
+        },
+        {
+          "personId": 5
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Postcard from Ljubljana",
+      "icon": "mail",
+      "startDate": "2026-04-02",
+      "impact": 1,
+      "reminder": false,
+      "description": "Now hanging on the fridge.",
+      "people": [
+        {
+          "personId": 2
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Phone call",
+      "icon": "phone",
+      "startDate": "2026-03-14",
+      "impact": 2,
+      "reminder": false,
+      "description": "Train in Croatia got cancelled, nine hours by bus. Still sounded happy.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Video call from Vienna",
+      "icon": "video",
+      "startDate": "2026-02-21",
+      "impact": 1,
+      "reminder": false,
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Interrail through Europe",
+      "icon": "plane",
+      "startDate": "2026-02-03",
+      "endDate": "2026-04-18",
+      "impact": 4,
+      "reminder": false,
+      "description": "Twelve countries in eleven weeks, favorite city Ljubljana.",
+      "people": [
+        {
+          "personId": 2
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Farewell dinner before Interrail",
+      "icon": "coffee",
+      "startDate": "2026-01-30",
+      "impact": 2,
+      "reminder": false,
+      "description": "Planned the route together, Lena packed way too much.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        },
+        {
+          "personId": 3
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Lena's 25th birthday",
+      "icon": "cake",
+      "startDate": "2025-10-25",
+      "impact": 3,
+      "reminder": false,
+      "description": "Garden party despite the drizzle.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        },
+        {
+          "personId": 4
+        },
+        {
+          "personId": 5
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Lena and Jonas got together",
+      "icon": "heart",
+      "startDate": "2025-05",
+      "impact": 4,
+      "reminder": false,
+      "people": [
+        {
+          "personId": 2
+        },
+        {
+          "personId": 3
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Bachelor's degree",
+      "icon": "grad",
+      "startDate": "2024-09",
+      "impact": 5,
+      "reminder": false,
+      "description": "Thesis on accessibility in learning apps.",
+      "people": [
+        {
+          "personId": 2
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Moving to Leipzig",
+      "icon": "home",
+      "startDate": "2024",
+      "impact": 5,
+      "reminder": false,
+      "description": "New shared flat in Connewitz, moving party with pizza.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2,
+          "impact": 5
+        },
+        {
+          "personId": 5,
+          "impact": 2
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "name": "First bouldering session together",
+      "icon": "trip",
+      "startDate": "2022-03",
+      "impact": 2,
+      "reminder": false,
+      "description": "Lena was hooked right away, you were sore for three days.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Met during freshers' week",
+      "icon": "people",
+      "startDate": "2021-10",
+      "impact": 3,
+      "reminder": false,
+      "description": "Same team at the campus scavenger hunt.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        },
+        {
+          "personId": 4
+        },
+        {
+          "personId": 5
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Statistics exam",
+      "icon": "exam",
+      "startDate": "2026-10-20",
+      "impact": 2,
+      "reminder": true,
+      "description": "Wish good luck.",
+      "people": [
+        {
+          "personId": 4
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Year abroad in Lisbon",
+      "icon": "plane",
+      "startDate": "2025-10",
+      "endDate": "2026-10",
+      "impact": 4,
+      "reminder": false,
+      "description": "Erasmus at the Universidade de Lisboa, shared flat in the Alfama.",
+      "people": [
+        {
+          "personId": 5
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Visiting Tim in Lisbon",
+      "icon": "plane",
+      "startDate": "2026-04-10",
+      "endDate": "2026-04-17",
+      "impact": 4,
+      "reminder": false,
+      "description": "A week of pastéis, miradouros and far too steep alleys.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 5
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Day trip to Sintra",
+      "icon": "trip",
+      "startDate": "2026-04-12",
+      "impact": 2,
+      "reminder": false,
+      "description": "Pena Palace in the fog, still beautiful.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 5
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Fado night in the Alfama",
+      "icon": "star",
+      "startDate": "2026-04-15",
+      "impact": 1,
+      "reminder": false,
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 5
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Phone call",
+      "icon": "phone",
+      "startDate": "2025-12-20",
+      "impact": 2,
+      "reminder": false,
+      "description": "First Christmas away from home.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 5
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Video call",
+      "icon": "video",
+      "startDate": "2026-02-08",
+      "impact": 1,
+      "reminder": false,
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 5
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Catch-up over messages",
+      "icon": "mail",
+      "startDate": "2026-08-27",
+      "impact": 1,
+      "reminder": false,
+      "description": "Sent Harz photos back and forth, she's already planning the next hike.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Voice message ping-pong",
+      "icon": "mail",
+      "startDate": "2026-05-18",
+      "impact": 1,
+      "reminder": false,
+      "description": "Half an hour on possible topics for the master's thesis.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Phone call",
+      "icon": "phone",
+      "startDate": "2025-12-28",
+      "impact": 2,
+      "reminder": false,
+      "description": "Looking back on the year. She really wants to do Interrail in 2026.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "name": "Phone call",
+      "icon": "phone",
+      "startDate": "2026-08-24",
+      "impact": 1,
+      "reminder": false,
+      "description": "Ankle is healing, but no bouldering until October.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 3
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "name": "Coffee after his shift",
+      "icon": "coffee",
+      "startDate": "2026-09-29",
+      "impact": 1,
+      "reminder": false,
+      "description": "Told me about the Lisbon vacation he's planning with Lena.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 3
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "name": "Messages about Lena's gift",
+      "icon": "mail",
+      "startDate": "2026-10-06",
+      "impact": 1,
+      "reminder": false,
+      "description": "We're chipping in for a used film camera.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 3
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "name": "Study video call",
+      "icon": "video",
+      "startDate": "2026-07-02",
+      "impact": 1,
+      "reminder": false,
+      "description": "Swapped statistics summaries.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 4
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "name": "Catch-up over messages",
+      "icon": "mail",
+      "startDate": "2026-05-03",
+      "impact": 1,
+      "reminder": false,
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 4
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "name": "Voice message from Lisbon",
+      "icon": "mail",
+      "startDate": "2026-09-14",
+      "impact": 1,
+      "reminder": false,
+      "description": "Sounds like he doesn't want to come back at all.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 5
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "name": "Phone call",
+      "icon": "phone",
+      "startDate": "2025-11-09",
+      "impact": 2,
+      "reminder": false,
+      "description": "First weeks in Lisbon, finding a flat was chaos.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 5
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "name": "Lena and Jonas's housewarming party",
+      "icon": "party",
+      "startDate": "2026-08-29T21:00",
+      "impact": 3,
+      "reminder": false,
+      "description": "First party in their new flat, danced in the kitchen until 3.",
+      "location": "Connewitz, Leipzig",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        },
+        {
+          "personId": 3
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "name": "Coffee at the market hall",
+      "icon": "coffee",
+      "startDate": "2026-08-29T10:00",
+      "impact": 2,
+      "reminder": false,
+      "description": "Lena told me about the photography class.",
+      "people": [
+        {
+          "personId": 1
+        },
+        {
+          "personId": 2
+        }
+      ]
+    }
+  ],
+  "openPoints": [
+    {
+      "id": 1,
+      "personId": 2,
+      "text": "Ask if she wants to swap film rolls sometime",
+      "createdAt": "2026-10-03"
+    },
+    {
+      "id": 2,
+      "personId": 2,
+      "text": "How did the interview for the UX job go?",
+      "activityId": 4,
+      "createdAt": "2026-09-21"
+    },
+    {
+      "id": 3,
+      "personId": 2,
+      "text": "Send photos from the Harz weekend",
+      "activityId": 6,
+      "createdAt": "2026-08-11"
+    },
+    {
+      "id": 4,
+      "personId": 2,
+      "text": "Look up a climbing shoe recommendation",
+      "activityId": 5,
+      "createdAt": "2026-09-02",
+      "doneAt": "2026-09-10"
+    },
+    {
+      "id": 5,
+      "personId": 3,
+      "text": "How's the ankle?",
+      "activityId": 6,
+      "createdAt": "2026-08-11"
+    },
+    {
+      "id": 6,
+      "personId": 5,
+      "text": "Ask when exactly he's coming back",
+      "activityId": 25,
+      "createdAt": "2026-02-08"
+    },
+    {
+      "id": 7,
+      "personId": 3,
+      "text": "Look for a film camera in the classifieds",
+      "activityId": 31,
+      "createdAt": "2026-10-06"
+    },
+    {
+      "id": 8,
+      "personId": 2,
+      "text": "You owe her a coffee",
+      "createdAt": "2026-10-11"
+    }
+  ],
+  "facts": [
+    {
+      "id": 1,
+      "personId": 2,
+      "label": "Lives in",
+      "value": "Leipzig, Connewitz",
+      "sort": 0
+    },
+    {
+      "id": 2,
+      "personId": 2,
+      "label": "Job",
+      "value": "Working student in UX, looking for a full-time job",
+      "sort": 1
+    },
+    {
+      "id": 3,
+      "personId": 2,
+      "label": "Partner",
+      "value": "Jonas (bouldering)",
+      "sort": 2
+    },
+    {
+      "id": 4,
+      "personId": 2,
+      "label": "Studies",
+      "value": "Computer Science, master's",
+      "sort": 3
+    },
+    {
+      "id": 5,
+      "personId": 2,
+      "label": "Interests",
+      "value": "Bouldering, film photography, hiking",
+      "sort": 4
+    },
+    {
+      "id": 6,
+      "personId": 2,
+      "label": "Dislikes",
+      "value": "Cilantro, surprise parties",
+      "sort": 5
+    },
+    {
+      "id": 7,
+      "personId": 3,
+      "label": "Job",
+      "value": "Physiotherapist",
+      "sort": 0
+    },
+    {
+      "id": 8,
+      "personId": 5,
+      "label": "Sisters",
+      "value": "Anna (b. 2006), Clara (b. 2001)",
+      "sort": 0
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+/*
+ * Design tokens. The only place with raw values – components use
+ * only the utilities generated from them (bg-surface, text-muted, rounded-card …).
+ * The default Tailwind palette is deliberately disabled so no ad-hoc colors
+ * end up in components.
+ */
+@theme {
+  --color-*: initial;
+  --color-white: #ffffff;
+
+  /* Surfaces */
+  --color-canvas: #f3f4f6; /* Page background */
+  --color-surface: #ffffff; /* Cards */
+  --color-subtle: #e6e8ec; /* Segmented control, progress track, everyday icons */
+
+  /* Lines */
+  --color-line: #e3e5ea; /* Card borders */
+  --color-divider: #eef0f3; /* Dividers in lists */
+  --color-rail: #dde0e6; /* Timeline rail */
+  --color-control: #b8bdc7; /* Border of unchecked checkboxes */
+
+  /* Text */
+  --color-ink: #16181d; /* Primary text */
+  --color-ink-2: #3a3f49; /* Descriptions */
+  --color-muted: #5b606b; /* Meta, labels */
+  --color-faint: #737883; /* Done items */
+
+  /* Accent */
+  --color-accent: #2f5bd3;
+  --color-accent-strong: #1e3f99; /* Text on light accent */
+  --color-accent-soft: #e8eefc; /* Chips, icon backgrounds */
+  --color-accent-line: #c9d6f6; /* Border for impact 4, milestones */
+  --color-accent-dash: #9aafe6; /* Border of planned entries */
+  --color-on-accent: #f2f5fe; /* Body text on filled accent */
+  --color-on-accent-muted: #dce5fb; /* Meta on filled accent */
+
+  /* Warm (birthday) */
+  --color-warm-bg: #fbefdf;
+  --color-warm-text: #5c3109;
+  --color-warm-sub: #7a4410;
+  --color-warm-icon: #8a4a0e;
+  --color-warm-line: #f1dcc0; /* Dividers on warm background */
+
+  /* Alert (reconnect overdue) */
+  --color-alert-bg: #fde3d3;
+  --color-alert-line: #f6c3a3;
+  --color-alert-text: #6e2606;
+  --color-alert-sub: #86300a;
+  --color-alert-bar: #c2470e;
+  --color-alert-icon: #a33a0b;
+
+  --color-dark: #16181d; /* Add button */
+  --color-scrim: rgb(22 24 29 / 0.35); /* Backdrop behind the add menu */
+
+  /* Typography */
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", system-ui, sans-serif;
+
+  --text-*: initial;
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --text-base: 15px;
+  --text-lg: 16px;
+  --text-xl: 19px;
+  --text-2xl: 22px;
+  --text-3xl: 28px;
+
+  /* Radii */
+  --radius-card: 18px;
+  --radius-card-sm: 16px;
+  --radius-control: 14px; /* Segmented control, outer */
+  --radius-tile: 12px; /* Icon tiles 40 px, segment inner 10 px */
+  --radius-tile-sm: 10px;
+  --radius-check: 7px;
+
+  /* Shadows */
+  --shadow-fab: 0 8px 20px rgb(22 24 29 / 0.25);
+  --shadow-raised: 0 1px 3px rgb(22 24 29 / 0.12);
+
+  /* Layout */
+  --container-app: 430px; /* Phone-sized column – the whole app below the `laptop` breakpoint */
+  --container-content: 640px; /* Content column on wide screens */
+  --container-wide: 1040px; /* Two-column pages on wide screens, e.g. Today */
+  --container-pane: 320px; /* Side columns on wide screens (people list, timeline) */
+  --container-rail: 88px; /* Navigation at the left edge on wide screens */
+}
+
+@layer base {
+  html,
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--color-accent);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,47 @@
+[package]
+name = "teagan"
+version = "0.1.0"
+edition = "2024"
+description = "A simple, self-hosted personal relationship manager"
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/Benjino16/teagan"
+
+[dependencies]
+sqlx = { version = "0.9.0", features = ["runtime-tokio", "macros", "sqlite", "migrate", "chrono"], default-features = false }
+tokio = { version = "1.53.2", features = ["full"] }
+anyhow = "1.0.104"
+chrono = { version = "0.4", features = ["serde"] }
+dotenvy = "0.15.7"
+axum = { version = "0.8.9", features = ["macros"] }
+serde = { version = "1.0.229", features = ["derive"] }
+validator = { version = "0.21.0", features = ["derive"] }
+clap = { version = "4.6.7", features = ["derive", "env"] }
+rust-embed = "8.13.0"
+mime_guess = "2.0.5"
+image = { version = "0.25.10", default-features = false, features = ["jpeg", "png", "webp"] }
+blake3 = "1.8.7"
+argon2 = "0.6.0"
+rpassword = "7.5.4"
+getrandom = "0.4"
+axum-extra = { version = "0.12.6", features = ["cookie"] }
+totp-rs = { version = "6.0.0", features = ["gen_secret", "otpauth"] }
+qrcode = { version = "0.14.1", default-features = false, features = ["svg"] }
+
+# Only for the `demo` feature, see below
+toml = { version = "0.8", optional = true }
+tower = { version = "0.5.3", features = ["util"], optional = true }
+serde_json = { version = "1.0.154", optional = true }
+
+[features]
+# `teagan demo load` – a demo account with realistic data, for dev stages and
+# presentations. Never part of a release build: the account has a public password.
+demo = ["dep:toml", "dep:tower", "dep:serde_json"]
+
+[dev-dependencies]
+serde_json = "1.0.154"
+tower = { version = "0.5.3", features = ["util"] }
+
+# Optimize dependencies even in debug builds: image decoding and scaling are
+# 10–20× slower without it. Our own code stays quick to compile.
+[profile.dev.package."*"]
+opt-level = 3

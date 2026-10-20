@@ -1,0 +1,3 @@
+[alias]
+# `cargo demo` – (re)load the demo account into the database of DATABASE_URL
+demo = "run --features demo -- demo load --reset"

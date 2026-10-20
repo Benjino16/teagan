@@ -1,0 +1,6 @@
+target/
+teagan.db*
+.env
+.DS_Store
+.idea/
+**/CLAUDE.md

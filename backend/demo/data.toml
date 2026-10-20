@@ -1,0 +1,337 @@
+# Demo account – the hand-written core. `src/demo/generate.rs` adds the loose
+# acquaintances (colleagues, uni, climbing …) to the groups below.
+#
+# Dates are relative to the day of loading (format in `src/demo/data.rs`):
+#   "-12d", "+2d 19:30", "-3w" → that day · "today-4y" → this day 4 years ago
+#   "-14m" → that month · "-6y" → that year
+# Birthdays: { in_days = 9, age = 32 } · { in_days = 40 } (year unknown) · { age = 24 } (year only)
+# People and groups get a `key` to refer to them; `me` is the demo user.
+#
+# Every case the app knows should appear somewhere: overdue and upcoming
+# reconnects, focus, deceased, archived, subgroups, ranges, partial dates,
+# reminders, open points with and without an activity.
+
+[me]
+name = "Alex Weber"
+birthday = { in_days = 124, age = 31 }
+facts = [
+  ["Job", "UX designer at Nordlicht Studio"],
+  ["Lives in", "Hamburg-Ottensen"],
+]
+
+# --- Groups ------------------------------------------------------------------
+
+[[groups]]
+key = "family"
+name = "Family"
+
+[[groups]]
+key = "family-cousins"
+name = "Cousins"
+parent = "family"
+
+[[groups]]
+key = "work"
+name = "Work"
+
+[[groups]]
+key = "work-nordlicht"
+name = "Nordlicht Studio"
+parent = "work"
+
+[[groups]]
+key = "work-pixelwerk"
+name = "Pixelwerk"
+parent = "work"
+archived = true
+
+[[groups]]
+key = "uni"
+name = "University"
+
+[[groups]]
+key = "uni-freshers"
+name = "Freshers 2014"
+parent = "uni"
+
+[[groups]]
+key = "school"
+name = "School"
+
+[[groups]]
+key = "school-class"
+name = "Class of 2013"
+parent = "school"
+
+[[groups]]
+key = "climbing"
+name = "Climbing crew"
+
+[[groups]]
+key = "neighbours"
+name = "Neighbours"
+
+[[groups]]
+key = "choir"
+name = "Choir"
+archived = true
+
+# --- Close people ------------------------------------------------------------
+
+[[people]]
+key = "jonas"
+name = "Jonas Krüger"
+impact = 5
+reconnect_days = 14
+birthday = { in_days = 9, age = 32 }
+birthday_note = "Wants the green Patagonia fleece (L) – or concert tickets for Kraftklub"
+groups = ["school-class", "climbing"]
+facts = [
+  ["Job", "Mechanical engineer at Airbus"],
+  ["Partner", "Sophie, together since 2019"],
+  ["Lives in", "Hamburg-Barmbek"],
+  ["Hobbies", "Bouldering, collecting vinyl"],
+  ["Coffee", "Flat white with oat milk"],
+]
+open_points = [
+  { text = "Give back his tent" },
+  { text = "Lend him the Interrail guide", done = true },
+]
+
+[[people]]
+key = "mama"
+name = "Sabine Weber"
+nickname = "Mama"
+impact = 5
+reconnect_days = 7
+birthday = { in_days = 63, age = 61 }
+birthday_note = "Loves orchids. Maybe a weekend in Lübeck together?"
+groups = ["family"]
+facts = [
+  ["Lives in", "Lüneburg"],
+  ["Job", "Retired primary school teacher"],
+  ["Health", "Knee surgery in spring went well, still does physio"],
+  ["Likes", "Earl Grey, Scandinavian crime novels"],
+]
+open_points = [
+  { text = "Set up the new phone with her" },
+  { text = "Send the photos from Christmas", done = true },
+]
+
+[[people]]
+key = "mira"
+name = "Mira Schulz"
+impact = 4
+focus = true
+reconnect_days = 21
+birthday = { in_days = 40 }
+birthday_note = "Into ceramics – a voucher for the pottery café?"
+groups = ["choir"]
+facts = [
+  ["Met", "In the choir, autumn 2024"],
+  ["Job", "Freelance illustrator"],
+  ["Lives in", "St. Pauli"],
+  ["Dog", "Greyhound named Pepper"],
+]
+open_points = [{ text = "Ask for the link to her ceramics course" }]
+
+# --- Special cases -----------------------------------------------------------
+
+[[people]]
+key = "papa"
+name = "Thomas Weber"
+nickname = "Papa"
+impact = 4
+birthday = { in_days = -75, age = 64 }
+groups = ["family"]
+facts = [["Hobbies", "Sailing on the Elbe"]]
+
+[[people]]
+key = "opa"
+name = "Heinz Weber"
+nickname = "Opa"
+impact = 4
+birthday = "1938-03-14"
+deceased = true
+died_on = "-430d"
+groups = ["family"]
+facts = [["Remember", "Taught me chess and how to whistle"]]
+
+[[people]]
+key = "tobias"
+name = "Tobias Brandt"
+impact = 2
+reconnect_days = 90
+archived = true
+facts = [["Met", "Shared a flat during my studies"]]
+
+# --- Activities --------------------------------------------------------------
+
+# Jonas
+[[activities]]
+name = "Dinner at Jonas & Sophie's"
+icon = "utensils"
+start = "-9d 19:30"
+impact = 4
+location = "Barmbek"
+people = ["me", { key = "jonas", note = "Finally showed me the new apartment" }]
+open_points = [{ person = "jonas", text = "Send him the hostel link for Lisbon" }]
+
+[[activities]]
+name = "Bouldering"
+icon = "dumbbell"
+start = "-23d"
+people = ["me", "jonas"]
+groups = ["climbing"]
+
+[[activities]]
+name = "Phone call"
+icon = "phone"
+start = "-40d"
+people = ["me", "jonas"]
+
+[[activities]]
+name = "Interrail through Italy"
+icon = "train"
+start = "-850d"
+end = "-834d"
+impact = 5
+description = """
+Milan → Florence → Rome → Naples, with a detour to Cinque Terre.
+
+- Missed the night train in Bologna
+- Best pizza: *Da Michele*
+"""
+people = ["me", "jonas"]
+
+# "On this day" on Today: exactly 1 and 4 years ago
+[[activities]]
+name = "Sailing on the Alster"
+icon = "ship"
+start = "today-1y"
+impact = 3
+location = "Segelschule Pieper"
+people = ["me", "jonas", "mira"]
+
+[[activities]]
+name = "Moved to Hamburg"
+icon = "home"
+start = "today-4y"
+impact = 5
+description = "Jonas drove the van, Mama brought soup for everyone."
+people = ["me", "jonas", "mama"]
+
+[[activities]]
+name = "Started at Airbus"
+icon = "briefcase"
+start = "-14m"
+impact = 3
+people = ["jonas"]
+
+[[activities]]
+name = "Jonas's birthday party"
+icon = "party"
+start = "+9d 20:00"
+reminder = true
+location = "Molotow Bar"
+people = ["me", "jonas"]
+
+# Mama
+[[activities]]
+name = "Phone call"
+icon = "phone"
+start = "-10d 18:00"
+people = ["me", "mama"]
+open_points = [{ person = "mama", text = "Look up train times for her visit", done = true }]
+
+[[activities]]
+name = "Phone call"
+icon = "phone"
+start = "-18d"
+people = ["me", "mama"]
+
+[[activities]]
+name = "Weekend in Lüneburg"
+icon = "home"
+start = "-45d"
+end = "-44d"
+impact = 4
+people = ["me", "mama", "papa"]
+groups = ["family"]
+
+[[activities]]
+name = "Mama visits Hamburg"
+icon = "train"
+start = "+16d"
+end = "+18d"
+reminder = true
+people = ["me", "mama"]
+
+[[activities]]
+name = "Farewell to Opa"
+icon = "flower"
+start = "-422d"
+impact = 5
+location = "St. Johannis, Lüneburg"
+people = ["me", "mama", "papa"]
+groups = [{ key = "family", note = "The whole family came" }]
+
+# Mira
+[[activities]]
+name = "Coffee at Mira's favourite place"
+icon = "coffee"
+start = "-30d 15:00"
+location = "Café Pfeffer"
+people = ["me", "mira"]
+open_points = [{ person = "mira", text = "Recommend »Tomorrow, and Tomorrow, and Tomorrow«" }]
+
+[[activities]]
+name = "Illustration exhibition"
+icon = "palette"
+start = "-60d"
+impact = 3
+description = "Mira had three pieces in the group show."
+people = ["me", { key = "mira", impact = 4 }]
+
+[[activities]]
+name = "Christmas concert"
+icon = "music"
+start = "-300d"
+groups = ["choir"]
+
+[[activities]]
+name = "Dinner at Mira's"
+icon = "utensils"
+start = "+3d 19:30"
+reminder = true
+people = ["me", "mira"]
+
+# Yourself
+[[activities]]
+name = "Semester abroad in Lisbon"
+icon = "plane"
+start = "-121m"
+end = "-116m"
+impact = 4
+people = ["me"]
+
+[[activities]]
+name = "Moved to Hamburg"
+icon = "key"
+start = "-5y"
+impact = 4
+people = ["me"]
+
+[[activities]]
+name = "First day at Nordlicht Studio"
+icon = "briefcase"
+start = "-2y"
+impact = 3
+people = ["me"]
+groups = ["work-nordlicht"]
+
+[[activities]]
+name = "Moved out of the shared flat"
+icon = "home"
+start = "-7y"
+people = ["me", "tobias"]

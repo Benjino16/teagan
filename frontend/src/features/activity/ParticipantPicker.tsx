@@ -1,0 +1,233 @@
+import { clsx } from 'clsx'
+import { ChevronRight, Plus } from 'lucide-react'
+import { useId, useState } from 'react'
+import {
+  Avatar,
+  Field,
+  ImpactDots,
+  inputStyles,
+  ListCard,
+  listRowStyles,
+  MediaRow,
+  RatingInput,
+  Switch,
+  TextInput,
+} from '../../components/ui'
+import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
+import type { ActivityParticipant, Id, Impact, Person, PhotoUrls } from '../../domain/model'
+import { displayName, isArchived } from '../../domain/people'
+import { matchesSearch } from '../../domain/search'
+
+const MAX_RESULTS = 6
+const IMPACT_LEVELS = Object.values(ACTIVITY_IMPACT_LEVELS)
+
+interface Props {
+  self: Person
+  /** All people except yourself. */
+  people: Person[]
+  participants: ActivityParticipant[]
+  onChange: (participants: ActivityParticipant[]) => void
+  /** Impact of the event – applies to everyone without their own value. */
+  impact: Impact
+}
+
+/**
+ * Participants as a list like in the detail view. The chevron expands a
+ * per-person impact that overrides the event's and a note for this person only.
+ */
+export function ParticipantPicker({ self, people, participants, onChange, impact }: Props) {
+  const [query, setQuery] = useState('')
+  const [expanded, setExpanded] = useState<Id | null>(null)
+  const byId = new Map([self, ...people].map((p) => [p.id, p]))
+  const withSelf = participants.some((p) => p.personId === self.id)
+
+  const chosen = new Set(participants.map((p) => p.personId))
+  // Archived people can't be added, but stay listed where they already take part
+  const results = query.trim()
+    ? people
+        .filter((p) => !chosen.has(p.id) && !isArchived(p) && matchesSearch(query, [p.name, p.nickname]))
+        .slice(0, MAX_RESULTS)
+    : []
+
+  function update(personId: Id, patch: Partial<ActivityParticipant>) {
+    onChange(participants.map((p) => (p.personId === personId ? { ...p, ...patch } : p)))
+  }
+
+  function remove(personId: Id) {
+    onChange(participants.filter((p) => p.personId !== personId))
+  }
+
+  return (
+    <fieldset className="flex flex-col gap-3">
+      <legend className="mb-1.5 text-xs font-medium tracking-wide text-muted uppercase">Participants</legend>
+
+      <Switch
+        label="I was there"
+        checked={withSelf}
+        onChange={(on) => (on ? onChange([{ personId: self.id, impact: null, note: null }, ...participants]) : remove(self.id))}
+      />
+
+      {participants.length > 0 && (
+        <ListCard aria-label="Participants">
+          {participants.map((participant) => {
+            const person = byId.get(participant.personId)
+            const isSelf = participant.personId === self.id
+            const name = isSelf ? 'You' : person ? person.name : 'Unknown'
+            return (
+              <ParticipantRow
+                key={participant.personId}
+                name={name}
+                photo={person?.photo ?? null}
+                forName={isSelf ? 'you' : person ? displayName(person) : name}
+                override={participant.impact}
+                impact={impact}
+                note={participant.note ?? ''}
+                open={expanded === participant.personId}
+                onToggle={() => setExpanded(expanded === participant.personId ? null : participant.personId)}
+                onImpactChange={(value) => update(participant.personId, { impact: value })}
+                onNoteChange={(value) => update(participant.personId, { note: value })}
+                onRemove={() => remove(participant.personId)}
+              />
+            )
+          })}
+        </ListCard>
+      )}
+
+      <TextInput
+        type="search"
+        aria-label="Add person"
+        placeholder="Add person …"
+        autoComplete="off"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+
+      {query.trim() && (
+        <ListCard aria-label="Search results">
+          {results.length === 0 && <li className="px-4 py-3 text-md text-muted">No one found.</li>}
+          {results.map((person) => (
+            <li key={person.id}>
+              <button
+                type="button"
+                onClick={() => {
+                  onChange([...participants, { personId: person.id, impact: null, note: null }])
+                  setQuery('')
+                }}
+                className={clsx(listRowStyles, 'py-2.5 hover:bg-canvas focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent')}
+              >
+                <MediaRow
+                  leading={<Avatar name={person.name} photo={person.photo} size="md" />}
+                  title={person.name}
+                  trailing={<Plus aria-hidden="true" size={18} className="flex-none text-accent" />}
+                />
+              </button>
+            </li>
+          ))}
+        </ListCard>
+      )}
+    </fieldset>
+  )
+}
+
+interface RowProps {
+  name: string
+  photo: PhotoUrls | null
+  /** “for Lena” / “for you” */
+  forName: string
+  override: Impact | null
+  impact: Impact
+  /** Raw input – trimmed on submit. */
+  note: string
+  open: boolean
+  onToggle: () => void
+  onImpactChange: (value: Impact | null) => void
+  onNoteChange: (value: string) => void
+  onRemove: () => void
+}
+
+function ParticipantRow({
+  name,
+  photo,
+  forName,
+  override,
+  impact,
+  note,
+  open,
+  onToggle,
+  onImpactChange,
+  onNoteChange,
+  onRemove,
+}: RowProps) {
+  const panelId = useId()
+
+  return (
+    <li>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={onToggle}
+        className={clsx(
+          listRowStyles,
+          'hover:bg-canvas focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
+        )}
+      >
+        <MediaRow
+          leading={<Avatar name={name} photo={photo} size="md" />}
+          title={name}
+          subtitle={
+            override !== null ? (
+              <ImpactDots value={override} label={`Own impact: ${ACTIVITY_IMPACT_LEVELS[override].label}`} className="py-1" />
+            ) : null
+          }
+          trailing={
+            <ChevronRight
+              aria-hidden="true"
+              size={18}
+              className={clsx('flex-none text-muted transition-transform', open && 'rotate-90')}
+            />
+          }
+        >
+          {note.trim() && (
+            <span className="line-clamp-3 text-sm whitespace-pre-line text-muted wrap-anywhere">{note.trim()}</span>
+          )}
+        </MediaRow>
+      </button>
+
+      {open && (
+        <div id={panelId} className="flex flex-col gap-3 px-4 pb-4">
+          <RatingInput
+            label={`Impact for ${forName}`}
+            levels={IMPACT_LEVELS}
+            value={override ?? impact}
+            onChange={(value) => onImpactChange(value as Impact)}
+          />
+          <Field label={`Note for ${forName}`} hint={`Only shown on this event and in ${forName === 'you' ? 'your' : `${forName}'s`} timeline.`}>
+            {(id) => (
+              <textarea
+                id={id}
+                rows={3}
+                className={`${inputStyles} py-3 leading-normal`}
+                value={note}
+                onChange={(e) => onNoteChange(e.target.value)}
+              />
+            )}
+          </Field>
+          <div className="-mx-2 flex flex-wrap gap-1">
+            {override !== null && (
+              <button type="button" onClick={() => onImpactChange(null)} className={textButton}>
+                Same as event
+              </button>
+            )}
+            <button type="button" onClick={onRemove} className={clsx(textButton, 'text-alert-text')}>
+              Remove
+            </button>
+          </div>
+        </div>
+      )}
+    </li>
+  )
+}
+
+const textButton =
+  'min-h-11 rounded-tile-sm px-2 text-md font-semibold text-accent hover:bg-canvas focus-visible:outline-2 focus-visible:outline-accent'
