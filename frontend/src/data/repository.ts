@@ -42,6 +42,8 @@ export interface Repository {
   logout(): Promise<void>
   /** Creates the first account and logs it in; `not_found` once any account exists.  /setup */
   setup(input: SetupInput): Promise<void>
+  /** The demo account's login – `null` unless this is a demo build with the demo loaded.  /demo */
+  getDemoLogin(): Promise<LoginInput | null>
 
   // Version and source code                        /about
   getAbout(): Promise<About>

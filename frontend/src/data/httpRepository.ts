@@ -66,6 +66,10 @@ export class HttpRepository implements Repository {
     return this.request<void>('POST', '/setup', input)
   }
 
+  getDemoLogin() {
+    return this.orNull(this.request<LoginInput>('GET', '/demo'))
+  }
+
   getAbout() {
     return this.request<About>('GET', '/about')
   }
