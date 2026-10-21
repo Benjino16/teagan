@@ -2,7 +2,9 @@ import { type FormEvent, useState } from 'react'
 import { Button, Field, TextButton, TextInput } from '../components/ui'
 import { useLogin, useLoginWithCode } from '../data/queries'
 import { RepositoryError } from '../data/repository'
+import type { LoginInput } from '../domain/model'
 import { AuthScreen } from '../features/auth/AuthScreen'
+import { DemoLogin } from '../features/auth/DemoLogin'
 
 /**
  * The login screen. A wrong login keeps the username. With
@@ -20,17 +22,19 @@ export function LoginPage() {
 
   function submitPassword(event: FormEvent) {
     event.preventDefault()
+    logIn({ username, password })
+  }
+
+  /** From the form or the demo button – both go on to the code step alike. */
+  function logIn(input: LoginInput) {
     setNotice(null)
-    login.mutate(
-      { username, password },
-      {
-        onSuccess: (result) => {
-          setPassword('')
-          if (result.totpRequired) setAskCode(true)
-        },
-        onError: () => setPassword(''),
+    login.mutate(input, {
+      onSuccess: (result) => {
+        setPassword('')
+        if (result.totpRequired) setAskCode(true)
       },
-    )
+      onError: () => setPassword(''),
+    })
   }
 
   function submitCode(event: FormEvent) {
@@ -117,6 +121,7 @@ export function LoginPage() {
         <Button type="submit" disabled={login.isPending || !username.trim() || !password}>
           Log in
         </Button>
+        <DemoLogin onLogin={logIn} disabled={login.isPending} />
       </form>
     </AuthScreen>
   )

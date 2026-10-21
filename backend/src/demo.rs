@@ -16,11 +16,16 @@
 //! - `data.toml` holds the hand-written core (the close people and their
 //!   stories), `generate` adds the bulk of loose acquaintances. Both produce
 //!   the same `Dataset`, so there is only one way into the database.
+//! - A running demo build also offers the login and guards the account,
+//!   see `server`.
 
 mod api;
 mod data;
 mod generate;
 mod seed;
+mod server;
+
+pub use server::{DemoConfig, extend};
 
 use anyhow::{Context, bail};
 use chrono::Local;

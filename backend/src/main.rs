@@ -49,6 +49,10 @@ struct Config {
     /// command-line arguments show up in the process list.
     #[arg(long, env = "INITIAL_PASSWORD", hide_env_values = true)]
     initial_password: Option<String>,
+
+    #[cfg(feature = "demo")]
+    #[command(flatten)]
+    demo: demo::DemoConfig,
 }
 
 #[derive(Subcommand)]
@@ -88,7 +92,10 @@ async fn serve(pool: SqlitePool, config: Config) -> anyhow::Result<()> {
         println!("no account yet – open the app in the browser to create the first one");
     }
 
-    let router = http::router(AppState::new(pool, config.secure_cookies));
+    let state = AppState::new(pool, config.secure_cookies);
+    let router = http::router(state.clone());
+    #[cfg(feature = "demo")]
+    let router = demo::extend(router, state, &config.demo);
     let address = format!("0.0.0.0:{}", config.port);
     let listener = tokio::net::TcpListener::bind(&address)
         .await

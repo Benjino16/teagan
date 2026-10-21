@@ -48,7 +48,7 @@ cd backend && cargo run
 cd frontend && npm install && npm run dev
 ```
 
-`cargo demo` loads a demo account with realistic data.
+`cargo demo` loads a demo account with realistic data. A server built with the `demo` feature then offers "Try the demo" on the login screen and keeps the demo account from changing its password or two-factor login – `DEMO_ACCOUNT_CHANGES=true` allows it, e.g. to show the setup in a presentation.
 
 To build the Docker image locally instead of pulling it: `COMPOSE_FILE=compose.yaml:compose.build.yaml docker compose up -d --build`.
 

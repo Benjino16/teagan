@@ -27,6 +27,7 @@ import { useRepository } from './RepositoryContext'
 /** Central query keys; prefixes allow targeted invalidation. */
 export const queryKeys = {
   auth: ['auth'] as const,
+  demoLogin: ['demoLogin'] as const,
   about: ['about'] as const,
   account: ['account'] as const,
   people: ['people'] as const,
@@ -70,6 +71,17 @@ export function useLoginWithCode() {
   return useMutation({
     mutationFn: (code: string) => repo.loginWithCode(code),
     onSuccess: () => setLoggedIn(queryClient, true),
+  })
+}
+
+/** Once per page load – a missing demo is the normal case, not worth a retry. */
+export function useDemoLogin() {
+  const repo = useRepository()
+  return useQuery({
+    queryKey: queryKeys.demoLogin,
+    queryFn: () => repo.getDemoLogin(),
+    staleTime: Infinity,
+    retry: false,
   })
 }
 
