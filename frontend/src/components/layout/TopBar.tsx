@@ -1,6 +1,6 @@
 import { clsx } from 'clsx'
 import { ChevronLeft } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { type ReactNode, useEffect, useEffectEvent } from 'react'
 import { useBack } from '../../app/useBack'
 import { IconButton } from '../ui'
 import { TOP_BAR_HEIGHT } from './useInView'
@@ -21,6 +21,25 @@ interface Props {
 export function TopBar({ backTo, title, subtitle, showTitle = true, trailing }: Props) {
   const back = useBack(backTo ?? '/')
   const scrolled = useScrolled()
+
+  // Escape goes back like the button. Whoever handles it first (a sheet, the add menu,
+  // clearing a search) prevents the default; in a text field it only leaves the field.
+  const onEscape = useEffectEvent((event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || event.defaultPrevented || event.isComposing) return
+    if (document.querySelector('dialog[open]')) return
+    const target = event.target
+    if (target instanceof HTMLElement && target.matches('input, textarea, select, [contenteditable="true"]')) {
+      target.blur()
+      return
+    }
+    back()
+  })
+
+  useEffect(() => {
+    if (!backTo) return
+    window.addEventListener('keydown', onEscape)
+    return () => window.removeEventListener('keydown', onEscape)
+  }, [backTo])
 
   return (
     <header

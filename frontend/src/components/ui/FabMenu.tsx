@@ -24,11 +24,14 @@ export function FabMenu({ label, items, className }: Props) {
 
   useEffect(() => {
     if (!open) return
+    // Capture phase and preventDefault: closing the menu must not also go back (TopBar)
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false)
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      setOpen(false)
     }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    window.addEventListener('keydown', onKeyDown, { capture: true })
+    return () => window.removeEventListener('keydown', onKeyDown, { capture: true })
   }, [open])
 
   return (
