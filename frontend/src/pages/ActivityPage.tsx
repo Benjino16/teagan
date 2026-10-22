@@ -295,7 +295,7 @@ function ActivityRow({ activity, withYear, nested }: { activity: Activity; withY
   return (
     <Link to={`/activities/${activity.id}`} className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
       <MediaRow
-        leading={<IconBadge icon={activityIcon(activity.icon).Icon} size={36} shape="circle" tone="canvas" />}
+        leading={<IconBadge icon={activityIcon(activity.icon).Icon} size={36} shape="circle" tone="neutral" />}
         title={activity.name}
         subtitle={nested > 0 ? `${date} · ${nested} ${nested === 1 ? 'event' : 'events'}` : date}
         trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}

@@ -2,7 +2,7 @@ import { clsx } from 'clsx'
 import type { LucideIcon } from 'lucide-react'
 
 export type IconBadgeSize = 28 | 32 | 36 | 40 | 44
-export type IconBadgeTone = 'subtle' | 'canvas' | 'surface' | 'accent-soft' | 'accent' | 'on-warm' | 'on-alert'
+export type IconBadgeTone = 'subtle' | 'neutral' | 'surface' | 'accent-soft' | 'accent' | 'on-warm' | 'on-alert'
 
 const sizes: Record<IconBadgeSize, { box: string; icon: number; tile: string }> = {
   28: { box: 'size-7', icon: 14, tile: 'rounded-tile-sm' },
@@ -14,7 +14,7 @@ const sizes: Record<IconBadgeSize, { box: string; icon: number; tile: string }> 
 
 const tones: Record<IconBadgeTone, string> = {
   subtle: 'bg-subtle text-muted',
-  canvas: 'bg-canvas text-ink-2',
+  neutral: 'bg-tile text-ink-2',
   surface: 'bg-surface text-ink-2 border border-line',
   'accent-soft': 'bg-accent-soft text-accent-ink',
   accent: 'bg-accent text-on-accent',

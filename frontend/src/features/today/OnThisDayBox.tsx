@@ -42,7 +42,7 @@ export function OnThisDayBox({ memories, selfId, nameOf, groupNameOf }: Props) {
                 className={clsx(listRowStyles, 'text-ink no-underline hover:bg-hover')}
               >
                 <MediaRow
-                  leading={<IconBadge icon={activityIcon(activity.icon).Icon} size={36} tone="canvas" />}
+                  leading={<IconBadge icon={activityIcon(activity.icon).Icon} size={36} tone="neutral" />}
                   title={activity.name}
                   subtitle={others ? `with ${others}` : undefined}
                   trailing={<span className="flex-none text-sm text-muted">{pluralize(yearsAgo, 'year')} ago</span>}

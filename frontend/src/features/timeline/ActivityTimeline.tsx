@@ -187,7 +187,7 @@ function EndItem({ activity, impact, lanes, today }: { activity: Activity; impac
       <LaneColumns lanes={lanes} anchor={14} bubble={28} />
       <div className="flex min-w-0 flex-auto gap-3">
         <Rail>
-          <IconBadge icon={activityIcon(activity.icon).Icon} size={28} shape="circle" tone={emphasis ? 'accent-soft' : 'canvas'} />
+          <IconBadge icon={activityIcon(activity.icon).Icon} size={28} shape="circle" tone={emphasis ? 'accent-soft' : 'neutral'} />
         </Rail>
         <div className="min-w-0 flex-auto pb-3.5">
           <article
@@ -333,7 +333,7 @@ function During({ activities, inverted }: { activities: Activity[]; inverted: bo
               to={`/activities/${activity.id}`}
               className="relative z-10 flex items-start gap-2.5 rounded-tile-sm py-1.5 text-inherit no-underline focus-visible:outline-2 focus-visible:outline-accent"
             >
-              <IconBadge icon={activityIcon(activity.icon).Icon} size={28} shape="circle" tone="canvas" />
+              <IconBadge icon={activityIcon(activity.icon).Icon} size={28} shape="circle" tone="neutral" />
               <div className="flex min-w-0 flex-auto flex-col gap-0.5">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-md font-semibold">{activity.name}</span>
