@@ -1,6 +1,6 @@
 import { SectionHeader, ShowMore, usePreview } from '../../components/ui'
 import type { Activity, Id, IsoDate } from '../../domain/model'
-import { participantsText } from '../../domain/people'
+import { companyText } from '../../domain/people'
 import { UpcomingActivityCard } from '../activity/UpcomingActivityCard'
 import { TODAY_PREVIEW } from './preview'
 
@@ -25,11 +25,7 @@ export function UpcomingFeed({ activities, selfId, nameOf, groupNameOf, today }:
           key={activity.id}
           activity={activity}
           today={today}
-          // Without other people, the groups say who it's with
-          participants={
-            participantsText(activity, { selfId, nameOf }) ??
-            (activity.groups.map((c) => groupNameOf(c.groupId)).join(', ') || null)
-          }
+          company={companyText(activity, { selfId, nameOf, groupNameOf })}
         />
       ))}
       <ShowMore hidden={preview.hidden} expanded={preview.expanded} onToggle={preview.toggle} className="px-1" />

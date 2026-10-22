@@ -69,6 +69,34 @@ export function participantsText(activity: Activity, options: ParticipantsOption
   return `${named.join(', ')} and ${others.length - 2} others`
 }
 
+export interface CompanyOptions {
+  selfId: Id
+  nameOf: (id: Id) => string
+  groupNameOf: (id: Id) => string
+}
+
+/**
+ * Who an activity is with, from your own point of view (Today page), including “with”:
+ * `with Jonas and Mira` if you take part, otherwise just `Jonas and Mira` – “with” would
+ * put you there. Without other people, the groups say it. `null` if it's only you.
+ */
+export function companyText(activity: Activity, options: CompanyOptions): string | null {
+  const { selfId, nameOf, groupNameOf } = options
+  const withSelf = activity.participants.some((p) => p.personId === selfId)
+  const others = activity.participants.map((p) => p.personId).filter((id) => id !== selfId)
+
+  let company: string | null = null
+  if (others.length > 0 && others.length <= MAX_NAMED) company = joinWithAnd(others.map(nameOf))
+  else if (others.length > 0)
+    company = withSelf
+      ? `${others.length} others`
+      : `${others.slice(0, 2).map(nameOf).join(', ')} and ${others.length - 2} others`
+  else if (activity.groups.length > 0) company = activity.groups.map((g) => groupNameOf(g.groupId)).join(', ')
+
+  if (company === null) return null
+  return withSelf ? `with ${company}` : company
+}
+
 export interface ImpactGroup {
   impact: Impact
   people: Person[]

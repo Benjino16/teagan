@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { createTestDatabase } from '../test/fixture'
 import type { Activity } from './model'
 import { countOpen, openPointSource, sortOpenPoints } from './openPoints'
-import { byImpactThenName, displayName, groupByImpact, initials, participantsText } from './people'
+import { byImpactThenName, companyText, displayName, groupByImpact, initials, participantsText } from './people'
 
 const db = createTestDatabase()
 const nameOf = (id: number) => displayName(db.people.find((p) => p.id === id)!)
@@ -41,6 +41,38 @@ describe('participantsText', () => {
     expect(participantsText(many, { ...opts, nameOf: names })).toBe('you and 4 others')
     const withoutSelf = { ...many, participants: many.participants.filter((p) => p.personId !== 1) }
     expect(participantsText(withoutSelf, { ...opts, nameOf: names })).toBe('Jonas, Mira and 2 others')
+  })
+})
+
+describe('companyText', () => {
+  const groupNameOf = (id: number) => db.groups.find((g) => g.id === id)!.name
+  const company = { selfId: 1, nameOf, groupNameOf }
+  const among = (people: number[], groups: number[] = []): Activity => ({
+    ...activity(1),
+    participants: people.map((personId) => ({ personId, impact: null, note: null })),
+    groups: groups.map((groupId) => ({ groupId, impact: null, note: null })),
+  })
+
+  it('says “with” only when you take part', () => {
+    expect(companyText(among([1, 3]), company)).toBe('with Jonas')
+    expect(companyText(among([3]), company)).toBe('Jonas')
+    expect(companyText(among([1, 3, 4, 5]), company)).toBe('with Jonas, Mira and Tim')
+    expect(companyText(among([3, 4]), company)).toBe('Jonas and Mira')
+  })
+
+  it('counts from four others on', () => {
+    expect(companyText(among([1, 2, 3, 4, 5, 6]), { ...company, nameOf: (id) => (id === 6 ? 'Sam' : nameOf(id)) })).toBe(
+      'with 5 others',
+    )
+    expect(companyText(among([2, 3, 4, 5, 6]), { ...company, nameOf: (id) => (id === 6 ? 'Sam' : nameOf(id)) })).toBe(
+      'Lena, Jonas and 3 others',
+    )
+  })
+
+  it('falls back to the groups, and to nothing if it is only you', () => {
+    expect(companyText(among([1], [5]), company)).toBe('with Bouldering')
+    expect(companyText(among([], [4, 5]), company)).toBe('Sports, Bouldering')
+    expect(companyText(among([1]), company)).toBeNull()
   })
 })
 
