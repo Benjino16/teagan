@@ -19,7 +19,7 @@ export function SubgroupRows({ nodes, indent = 16 }: Props) {
         to={`/groups/${group.id}`}
         className={clsx(
           listRowStyles,
-          'py-3 no-underline hover:bg-canvas aria-[current=page]:bg-accent-soft',
+          'py-3 no-underline hover:bg-hover aria-[current=page]:bg-accent-soft',
           group.archivedAt ? 'text-muted' : 'text-ink',
         )}
         style={{ paddingLeft: indent }}

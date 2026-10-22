@@ -22,7 +22,7 @@ export function GroupArchivedNotice({ group, along }: NoticeProps) {
         action={
           <Link
             to={`/groups/${along.id}`}
-            className="flex min-h-11 items-center rounded-tile px-2 text-sm font-medium text-accent no-underline hover:bg-accent-soft"
+            className="flex min-h-11 items-center rounded-tile px-2 text-sm font-medium text-accent-ink no-underline hover:bg-accent-soft"
           >
             Open
           </Link>

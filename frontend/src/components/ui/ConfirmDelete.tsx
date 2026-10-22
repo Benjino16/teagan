@@ -16,7 +16,7 @@ export function ConfirmDelete({ onConfirm, disabled = false, question = 'Delete 
     return (
       <Button
         variant="ghost"
-        className="text-alert-text hover:bg-alert-bg"
+        className="text-danger hover:bg-danger-soft"
         onClick={() => setConfirming(true)}
         disabled={disabled}
       >
@@ -32,7 +32,7 @@ export function ConfirmDelete({ onConfirm, disabled = false, question = 'Delete 
         <Button variant="secondary" onClick={() => setConfirming(false)} disabled={disabled}>
           Cancel
         </Button>
-        <Button variant="secondary" className="text-alert-text" onClick={onConfirm} disabled={disabled} autoFocus>
+        <Button variant="secondary" className="text-danger" onClick={onConfirm} disabled={disabled} autoFocus>
           Delete
         </Button>
       </div>

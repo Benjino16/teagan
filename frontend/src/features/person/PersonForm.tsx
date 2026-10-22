@@ -221,7 +221,7 @@ export function PersonForm({
       )}
 
       {error && (
-        <p role="alert" className="rounded-tile bg-alert-bg px-4 py-3 text-md text-alert-text">
+        <p role="alert" className="rounded-tile bg-danger-soft px-4 py-3 text-md text-danger">
           {error}
         </p>
       )}
@@ -281,7 +281,7 @@ function PhotoPicker({ name, current, change, onChange }: PhotoPickerProps) {
         <input ref={inputRef} type="file" accept="image/*" hidden onChange={choose} />
       </div>
       {error && (
-        <p role="alert" className="text-sm text-alert-text">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       )}

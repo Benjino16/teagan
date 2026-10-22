@@ -11,7 +11,7 @@ export type CardPadding = 'none' | 'sm' | 'md' | 'lg'
 const cardVariants: Record<CardVariant, string> = {
   default: 'bg-surface border border-line text-ink',
   accent: 'bg-surface border border-accent-line text-ink',
-  filled: 'bg-accent text-white',
+  filled: 'bg-accent text-on-accent',
   warm: 'bg-warm-bg text-warm-text',
   alert: 'bg-alert-bg border border-alert-line text-alert-text',
   dashed: 'border-[1.5px] border-dashed border-accent-dash text-ink',
@@ -44,9 +44,9 @@ export function cardStyles({ variant = 'default', padding = 'md', radius = 'md' 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost'
 
 const buttonVariants: Record<ButtonVariant, string> = {
-  primary: 'bg-dark text-white hover:bg-ink-2',
-  secondary: 'bg-surface text-ink border border-line hover:bg-canvas',
-  ghost: 'text-accent hover:bg-accent-soft',
+  primary: 'bg-inverse text-on-inverse hover:bg-inverse-hover',
+  secondary: 'bg-surface text-ink border border-line hover:bg-hover',
+  ghost: 'text-accent-ink hover:bg-accent-soft',
 }
 
 export function buttonStyles(variant: ButtonVariant = 'primary', className?: string): string {

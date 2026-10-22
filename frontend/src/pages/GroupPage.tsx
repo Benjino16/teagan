@@ -80,7 +80,7 @@ export function GroupPage() {
           <nav aria-label="More about this group">
             <ListCard>
               <li>
-                <Link to={`/groups/${id}/timeline`} className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}>
+                <Link to={`/groups/${id}/timeline`} className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
                   <MediaRow
                     leading={<IconBadge icon={History} size={36} />}
                     title="Timeline"
@@ -110,7 +110,7 @@ export function GroupPage() {
               <button
                 type="button"
                 onClick={() => setEditing(true)}
-                className="-my-3 -mr-2 min-h-11 rounded-tile-sm px-2 text-md font-semibold text-accent hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent"
+                className="-my-3 -mr-2 min-h-11 rounded-tile-sm px-2 text-md font-semibold text-accent-ink hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent"
               >
                 Edit
               </button>
@@ -124,7 +124,7 @@ export function GroupPage() {
                 const subtitle = subgroupIds.map(nameOf).join(', ')
                 return (
                   <li key={person.id}>
-                    <Link to={`/people/${person.id}`} className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}>
+                    <Link to={`/people/${person.id}`} className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
                       <MediaRow
                         leading={<Avatar name={person.name} photo={person.photo} size="md" />}
                         title={person.name}

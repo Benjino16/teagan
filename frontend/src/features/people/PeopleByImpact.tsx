@@ -24,7 +24,7 @@ export function PeopleByImpact({ people, headerOffset = 0 }: Props) {
             {/* Highlighted where the list sits beside the open person (wide screens) */}
             <NavLink
               to={`/people/${person.id}`}
-              className={`${listRowStyles} text-ink no-underline hover:bg-canvas aria-[current=page]:bg-accent-soft`}
+              className={`${listRowStyles} text-ink no-underline hover:bg-hover aria-[current=page]:bg-accent-soft`}
             >
               <MediaRow
                 leading={<Avatar name={person.name} photo={person.photo} size="md" />}
@@ -33,7 +33,7 @@ export function PeopleByImpact({ people, headerOffset = 0 }: Props) {
                   person.focus && !isContactPaused(person) ? (
                     <span className="flex items-center gap-1.5">
                       {person.name}
-                      <Target aria-label="In focus" role="img" size={14} className="flex-none text-accent" />
+                      <Target aria-label="In focus" role="img" size={14} className="flex-none text-accent-ink" />
                     </span>
                   ) : (
                     person.name

@@ -34,7 +34,7 @@ export function SettingsPage() {
               />
             </li>
             <li>
-              <Link to="/settings/password" className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}>
+              <Link to="/settings/password" className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
                 <MediaRow
                   leading={<IconBadge icon={KeyRound} size={36} />}
                   title="Password"
@@ -43,7 +43,7 @@ export function SettingsPage() {
               </Link>
             </li>
             <li>
-              <Link to="/settings/two-factor" className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}>
+              <Link to="/settings/two-factor" className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
                 <MediaRow
                   leading={<IconBadge icon={ShieldCheck} size={36} />}
                   title="Two-factor login"
@@ -59,7 +59,7 @@ export function SettingsPage() {
           Log out
         </Button>
         {logout.error && (
-          <p role="alert" className="rounded-tile bg-alert-bg px-4 py-3 text-md text-alert-text">
+          <p role="alert" className="rounded-tile bg-danger-soft px-4 py-3 text-md text-danger">
             {logout.error.message}
           </p>
         )}
@@ -73,7 +73,7 @@ export function SettingsPage() {
                   href={about.data.sourceUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}
+                  className={`${listRowStyles} text-ink no-underline hover:bg-hover`}
                 >
                   <MediaRow
                     leading={<IconBadge icon={Code} size={36} />}

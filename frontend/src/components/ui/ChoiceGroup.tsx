@@ -34,7 +34,7 @@ export function ChoiceGroup<T>({ label, choices, value, onChange, hint, classNam
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
                 selected
                   ? 'border-accent bg-accent-soft text-accent-strong'
-                  : 'border-line bg-surface text-ink-2 hover:bg-canvas',
+                  : 'border-line bg-surface text-ink-2 hover:bg-hover',
               )}
             >
               {choice.label}

@@ -14,7 +14,7 @@ export function Fab({ className, type = 'button', open = false, ...rest }: Props
     <button
       type={type}
       className={clsx(
-        'flex size-14 items-center justify-center rounded-full bg-dark text-white shadow-fab',
+        'flex size-14 items-center justify-center rounded-full bg-inverse text-on-inverse shadow-fab',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
         className,
       )}

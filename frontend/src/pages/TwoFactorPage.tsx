@@ -72,7 +72,7 @@ export function TwoFactorPage() {
           Besides your password, logging in needs a code from an authenticator app on your phone.
         </p>
         {start.error && (
-          <p role="alert" className="rounded-tile bg-alert-bg px-4 py-3 text-md text-alert-text">
+          <p role="alert" className="rounded-tile bg-danger-soft px-4 py-3 text-md text-danger">
             {start.error.message}
           </p>
         )}

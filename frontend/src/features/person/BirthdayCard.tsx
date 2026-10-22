@@ -75,7 +75,7 @@ function BirthdayNoteSheet({ person, onClose }: { person: Person; onClose: () =>
         </Field>
 
         {updatePerson.error && (
-          <p role="alert" className="rounded-tile bg-alert-bg px-4 py-3 text-md text-alert-text">
+          <p role="alert" className="rounded-tile bg-danger-soft px-4 py-3 text-md text-danger">
             {updatePerson.error.message}
           </p>
         )}

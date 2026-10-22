@@ -129,7 +129,7 @@ export function LoginPage() {
 
 function Alert({ message }: { message: string }) {
   return (
-    <p role="alert" className="rounded-tile bg-alert-bg px-4 py-3 text-md text-alert-text">
+    <p role="alert" className="rounded-tile bg-danger-soft px-4 py-3 text-md text-danger">
       {message}
     </p>
   )

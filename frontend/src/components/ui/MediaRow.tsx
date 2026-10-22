@@ -6,8 +6,8 @@ export type MediaRowTone = 'default' | 'warm' | 'alert' | 'inverted'
 const titleTones: Record<MediaRowTone, string> = {
   default: 'text-ink',
   warm: 'text-warm-text',
-  alert: 'text-alert-text',
-  inverted: 'text-white',
+  alert: 'text-danger',
+  inverted: 'text-on-accent',
 }
 
 const subtitleTones: Record<MediaRowTone, string> = {

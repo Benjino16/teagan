@@ -48,7 +48,7 @@ const looks: Record<Impact, EntryLook> = {
     bubble: { size: 44, tone: 'accent' },
     title: 'font-display text-2xl leading-tight font-bold',
     meta: 'text-on-accent-muted',
-    description: 'text-on-accent',
+    description: 'text-on-accent-2',
   },
 }
 
@@ -196,7 +196,7 @@ function EndItem({ activity, impact, lanes, today }: { activity: Activity; impac
               'relative flex flex-col px-3.5 py-2',
             )}
           >
-            <p className={clsx('text-xs font-medium', remaining >= 0 ? 'text-accent' : 'text-muted')}>{label}</p>
+            <p className={clsx('text-xs font-medium', remaining >= 0 ? 'text-accent-ink' : 'text-muted')}>{label}</p>
             <h4 className="text-md font-semibold">
               <Link to={`/activities/${activity.id}`} className={stretchedLink}>
                 End: {activity.name}
@@ -258,7 +258,7 @@ function TimelineItem({
   const date =
     entryDate(activity, sameDay) +
     (status === 'planned' ? ' · planned' : status === 'ongoing' ? ' · ongoing' : '')
-  const metaColor = planned ? 'text-accent' : look.meta
+  const metaColor = planned ? 'text-accent-ink' : look.meta
 
   return (
     <li className="flex items-stretch">
@@ -293,7 +293,7 @@ function TimelineItem({
               <p
                 className={clsx(
                   'border-l-2 pl-2.5 text-md leading-normal whitespace-pre-line wrap-anywhere',
-                  inverted ? 'border-on-accent-muted text-on-accent' : 'border-accent text-ink-2',
+                  inverted ? 'border-on-accent-muted text-on-accent-2' : 'border-accent text-ink-2',
                 )}
               >
                 {note}
@@ -301,7 +301,7 @@ function TimelineItem({
             )}
             {others && <p className={clsx('text-xs', metaColor)}>with {others}</p>}
             {planned && activity.reminder && (
-              <p className="flex items-center gap-1.5 text-xs font-medium text-accent">
+              <p className="flex items-center gap-1.5 text-xs font-medium text-accent-ink">
                 <ReminderIcon aria-hidden="true" size={14} />
                 Reminder on the day
               </p>
@@ -342,7 +342,7 @@ function During({ activities, inverted }: { activities: Activity[]; inverted: bo
                   </span>
                 </div>
                 {activity.description && (
-                  <p className={clsx('text-sm leading-snug', inverted ? 'text-on-accent' : 'text-ink-2')}>
+                  <p className={clsx('text-sm leading-snug', inverted ? 'text-on-accent-2' : 'text-ink-2')}>
                     {activity.description}
                   </p>
                 )}

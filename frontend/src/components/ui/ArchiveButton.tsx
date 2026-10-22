@@ -20,7 +20,7 @@ export function ArchiveButton({ archived, onChange, disabled = false, hint, erro
       </Button>
       <p className="text-center text-sm text-muted">{hint}</p>
       {error && (
-        <p role="alert" className="text-center text-sm text-alert-text">
+        <p role="alert" className="text-center text-sm text-danger">
           {error}
         </p>
       )}

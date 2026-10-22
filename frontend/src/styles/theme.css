@@ -6,12 +6,12 @@
  */
 @theme {
   --color-*: initial;
-  --color-white: #ffffff;
 
   /* Surfaces */
   --color-canvas: #f3f4f6; /* Page background */
   --color-surface: #ffffff; /* Cards */
   --color-subtle: #e6e8ec; /* Segmented control, progress track, everyday icons */
+  --color-hover: #f3f4f6; /* Hovered rows, buttons and cards on a surface */
 
   /* Lines */
   --color-line: #e3e5ea; /* Card borders */
@@ -25,13 +25,18 @@
   --color-muted: #5b606b; /* Meta, labels */
   --color-faint: #737883; /* Done items */
 
-  /* Accent */
-  --color-accent: #2f5bd3;
+  /*
+   * Accent – the color scheme. A different scheme only overrides this group;
+   * components never pick a hue themselves.
+   */
+  --color-accent: #2f5bd3; /* Fills, rings, focus outlines */
+  --color-accent-ink: #2f5bd3; /* Accent as text/icon color on neutral or soft backgrounds */
   --color-accent-strong: #1e3f99; /* Text on light accent */
   --color-accent-soft: #e8eefc; /* Chips, icon backgrounds */
   --color-accent-line: #c9d6f6; /* Border for impact 4, milestones */
   --color-accent-dash: #9aafe6; /* Border of planned entries */
-  --color-on-accent: #f2f5fe; /* Body text on filled accent */
+  --color-on-accent: #ffffff; /* Titles and icons on filled accent */
+  --color-on-accent-2: #f2f5fe; /* Body text on filled accent */
   --color-on-accent-muted: #dce5fb; /* Meta on filled accent */
 
   /* Warm (birthday) */
@@ -41,6 +46,10 @@
   --color-warm-icon: #8a4a0e;
   --color-warm-line: #f1dcc0; /* Dividers on warm background */
 
+  /* Danger (errors, delete) */
+  --color-danger: #6e2606;
+  --color-danger-soft: #fde3d3; /* Error message background, hover of delete */
+
   /* Alert (reconnect overdue) */
   --color-alert-bg: #fde3d3;
   --color-alert-line: #f6c3a3;
@@ -49,7 +58,12 @@
   --color-alert-bar: #c2470e;
   --color-alert-icon: #a33a0b;
 
-  --color-dark: #16181d; /* Add button */
+  /* Inverse (primary button, add button) */
+  --color-inverse: #16181d;
+  --color-inverse-hover: #3a3f49;
+  --color-on-inverse: #ffffff;
+
+  --color-knob: #ffffff; /* Switch thumb */
   --color-scrim: rgb(22 24 29 / 0.35); /* Backdrop behind the add menu */
 
   /* Typography */
@@ -97,7 +111,7 @@
   }
 
   a {
-    color: var(--color-accent);
+    color: var(--color-accent-ink);
   }
 
   button:not(:disabled),

@@ -8,7 +8,7 @@ export function CheckBox({ checked, className }: { checked: boolean; className?:
       aria-hidden="true"
       className={clsx(
         'flex size-5.5 flex-none items-center justify-center rounded-check border-2 transition-colors',
-        checked ? 'border-accent bg-accent text-white' : 'border-control bg-surface',
+        checked ? 'border-accent bg-accent text-on-accent' : 'border-control bg-surface',
         className,
       )}
     >

@@ -39,7 +39,7 @@ export function OnThisDayBox({ memories, selfId, nameOf, groupNameOf }: Props) {
             <li key={activity.id}>
               <Link
                 to={`/activities/${activity.id}`}
-                className={clsx(listRowStyles, 'text-ink no-underline hover:bg-canvas')}
+                className={clsx(listRowStyles, 'text-ink no-underline hover:bg-hover')}
               >
                 <MediaRow
                   leading={<IconBadge icon={activityIcon(activity.icon).Icon} size={36} tone="canvas" />}

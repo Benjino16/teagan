@@ -29,14 +29,14 @@ export function ReconnectBox({ reconnects }: Props) {
       <ul className="divide-y divide-divider">
         {preview.shown.map(({ person, status, daysSince }) => (
           <li key={person.id}>
-            <Link to={`/people/${person.id}`} className={clsx(listRowStyles, 'text-ink no-underline hover:bg-canvas')}>
+            <Link to={`/people/${person.id}`} className={clsx(listRowStyles, 'text-ink no-underline hover:bg-hover')}>
               <MediaRow
                 leading={<Avatar name={person.name} photo={person.photo} size="md" />}
                 title={person.name}
                 subtitle={reconnectRowText(person.reconnectDays!, daysSince)}
                 trailing={
                   status.overdue ? (
-                    <span className="flex-none rounded-full bg-alert-bg px-2.5 py-1 text-sm font-semibold text-alert-text">
+                    <span className="flex-none rounded-full bg-danger-soft px-2.5 py-1 text-sm font-semibold text-danger">
                       overdue
                     </span>
                   ) : (

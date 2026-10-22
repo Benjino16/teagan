@@ -35,7 +35,7 @@ export function PeopleList() {
           <li>
             <NavLink
               to={`/people/${self.id}`}
-              className={`${listRowStyles} text-ink no-underline hover:bg-canvas aria-[current=page]:bg-accent-soft`}
+              className={`${listRowStyles} text-ink no-underline hover:bg-hover aria-[current=page]:bg-accent-soft`}
             >
               <MediaRow
                 leading={<Avatar name={self.name} photo={self.photo} size="md" />}

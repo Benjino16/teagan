@@ -16,7 +16,7 @@ export function IconButton({ icon: Icon, iconSize = 20, className, type = 'butto
       type={type}
       className={clsx(
         'flex size-11 flex-none items-center justify-center rounded-full border border-line bg-surface text-ink',
-        'transition-colors hover:bg-canvas disabled:opacity-40',
+        'transition-colors hover:bg-hover disabled:opacity-40',
         'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
         className,
       )}

@@ -113,12 +113,12 @@ export function ParticipantPicker({ self, people, participants, onChange, impact
                   onChange([...participants, { personId: person.id, impact: null, note: null }])
                   setQuery('')
                 }}
-                className={clsx(listRowStyles, 'py-2.5 hover:bg-canvas focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent')}
+                className={clsx(listRowStyles, 'py-2.5 hover:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent')}
               >
                 <MediaRow
                   leading={<Avatar name={person.name} photo={person.photo} size="md" />}
                   title={person.name}
-                  trailing={<Plus aria-hidden="true" size={18} className="flex-none text-accent" />}
+                  trailing={<Plus aria-hidden="true" size={18} className="flex-none text-accent-ink" />}
                 />
               </button>
             </li>
@@ -169,7 +169,7 @@ function ParticipantRow({
         onClick={onToggle}
         className={clsx(
           listRowStyles,
-          'hover:bg-canvas focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
+          'hover:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
         )}
       >
         <MediaRow
@@ -219,7 +219,7 @@ function ParticipantRow({
                 Same as event
               </button>
             )}
-            <button type="button" onClick={onRemove} className={clsx(textButton, 'text-alert-text')}>
+            <button type="button" onClick={onRemove} className={clsx(textButton, 'text-danger')}>
               Remove
             </button>
           </div>
@@ -230,4 +230,4 @@ function ParticipantRow({
 }
 
 const textButton =
-  'min-h-11 rounded-tile-sm px-2 text-md font-semibold text-accent hover:bg-canvas focus-visible:outline-2 focus-visible:outline-accent'
+  'min-h-11 rounded-tile-sm px-2 text-md font-semibold text-accent-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-accent'

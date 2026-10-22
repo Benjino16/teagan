@@ -16,8 +16,8 @@ const tones: Record<IconBadgeTone, string> = {
   subtle: 'bg-subtle text-muted',
   canvas: 'bg-canvas text-ink-2',
   surface: 'bg-surface text-ink-2 border border-line',
-  'accent-soft': 'bg-accent-soft text-accent',
-  accent: 'bg-accent text-white',
+  'accent-soft': 'bg-accent-soft text-accent-ink',
+  accent: 'bg-accent text-on-accent',
   'on-warm': 'bg-surface text-warm-icon',
   'on-alert': 'bg-surface text-alert-icon',
 }
