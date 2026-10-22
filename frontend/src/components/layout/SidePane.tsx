@@ -29,7 +29,7 @@ export function SidePane({ title, side, action, children }: Props) {
       <header
         // + 1 px for the divider, like the top bar's
         style={{ height: TOP_BAR_HEIGHT + 1 }}
-        className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-line bg-canvas/90 pr-3 pl-5 backdrop-blur-md"
+        className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-line bg-canvas/90 px-5 backdrop-blur-md"
       >
         <h2 className="truncate text-base font-semibold">{title}</h2>
         {action}

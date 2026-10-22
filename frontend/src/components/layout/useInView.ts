@@ -1,7 +1,10 @@
 import { type RefCallback, useCallback, useState } from 'react'
 
-/** Height of the sticky top bar – whatever disappears beneath it counts as no longer visible. */
-export const TOP_BAR_HEIGHT = 48
+/**
+ * Height of the sticky top bar – whatever disappears beneath it counts as no longer visible.
+ * Leaves 6 px above and below its 44 px buttons.
+ */
+export const TOP_BAR_HEIGHT = 56
 
 /**
  * Observes whether an element is (still) visible below the top bar.

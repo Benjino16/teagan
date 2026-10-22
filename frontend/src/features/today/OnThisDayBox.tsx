@@ -5,7 +5,7 @@ import { cardStyles, IconBadge, listRowStyles, MediaRow, ShowMore, usePreview } 
 import type { Memory } from '../../domain/activities'
 import { pluralize } from '../../domain/dates'
 import type { Id } from '../../domain/model'
-import { participantsText } from '../../domain/people'
+import { companyText } from '../../domain/people'
 import { activityIcon } from '../../icons/activityIcons'
 import { TODAY_PREVIEW } from './preview'
 
@@ -31,10 +31,7 @@ export function OnThisDayBox({ memories, selfId, nameOf, groupNameOf }: Props) {
       </div>
       <ul className="divide-y divide-divider">
         {preview.shown.map(({ activity, yearsAgo }) => {
-          // Without other people, the groups say who it was with
-          const others =
-            participantsText(activity, { selfId, nameOf }) ??
-            (activity.groups.map((g) => groupNameOf(g.groupId)).join(', ') || null)
+          const company = companyText(activity, { selfId, nameOf, groupNameOf })
           return (
             <li key={activity.id}>
               <Link
@@ -44,7 +41,7 @@ export function OnThisDayBox({ memories, selfId, nameOf, groupNameOf }: Props) {
                 <MediaRow
                   leading={<IconBadge icon={activityIcon(activity.icon).Icon} size={36} tone="neutral" />}
                   title={activity.name}
-                  subtitle={others ? `with ${others}` : undefined}
+                  subtitle={company ?? undefined}
                   trailing={<span className="flex-none text-sm text-muted">{pluralize(yearsAgo, 'year')} ago</span>}
                 />
               </Link>

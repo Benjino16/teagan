@@ -3,20 +3,20 @@ import { cardStyles, IconBadge, MediaRow } from '../../components/ui'
 import { isOngoing } from '../../domain/activities'
 import { daysBetween, formatDateRange, formatRelativeFuture, formatSince, normalizeStart } from '../../domain/dates'
 import type { Activity, IsoDate } from '../../domain/model'
-import { activityIcon, ReminderIcon } from '../../icons/activityIcons'
+import { activityIcon, LocationIcon, ReminderIcon } from '../../icons/activityIcons'
 
 interface Props {
   activity: Activity
   today: IsoDate
-  /** Other participants without “with”, e.g. `Lena and Jonas` (from `participantsText`). */
-  participants?: string | null
+  /** Who it's with, from your point of view, e.g. `with Lena and Jonas` (from `companyText`). */
+  company?: string | null
 }
 
 /**
  * Card for a future activity (“Oct 17–24 · in 4 days”, bell when a reminder is set)
  * or an ongoing range (“Sep 8 – Dec 15 · ongoing for 5 weeks”).
  */
-export function UpcomingActivityCard({ activity, today, participants }: Props) {
+export function UpcomingActivityCard({ activity, today, company }: Props) {
   const start = normalizeStart(activity.startDate)
   const relative = isOngoing(activity, today)
     ? `ongoing ${formatSince(daysBetween(start, today))}`
@@ -35,7 +35,13 @@ export function UpcomingActivityCard({ activity, today, participants }: Props) {
           )
         }
       >
-        {participants && <span className="text-sm text-muted">with {participants}</span>}
+        {activity.location && (
+          <span className="flex items-center gap-1 text-sm text-muted">
+            <LocationIcon aria-hidden="true" size={13} className="shrink-0" />
+            <span className="min-w-0 truncate">{activity.location}</span>
+          </span>
+        )}
+        {company && <span className="text-sm text-muted">{company}</span>}
       </MediaRow>
     </Link>
   )

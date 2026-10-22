@@ -169,8 +169,7 @@ function ActivityHero({
         <h1 id="activity-name" ref={titleRef} className="font-display text-3xl leading-[1.1] font-bold tracking-tight">
           {activity.name}
         </h1>
-        {impact >= 3 && activity.location && (
-          // Only from impact 3 on
+        {activity.location && (
           <p className="flex items-center gap-1.5 text-md text-ink-2">
             <LocationIcon aria-hidden="true" size={15} className="shrink-0" />
             <span className="min-w-0 wrap-anywhere">{activity.location}</span>

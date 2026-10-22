@@ -276,8 +276,8 @@ function TimelineItem({
                 {activity.name}
               </Link>
             </h4>
-            {impact >= 3 && activity.location && (
-              // Only from impact 3 on
+            {(impact >= 2 || planned) && activity.location && (
+              // From impact 2 on, and always when planned – where to meet matters then
               <p className={clsx('flex items-center gap-1 text-xs', metaColor)}>
                 <LocationIcon aria-hidden="true" size={12} className="shrink-0" />
                 <span className="min-w-0 truncate">{activity.location}</span>

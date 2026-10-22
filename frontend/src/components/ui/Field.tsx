@@ -1,5 +1,5 @@
 import { clsx } from 'clsx'
-import { type ComponentPropsWithoutRef, type ReactNode, useId } from 'react'
+import { type ComponentProps, type ReactNode, useId } from 'react'
 import { inputStyles } from './styles'
 
 interface FieldProps {
@@ -24,6 +24,6 @@ export function Field({ label, hint, children, className }: FieldProps) {
   )
 }
 
-export function TextInput({ className, ...rest }: ComponentPropsWithoutRef<'input'>) {
+export function TextInput({ className, ...rest }: ComponentProps<'input'>) {
   return <input className={clsx(inputStyles, className)} {...rest} />
 }

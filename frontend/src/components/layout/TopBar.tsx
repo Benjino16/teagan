@@ -1,8 +1,9 @@
 import { clsx } from 'clsx'
 import { ChevronLeft } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { type ReactNode, useEffect, useEffectEvent } from 'react'
 import { useBack } from '../../app/useBack'
 import { IconButton } from '../ui'
+import { TOP_BAR_HEIGHT } from './useInView'
 import { useScrolled } from './useScrolled'
 
 interface Props {
@@ -21,6 +22,25 @@ export function TopBar({ backTo, title, subtitle, showTitle = true, trailing }: 
   const back = useBack(backTo ?? '/')
   const scrolled = useScrolled()
 
+  // Escape goes back like the button. Whoever handles it first (a sheet, the add menu,
+  // clearing a search) prevents the default; in a text field it only leaves the field.
+  const onEscape = useEffectEvent((event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || event.defaultPrevented || event.isComposing) return
+    if (document.querySelector('dialog[open]')) return
+    const target = event.target
+    if (target instanceof HTMLElement && target.matches('input, textarea, select, [contenteditable="true"]')) {
+      target.blur()
+      return
+    }
+    back()
+  })
+
+  useEffect(() => {
+    if (!backTo) return
+    window.addEventListener('keydown', onEscape)
+    return () => window.removeEventListener('keydown', onEscape)
+  }, [backTo])
+
   return (
     <header
       className={clsx(
@@ -28,7 +48,8 @@ export function TopBar({ backTo, title, subtitle, showTitle = true, trailing }: 
         scrolled ? 'border-line' : 'border-transparent',
       )}
     >
-      <div className="flex h-12 items-center gap-2 px-4">
+      {/* Same side padding as the page, so the buttons line up with the content */}
+      <div style={{ height: TOP_BAR_HEIGHT }} className="flex items-center gap-2 px-5">
         {backTo ? <IconButton icon={ChevronLeft} aria-label="Back" onClick={back} /> : <Spacer />}
         <div
           aria-hidden={!showTitle}

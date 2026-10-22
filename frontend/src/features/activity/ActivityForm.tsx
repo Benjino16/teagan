@@ -130,7 +130,9 @@ export function ActivityForm({
   const message = problem ?? error
 
   return (
-    <form onSubmit={submit} noValidate className="flex flex-col gap-7">
+    // No scroll anchoring: Chrome would pin an element below the search results
+    // and push the search field out of view as soon as the results appear
+    <form onSubmit={submit} noValidate className="flex flex-col gap-7 [overflow-anchor:none]">
       <div className="flex flex-col gap-3">
         <div className="flex items-end gap-2">
           <IconPicker value={icon} onChange={setIcon} />
