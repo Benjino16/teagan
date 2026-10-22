@@ -1,15 +1,17 @@
 import { ChevronRight, Code, ExternalLink, KeyRound, ShieldCheck, UserRound } from 'lucide-react'
 import { Link } from 'react-router'
+import { readThemePreference, THEME_CHOICES } from '../app/theme'
 import { PageHeader } from '../components/layout/PageHeader'
 import { PageError, PageLoading } from '../components/layout/PageStatus'
 import { Button, IconBadge, ListCard, listRowStyles, MediaRow, SectionHeader } from '../components/ui'
 import { useAbout, useAccount, useLogout } from '../data/queries'
 
-/** Fourth tab: own account, logout and which version runs. */
+/** Fourth tab: own account, appearance, logout and which version runs. */
 export function SettingsPage() {
   const account = useAccount()
   const about = useAbout()
   const logout = useLogout()
+  const theme = THEME_CHOICES.find((choice) => choice.value === readThemePreference())!
 
   if (account.isPending) return <PageLoading />
   if (account.isError) return <PageError message="Couldn't load your account." />
@@ -48,6 +50,22 @@ export function SettingsPage() {
                   leading={<IconBadge icon={ShieldCheck} size={36} />}
                   title="Two-factor login"
                   subtitle={twoFactor}
+                  trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}
+                />
+              </Link>
+            </li>
+          </ListCard>
+        </section>
+
+        <section aria-labelledby="settings-device" className="flex flex-col gap-3">
+          <SectionHeader id="settings-device" title="This device" />
+          <ListCard>
+            <li>
+              <Link to="/settings/appearance" className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
+                <MediaRow
+                  leading={<IconBadge icon={theme.icon} size={36} />}
+                  title="Appearance"
+                  subtitle={theme.label}
                   trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}
                 />
               </Link>

@@ -1,6 +1,7 @@
 import { BookOpen, CalendarPlus, LayoutGrid, ListTodo } from 'lucide-react'
 import { createBrowserRouter, type Params } from 'react-router'
 import { ActivityPage } from '../pages/ActivityPage'
+import { AppearancePage } from '../pages/AppearancePage'
 import { ArchivedGroupsPage } from '../pages/ArchivedGroupsPage'
 import { ArchivedPeoplePage } from '../pages/ArchivedPeoplePage'
 import { EditActivityPage } from '../pages/EditActivityPage'
@@ -118,6 +119,7 @@ export const router = createBrowserRouter([
       { path: '/settings', element: <SettingsPage />, handle: { fab: null } satisfies RouteHandle },
       { path: '/settings/password', element: <ChangePasswordPage />, handle: { fullscreen: true } satisfies RouteHandle },
       { path: '/settings/two-factor', element: <TwoFactorPage />, handle: { fullscreen: true } satisfies RouteHandle },
+      { path: '/settings/appearance', element: <AppearancePage />, handle: { fullscreen: true } satisfies RouteHandle },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

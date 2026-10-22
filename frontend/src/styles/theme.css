@@ -110,6 +110,15 @@
     color-scheme: light dark;
   }
 
+  /* Choice from Settings, overrides the system (src/app/theme.ts) */
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
   html,
   body {
     background-color: var(--color-canvas);
