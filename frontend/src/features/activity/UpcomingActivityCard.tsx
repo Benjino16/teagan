@@ -3,7 +3,7 @@ import { cardStyles, IconBadge, MediaRow } from '../../components/ui'
 import { isOngoing } from '../../domain/activities'
 import { daysBetween, formatDateRange, formatRelativeFuture, formatSince, normalizeStart } from '../../domain/dates'
 import type { Activity, IsoDate } from '../../domain/model'
-import { activityIcon, ReminderIcon } from '../../icons/activityIcons'
+import { activityIcon, LocationIcon, ReminderIcon } from '../../icons/activityIcons'
 
 interface Props {
   activity: Activity
@@ -35,6 +35,12 @@ export function UpcomingActivityCard({ activity, today, company }: Props) {
           )
         }
       >
+        {activity.location && (
+          <span className="flex items-center gap-1 text-sm text-muted">
+            <LocationIcon aria-hidden="true" size={13} className="shrink-0" />
+            <span className="min-w-0 truncate">{activity.location}</span>
+          </span>
+        )}
         {company && <span className="text-sm text-muted">{company}</span>}
       </MediaRow>
     </Link>
