@@ -3,6 +3,7 @@ import { ChevronLeft } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useBack } from '../../app/useBack'
 import { IconButton } from '../ui'
+import { TOP_BAR_HEIGHT } from './useInView'
 import { useScrolled } from './useScrolled'
 
 interface Props {
@@ -28,7 +29,8 @@ export function TopBar({ backTo, title, subtitle, showTitle = true, trailing }: 
         scrolled ? 'border-line' : 'border-transparent',
       )}
     >
-      <div className="flex h-12 items-center gap-2 px-4">
+      {/* Same side padding as the page, so the buttons line up with the content */}
+      <div style={{ height: TOP_BAR_HEIGHT }} className="flex items-center gap-2 px-5">
         {backTo ? <IconButton icon={ChevronLeft} aria-label="Back" onClick={back} /> : <Spacer />}
         <div
           aria-hidden={!showTitle}
