@@ -29,7 +29,7 @@ export function GroupCard({ node, personById, parent = null, archivedSubgroups =
       {/* Highlighted where the list sits beside the open group (large screens) */}
       <NavLink
         to={`/groups/${group.id}`}
-        className={clsx(listRowStyles, 'text-ink no-underline hover:bg-canvas aria-[current=page]:bg-accent-soft')}
+        className={clsx(listRowStyles, 'text-ink no-underline hover:bg-hover aria-[current=page]:bg-accent-soft')}
       >
         <IconBadge icon={LayoutGrid} />
         <span className="flex min-w-0 flex-auto flex-col gap-0.5">
@@ -50,7 +50,7 @@ export function GroupCard({ node, personById, parent = null, archivedSubgroups =
             <li>
               <Link
                 to="/groups/archived"
-                className={clsx(listRowStyles, 'py-3 text-sm text-muted no-underline hover:bg-canvas')}
+                className={clsx(listRowStyles, 'py-3 text-sm text-muted no-underline hover:bg-hover')}
                 style={{ paddingLeft: 68 }}
               >
                 <span className="flex-auto">{pluralize(archivedSubgroups, 'subgroup')} archived</span>

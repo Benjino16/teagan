@@ -22,14 +22,14 @@ export function UpcomingActivityCard({ activity, today, participants }: Props) {
     ? `ongoing ${formatSince(daysBetween(start, today))}`
     : formatRelativeFuture(daysBetween(today, start))
   return (
-    <Link to={`/activities/${activity.id}`} className={`${cardStyles()} block no-underline hover:bg-canvas`}>
+    <Link to={`/activities/${activity.id}`} className={`${cardStyles()} block no-underline hover:bg-hover`}>
       <MediaRow
         leading={<IconBadge icon={activityIcon(activity.icon).Icon} />}
         title={activity.name}
         subtitle={`${formatDateRange(activity.startDate, activity.endDate)} · ${relative}`}
         trailing={
           activity.reminder && (
-            <span role="img" aria-label="Reminder on" className="flex flex-none text-accent">
+            <span role="img" aria-label="Reminder on" className="flex flex-none text-accent-ink">
               <ReminderIcon aria-hidden="true" size={18} />
             </span>
           )

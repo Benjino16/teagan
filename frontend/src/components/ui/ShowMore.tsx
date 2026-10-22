@@ -11,7 +11,7 @@ interface Props {
 }
 
 const tones = {
-  accent: 'text-accent hover:text-accent-strong focus-visible:outline-accent',
+  accent: 'text-accent-ink hover:text-accent-strong focus-visible:outline-accent',
   warm: 'text-warm-sub hover:text-warm-text focus-visible:outline-warm-icon',
 }
 

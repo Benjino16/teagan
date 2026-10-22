@@ -1,15 +1,17 @@
 import { ChevronRight, Code, ExternalLink, KeyRound, ShieldCheck, UserRound } from 'lucide-react'
 import { Link } from 'react-router'
+import { readThemePreference, THEME_CHOICES } from '../app/theme'
 import { PageHeader } from '../components/layout/PageHeader'
 import { PageError, PageLoading } from '../components/layout/PageStatus'
 import { Button, IconBadge, ListCard, listRowStyles, MediaRow, SectionHeader } from '../components/ui'
 import { useAbout, useAccount, useLogout } from '../data/queries'
 
-/** Fourth tab: own account, logout and which version runs. */
+/** Fourth tab: own account, appearance, logout and which version runs. */
 export function SettingsPage() {
   const account = useAccount()
   const about = useAbout()
   const logout = useLogout()
+  const theme = THEME_CHOICES.find((choice) => choice.value === readThemePreference())!
 
   if (account.isPending) return <PageLoading />
   if (account.isError) return <PageError message="Couldn't load your account." />
@@ -34,7 +36,7 @@ export function SettingsPage() {
               />
             </li>
             <li>
-              <Link to="/settings/password" className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}>
+              <Link to="/settings/password" className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
                 <MediaRow
                   leading={<IconBadge icon={KeyRound} size={36} />}
                   title="Password"
@@ -43,7 +45,7 @@ export function SettingsPage() {
               </Link>
             </li>
             <li>
-              <Link to="/settings/two-factor" className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}>
+              <Link to="/settings/two-factor" className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
                 <MediaRow
                   leading={<IconBadge icon={ShieldCheck} size={36} />}
                   title="Two-factor login"
@@ -55,11 +57,27 @@ export function SettingsPage() {
           </ListCard>
         </section>
 
+        <section aria-labelledby="settings-device" className="flex flex-col gap-3">
+          <SectionHeader id="settings-device" title="This device" />
+          <ListCard>
+            <li>
+              <Link to="/settings/appearance" className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
+                <MediaRow
+                  leading={<IconBadge icon={theme.icon} size={36} />}
+                  title="Appearance"
+                  subtitle={theme.label}
+                  trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}
+                />
+              </Link>
+            </li>
+          </ListCard>
+        </section>
+
         <Button variant="secondary" disabled={logout.isPending} onClick={() => logout.mutate()}>
           Log out
         </Button>
         {logout.error && (
-          <p role="alert" className="rounded-tile bg-alert-bg px-4 py-3 text-md text-alert-text">
+          <p role="alert" className="rounded-tile bg-danger-soft px-4 py-3 text-md text-danger">
             {logout.error.message}
           </p>
         )}
@@ -73,7 +91,7 @@ export function SettingsPage() {
                   href={about.data.sourceUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}
+                  className={`${listRowStyles} text-ink no-underline hover:bg-hover`}
                 >
                   <MediaRow
                     leading={<IconBadge icon={Code} size={36} />}

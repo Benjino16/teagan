@@ -161,7 +161,7 @@ function ActivityHero({
     <section aria-labelledby="activity-name" className="flex flex-col gap-3 px-5 pt-1">
       <IconBadge icon={activityIcon(activity.icon).Icon} size={44} shape="circle" tone={bubbleTone[impact]} iconSize={20} />
       <div className="flex flex-col gap-1">
-        <p className={clsx('text-sm font-medium', status === 'planned' ? 'text-accent' : 'text-muted')}>
+        <p className={clsx('text-sm font-medium', status === 'planned' ? 'text-accent-ink' : 'text-muted')}>
           {formatDateRangeWithYear(activity.startDate, activity.endDate)}
           {status === 'planned' && ' · planned'}
           {status === 'ongoing' && ' · ongoing'}
@@ -181,7 +181,7 @@ function ActivityHero({
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <ImpactDots value={activity.impact} />
         {activity.reminder && status === 'planned' && (
-          <span className="flex items-center gap-1.5 text-sm font-medium text-accent">
+          <span className="flex items-center gap-1.5 text-sm font-medium text-accent-ink">
             <ReminderIcon aria-hidden="true" size={14} />
             Reminder on the day
           </span>
@@ -237,7 +237,7 @@ function Participants({ activity, personById }: { activity: Activity; personById
               {person.isSelf ? (
                 <div className={listRowStyles}>{row}</div>
               ) : (
-                <Link to={`/people/${person.id}`} className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}>
+                <Link to={`/people/${person.id}`} className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
                   {row}
                 </Link>
               )}
@@ -263,7 +263,7 @@ function Groups({ activity, groups }: { activity: Activity; groups: Group[] }) {
       <ListCard>
         {rows.map(({ groupId, impact, note, name }) => (
           <li key={groupId}>
-            <Link to={`/groups/${groupId}`} className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}>
+            <Link to={`/groups/${groupId}`} className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
               <MediaRow
                 leading={<IconBadge icon={LayoutGrid} size={44} />}
                 title={name}
@@ -293,9 +293,9 @@ function Groups({ activity, groups }: { activity: Activity; groups: Group[] }) {
 function ActivityRow({ activity, withYear, nested }: { activity: Activity; withYear: boolean; nested: number }) {
   const date = (withYear ? formatDateRangeWithYear : formatDateRange)(activity.startDate, activity.endDate)
   return (
-    <Link to={`/activities/${activity.id}`} className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}>
+    <Link to={`/activities/${activity.id}`} className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
       <MediaRow
-        leading={<IconBadge icon={activityIcon(activity.icon).Icon} size={36} shape="circle" tone="canvas" />}
+        leading={<IconBadge icon={activityIcon(activity.icon).Icon} size={36} shape="circle" tone="neutral" />}
         title={activity.name}
         subtitle={nested > 0 ? `${date} · ${nested} ${nested === 1 ? 'event' : 'events'}` : date}
         trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}
@@ -308,7 +308,7 @@ function ActivityLinkCard({ activity }: { activity: Activity }) {
   return (
     <Link
       to={`/activities/${activity.id}`}
-      className={clsx(cardStyles({ variant: 'accent', padding: 'sm', radius: 'sm' }), 'block no-underline hover:bg-canvas')}
+      className={clsx(cardStyles({ variant: 'accent', padding: 'sm', radius: 'sm' }), 'block no-underline hover:bg-hover')}
     >
       <MediaRow
         leading={<IconBadge icon={activityIcon(activity.icon).Icon} size={36} shape="circle" tone="accent-soft" />}

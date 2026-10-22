@@ -63,7 +63,7 @@ export function MembersSheet({ group, groups, people, memberships, onClose }: Pr
                   onClick={() => setMembership.mutate({ personId: person.id, groupId: group.id, member: !checked })}
                   className={clsx(
                     listRowStyles,
-                    'py-2.5 hover:bg-canvas focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
+                    'py-2.5 hover:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
                   )}
                 >
                   <MediaRow

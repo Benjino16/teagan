@@ -100,7 +100,7 @@ function SortableFact({ fact }: { fact: Fact }) {
         ref={setActivatorNodeRef}
         aria-label={`Move “${fact.label}”`}
         className={clsx(
-          'flex size-11 flex-none touch-none items-center justify-center rounded-full text-muted hover:bg-canvas',
+          'flex size-11 flex-none touch-none items-center justify-center rounded-full text-muted hover:bg-hover',
           'focus-visible:outline-2 focus-visible:outline-accent',
           isDragging ? 'cursor-grabbing' : 'cursor-grab',
         )}

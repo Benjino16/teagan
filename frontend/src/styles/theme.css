@@ -3,54 +3,72 @@
  * only the utilities generated from them (bg-surface, text-muted, rounded-card …).
  * The default Tailwind palette is deliberately disabled so no ad-hoc colors
  * end up in components.
+ *
+ * Colors are `light-dark(light, dark)`: which one applies follows `color-scheme`
+ * on <html> (see the base layer below). A token without it looks the same in both.
  */
 @theme {
   --color-*: initial;
-  --color-white: #ffffff;
 
   /* Surfaces */
-  --color-canvas: #f3f4f6; /* Page background */
-  --color-surface: #ffffff; /* Cards */
-  --color-subtle: #e6e8ec; /* Segmented control, progress track, everyday icons */
+  --color-canvas: light-dark(#f3f4f6, #0f1114); /* Page background */
+  --color-surface: light-dark(#ffffff, #1a1d22); /* Cards */
+  --color-subtle: light-dark(#e6e8ec, #2a2e35); /* Segmented control, progress track, everyday icons */
+  --color-hover: light-dark(#f3f4f6, #23272d); /* Hovered rows, buttons and cards on a surface */
+  --color-tile: light-dark(#f3f4f6, #262a31); /* Neutral icon tiles (activity icons) */
 
   /* Lines */
-  --color-line: #e3e5ea; /* Card borders */
-  --color-divider: #eef0f3; /* Dividers in lists */
-  --color-rail: #dde0e6; /* Timeline rail */
-  --color-control: #b8bdc7; /* Border of unchecked checkboxes */
+  --color-line: light-dark(#e3e5ea, #2c3037); /* Card borders */
+  --color-divider: light-dark(#eef0f3, #24282e); /* Dividers in lists */
+  --color-rail: light-dark(#dde0e6, #33373f); /* Timeline rail */
+  --color-control: light-dark(#b8bdc7, #5a606b); /* Border of unchecked checkboxes */
 
   /* Text */
-  --color-ink: #16181d; /* Primary text */
-  --color-ink-2: #3a3f49; /* Descriptions */
-  --color-muted: #5b606b; /* Meta, labels */
-  --color-faint: #737883; /* Done items */
+  --color-ink: light-dark(#16181d, #eceef2); /* Primary text */
+  --color-ink-2: light-dark(#3a3f49, #c4c8d0); /* Descriptions */
+  --color-muted: light-dark(#5b606b, #9a9fab); /* Meta, labels */
+  --color-faint: light-dark(#737883, #80858f); /* Done items */
 
-  /* Accent */
-  --color-accent: #2f5bd3;
-  --color-accent-strong: #1e3f99; /* Text on light accent */
-  --color-accent-soft: #e8eefc; /* Chips, icon backgrounds */
-  --color-accent-line: #c9d6f6; /* Border for impact 4, milestones */
-  --color-accent-dash: #9aafe6; /* Border of planned entries */
-  --color-on-accent: #f2f5fe; /* Body text on filled accent */
+  /*
+   * Accent – the color scheme. A different scheme only overrides this group;
+   * components never pick a hue themselves.
+   */
+  --color-accent: #2f5bd3; /* Fills, rings, focus outlines */
+  --color-accent-ink: light-dark(#2f5bd3, #8eaaf5); /* Accent as text/icon color on neutral or soft backgrounds */
+  --color-accent-strong: light-dark(#1e3f99, #c3d2fb); /* Text on light accent */
+  --color-accent-soft: light-dark(#e8eefc, #1f2a47); /* Chips, icon backgrounds */
+  --color-accent-line: light-dark(#c9d6f6, #2f4373); /* Border for impact 4, milestones */
+  --color-accent-dash: light-dark(#9aafe6, #4c64a8); /* Border of planned entries */
+  --color-on-accent: #ffffff; /* Titles and icons on filled accent */
+  --color-on-accent-2: #f2f5fe; /* Body text on filled accent */
   --color-on-accent-muted: #dce5fb; /* Meta on filled accent */
 
   /* Warm (birthday) */
-  --color-warm-bg: #fbefdf;
-  --color-warm-text: #5c3109;
-  --color-warm-sub: #7a4410;
-  --color-warm-icon: #8a4a0e;
-  --color-warm-line: #f1dcc0; /* Dividers on warm background */
+  --color-warm-bg: light-dark(#fbefdf, #2e2417);
+  --color-warm-text: light-dark(#5c3109, #f6dcb8);
+  --color-warm-sub: light-dark(#7a4410, #e3bd8e);
+  --color-warm-icon: light-dark(#8a4a0e, #f0b46c);
+  --color-warm-line: light-dark(#f1dcc0, #46371f); /* Dividers on warm background */
+
+  /* Danger (errors, delete) */
+  --color-danger: light-dark(#6e2606, #ff9f80);
+  --color-danger-soft: light-dark(#fde3d3, #3d1e14); /* Error message background, hover of delete */
 
   /* Alert (reconnect overdue) */
-  --color-alert-bg: #fde3d3;
-  --color-alert-line: #f6c3a3;
-  --color-alert-text: #6e2606;
-  --color-alert-sub: #86300a;
-  --color-alert-bar: #c2470e;
-  --color-alert-icon: #a33a0b;
+  --color-alert-bg: light-dark(#fde3d3, #3b1f14);
+  --color-alert-line: light-dark(#f6c3a3, #6b3420);
+  --color-alert-text: light-dark(#6e2606, #ffc8ad);
+  --color-alert-sub: light-dark(#86300a, #f2aa88);
+  --color-alert-bar: light-dark(#c2470e, #e0612a);
+  --color-alert-icon: light-dark(#a33a0b, #f39062);
 
-  --color-dark: #16181d; /* Add button */
-  --color-scrim: rgb(22 24 29 / 0.35); /* Backdrop behind the add menu */
+  /* Inverse (primary button, add button) */
+  --color-inverse: light-dark(#16181d, #eceef2);
+  --color-inverse-hover: light-dark(#3a3f49, #c4c8d0);
+  --color-on-inverse: light-dark(#ffffff, #16181d);
+
+  --color-knob: #ffffff; /* Switch thumb */
+  --color-scrim: light-dark(rgb(22 24 29 / 0.35), rgb(0 0 0 / 0.55)); /* Backdrop behind the add menu */
 
   /* Typography */
   --font-sans: "DM Sans", system-ui, sans-serif;
@@ -76,8 +94,8 @@
   --radius-check: 7px;
 
   /* Shadows */
-  --shadow-fab: 0 8px 20px rgb(22 24 29 / 0.25);
-  --shadow-raised: 0 1px 3px rgb(22 24 29 / 0.12);
+  --shadow-fab: 0 8px 20px light-dark(rgb(22 24 29 / 0.25), rgb(0 0 0 / 0.5));
+  --shadow-raised: 0 1px 3px light-dark(rgb(22 24 29 / 0.12), rgb(0 0 0 / 0.4));
 
   /* Layout */
   --container-app: 430px; /* Phone-sized column – the whole app below the `laptop` breakpoint */
@@ -88,6 +106,19 @@
 }
 
 @layer base {
+  :root {
+    color-scheme: light dark;
+  }
+
+  /* Choice from Settings, overrides the system (src/app/theme.ts) */
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+
   html,
   body {
     background-color: var(--color-canvas);
@@ -97,7 +128,7 @@
   }
 
   a {
-    color: var(--color-accent);
+    color: var(--color-accent-ink);
   }
 
   button:not(:disabled),

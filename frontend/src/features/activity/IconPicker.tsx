@@ -30,7 +30,7 @@ export function IconPicker({ value, onChange }: Props) {
         aria-haspopup="dialog"
         onClick={() => setOpen(true)}
         className={clsx(
-          'flex size-11 items-center justify-center rounded-tile border border-line bg-accent-soft text-accent',
+          'flex size-11 items-center justify-center rounded-tile border border-line bg-accent-soft text-accent-ink',
           'hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
         )}
       >
@@ -55,7 +55,7 @@ export function IconPicker({ value, onChange }: Props) {
                     className={clsx(
                       'flex size-14 items-center justify-center rounded-tile',
                       'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-                      isSelected ? 'bg-accent-soft text-accent ring-2 ring-accent' : 'bg-subtle text-ink-2 hover:bg-canvas',
+                      isSelected ? 'bg-accent-soft text-accent-ink ring-2 ring-accent' : 'bg-subtle text-ink-2 hover:bg-hover',
                     )}
                   >
                     <Icon aria-hidden="true" size={24} />

@@ -31,7 +31,7 @@ export function RemembranceBox({ remembrances }: Props) {
           const { person, daysUntil } = remembrance
           return (
             <li key={`${person.id}-${remembrance.kind}`}>
-              <Link to={`/people/${person.id}`} className={clsx(listRowStyles, 'text-ink no-underline hover:bg-canvas')}>
+              <Link to={`/people/${person.id}`} className={clsx(listRowStyles, 'text-ink no-underline hover:bg-hover')}>
                 <MediaRow
                   leading={<Avatar name={person.name} photo={person.photo} size="md" />}
                   title={person.name}

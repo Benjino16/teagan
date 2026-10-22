@@ -38,7 +38,7 @@ export function Switch({ checked, onChange, label, hint, disabled, className }: 
       >
         <span
           className={clsx(
-            'absolute top-0.5 left-0.5 size-6 rounded-full bg-white shadow-raised transition-transform',
+            'absolute top-0.5 left-0.5 size-6 rounded-full bg-knob shadow-raised transition-transform',
             checked && 'translate-x-5',
           )}
         />

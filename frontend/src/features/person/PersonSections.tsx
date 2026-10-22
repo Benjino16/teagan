@@ -40,7 +40,7 @@ export function PersonSections({ data }: { data: PersonViewData }) {
       <ListCard>
         {sections.map((section) => (
           <li key={section.to}>
-            <Link to={section.to} className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}>
+            <Link to={section.to} className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
               <MediaRow
                 leading={<IconBadge icon={section.icon} size={36} />}
                 title={section.title}

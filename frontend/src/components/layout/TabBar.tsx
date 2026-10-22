@@ -19,7 +19,7 @@ function Tabs() {
         clsx(
           'flex min-h-17 flex-col items-center justify-center gap-1 text-xs no-underline',
           'focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-accent',
-          isActive ? 'font-semibold text-accent' : 'font-medium text-muted',
+          isActive ? 'font-semibold text-accent-ink' : 'font-medium text-muted',
         )
       }
     >

@@ -96,12 +96,12 @@ export function GroupPicker({ groups, links, onChange, impact }: Props) {
                   onChange([...links, { groupId: group.id, impact: null, note: null }])
                   setQuery('')
                 }}
-                className={clsx(listRowStyles, 'py-2.5 hover:bg-canvas focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent')}
+                className={clsx(listRowStyles, 'py-2.5 hover:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent')}
               >
                 <MediaRow
                   leading={<IconBadge icon={LayoutGrid} size={44} />}
                   title={groupPath(group.id, groups)}
-                  trailing={<Plus aria-hidden="true" size={18} className="flex-none text-accent" />}
+                  trailing={<Plus aria-hidden="true" size={18} className="flex-none text-accent-ink" />}
                 />
               </button>
             </li>
@@ -138,7 +138,7 @@ function GroupRow({ name, override, impact, note, open, onToggle, onImpactChange
         onClick={onToggle}
         className={clsx(
           listRowStyles,
-          'hover:bg-canvas focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
+          'hover:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
         )}
       >
         <MediaRow
@@ -188,7 +188,7 @@ function GroupRow({ name, override, impact, note, open, onToggle, onImpactChange
                 Same as event
               </button>
             )}
-            <button type="button" onClick={onRemove} className={clsx(textButton, 'text-alert-text')}>
+            <button type="button" onClick={onRemove} className={clsx(textButton, 'text-danger')}>
               Remove
             </button>
           </div>
@@ -199,4 +199,4 @@ function GroupRow({ name, override, impact, note, open, onToggle, onImpactChange
 }
 
 const textButton =
-  'min-h-11 rounded-tile-sm px-2 text-md font-semibold text-accent hover:bg-canvas focus-visible:outline-2 focus-visible:outline-accent'
+  'min-h-11 rounded-tile-sm px-2 text-md font-semibold text-accent-ink hover:bg-hover focus-visible:outline-2 focus-visible:outline-accent'

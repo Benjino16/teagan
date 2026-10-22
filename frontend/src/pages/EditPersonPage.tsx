@@ -67,7 +67,7 @@ export function EditPersonPage() {
                   question={deleteQuestion}
                 />
                 {deletePerson.error && (
-                  <p role="alert" className="text-center text-sm text-alert-text">
+                  <p role="alert" className="text-center text-sm text-danger">
                     {deletePerson.error.message}
                   </p>
                 )}

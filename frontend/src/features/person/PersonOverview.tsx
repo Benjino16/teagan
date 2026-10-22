@@ -119,10 +119,10 @@ function RecentSection({ data }: { data: PersonViewData }) {
               <li key={activity.id}>
                 <Link
                   to={`/activities/${activity.id}`}
-                  className={`${cardStyles({ padding: 'sm', radius: 'sm' })} block no-underline hover:bg-canvas`}
+                  className={`${cardStyles({ padding: 'sm', radius: 'sm' })} block no-underline hover:bg-hover`}
                 >
                   <MediaRow
-                    leading={<IconBadge icon={activityIcon(activity.icon).Icon} size={36} tone="canvas" />}
+                    leading={<IconBadge icon={activityIcon(activity.icon).Icon} size={36} tone="neutral" />}
                     title={activity.name}
                     subtitle={meta.filter(Boolean).join(' · ')}
                   />

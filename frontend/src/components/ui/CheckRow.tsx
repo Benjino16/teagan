@@ -45,7 +45,7 @@ export function CheckRow({ checked, onToggle, label, meta, editTo, className }: 
         to={editTo}
         aria-label={`Edit “${label}”`}
         className={clsx(
-          'mt-1.5 mr-1.5 flex size-11 flex-none items-center justify-center rounded-full text-faint hover:bg-canvas hover:text-ink',
+          'mt-1.5 mr-1.5 flex size-11 flex-none items-center justify-center rounded-full text-faint hover:bg-hover hover:text-ink',
           focusRing,
         )}
       >

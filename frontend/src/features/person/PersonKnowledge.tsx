@@ -29,7 +29,7 @@ export function PersonKnowledge({ data }: { data: PersonViewData }) {
                 type="button"
                 aria-pressed={sorting}
                 onClick={() => setSorting(!sorting)}
-                className="-my-3 -mr-2 min-h-11 rounded-tile-sm px-2 text-md font-semibold text-accent hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent"
+                className="-my-3 -mr-2 min-h-11 rounded-tile-sm px-2 text-md font-semibold text-accent-ink hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-accent"
               >
                 {sorting ? 'Done' : 'Sort'}
               </button>
@@ -46,7 +46,7 @@ export function PersonKnowledge({ data }: { data: PersonViewData }) {
               <li key={fact.id}>
                 <Link
                   to={`/people/${person.id}/facts/${fact.id}/edit`}
-                  className="flex flex-col gap-0.75 px-4 py-3.5 text-ink no-underline hover:bg-canvas"
+                  className="flex flex-col gap-0.75 px-4 py-3.5 text-ink no-underline hover:bg-hover"
                 >
                   <span className="text-xs font-medium tracking-wide text-muted uppercase">{fact.label}</span>
                   <span className="text-base font-medium whitespace-pre-line">{fact.value}</span>
@@ -65,7 +65,7 @@ export function PersonKnowledge({ data }: { data: PersonViewData }) {
               <li key={activity.id}>
                 <Link
                   to={`/activities/${activity.id}`}
-                  className={`${listRowStyles} text-ink no-underline hover:bg-canvas`}
+                  className={`${listRowStyles} text-ink no-underline hover:bg-hover`}
                 >
                   <IconBadge icon={activityIcon(activity.icon).Icon} size={36} shape="circle" tone="accent" />
                   <span className="min-w-0 flex-auto text-base font-semibold">{activity.name}</span>

@@ -9,7 +9,7 @@ const sizes = {
 }
 
 const tones = {
-  accent: 'bg-accent text-white',
+  accent: 'bg-accent text-on-accent',
   /** On warm background (birthday), matching the birthday card's icon. */
   'on-warm': 'bg-surface text-warm-icon',
 }
