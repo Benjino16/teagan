@@ -23,7 +23,7 @@ export function GroupPage() {
   const activities = useActivitiesForGroup(id)
   const [editing, setEditing] = useState(false)
   const wide = useBreakpoint('laptop')
-  // Large screens: the list of groups is already beside a top-level group, nothing to go back to
+  // Large screens: the list of groups, subgroups included, is already beside it – nothing to go back to
   const listBeside = useListBeside()
 
   if (groupsData.status !== 'ready') {
@@ -62,7 +62,7 @@ export function GroupPage() {
     >
       <PageHeader
         title={group.name}
-        backTo={parent ? `/groups/${parent.id}` : listBeside ? undefined : '/groups'}
+        backTo={listBeside ? undefined : parent ? `/groups/${parent.id}` : '/groups'}
         subtitle={parent ? `${parent.name} · ${count}` : count}
         trailing={
           <IconButton
