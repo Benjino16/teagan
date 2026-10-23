@@ -12,7 +12,7 @@ interface Props {
   className?: string
 }
 
-/** Search input with a leading icon and a clear button; Escape clears as well. */
+/** Search input with a leading icon and a clear button; Escape clears as well, Enter keeps the query and leaves the field (closing the keyboard on phones). */
 export function SearchField({ value, onChange, label, placeholder = 'Search …', className }: Props) {
   const input = useRef<HTMLInputElement>(null)
 
@@ -29,7 +29,10 @@ export function SearchField({ value, onChange, label, placeholder = 'Search …'
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
-          if (e.key === 'Escape' && value) {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            e.currentTarget.blur()
+          } else if (e.key === 'Escape' && value) {
             e.preventDefault()
             onChange('')
           }
