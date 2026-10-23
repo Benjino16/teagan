@@ -4,7 +4,7 @@ import { PageError, PageLoading } from '../components/layout/PageStatus'
 import { PageWithPane } from '../components/layout/SidePane'
 import { useBreakpoint } from '../components/layout/useBreakpoint'
 import { useActivities, useGroups, usePeople, useSelf } from '../data/queries'
-import { onThisDay, upcomingWithOthers } from '../domain/activities'
+import { ongoingWithOthers, onThisDay, upcomingWithOthers } from '../domain/activities'
 import { upcomingBirthdays } from '../domain/birthday'
 import { dueReconnects } from '../domain/contact'
 import { formatWeekdayLong } from '../domain/dates'
@@ -13,6 +13,7 @@ import { displayName } from '../domain/people'
 import { upcomingRemembrances } from '../domain/remembrance'
 import { getToday } from '../domain/today'
 import { BirthdaysBox } from '../features/today/BirthdaysBox'
+import { OngoingFeed } from '../features/today/OngoingFeed'
 import { OnThisDayBox } from '../features/today/OnThisDayBox'
 import { ReconnectBox } from '../features/today/ReconnectBox'
 import { RemembranceBox } from '../features/today/RemembranceBox'
@@ -52,6 +53,13 @@ export function TodayPage() {
             <ReconnectBox reconnects={dueReconnects(people.data, activities.data, self.data.id, today)} />
           </div>
           <div className="flex flex-col gap-6 empty:hidden">
+            <OngoingFeed
+              activities={ongoingWithOthers(activities.data, self.data.id, today)}
+              selfId={self.data.id}
+              nameOf={nameOf}
+              groupNameOf={groupNameOf}
+              today={today}
+            />
             <UpcomingFeed
               activities={upcomingWithOthers(activities.data, self.data.id, today)}
               selfId={self.data.id}

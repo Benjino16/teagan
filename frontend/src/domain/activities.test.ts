@@ -15,6 +15,7 @@ import {
   onThisDay,
   participantNote,
   ongoingActivities,
+  ongoingWithOthers,
   upcomingActivities,
   upcomingWithOthers,
 } from './activities'
@@ -120,6 +121,32 @@ describe('status', () => {
   it('lists coming up ascending and limited', () => {
     expect(names(upcomingActivities(db.activities, today))).toEqual(['Vacation in Lisbon', 'Statistics exam'])
     expect(upcomingActivities(db.activities, today, 1)).toHaveLength(1)
+  })
+})
+
+describe('ongoingWithOthers', () => {
+  const SELF = 1
+  const ongoing = (id: number, startDate: string, personIds: number[], groupIds: number[] = []): Activity => ({
+    ...byId(1),
+    id,
+    startDate,
+    endDate: '2026-12-31',
+    participants: personIds.map((personId) => ({ personId, impact: null, note: null })),
+    groups: groupIds.map((groupId) => link(groupId)),
+  })
+
+  it('shows ongoing ranges with others or a group, most recently started first', () => {
+    const list = [ongoing(201, '2026-09-01', [SELF, LENA]), ongoing(202, '2026-10-01', [], [FAMILY])]
+    expect(ongoingWithOthers(list, SELF, today).map((a) => a.id)).toEqual([202, 201])
+  })
+
+  it('leaves out ranges with only you, and those not running today', () => {
+    const list = [
+      ongoing(203, '2026-09-01', [SELF]),
+      ongoing(204, '2026-11-01', [LENA]),
+      { ...ongoing(205, '2026-09-01', [LENA]), endDate: '2026-10-12' },
+    ]
+    expect(ongoingWithOthers(list, SELF, today)).toEqual([])
   })
 })
 

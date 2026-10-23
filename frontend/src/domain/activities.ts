@@ -115,10 +115,19 @@ export function upcomingActivities(activities: Activity[], today: IsoDate, limit
     .slice(0, limit)
 }
 
-/** “Coming up” on Today: future activities with at least one person other than you, or a group. */
+/** Activities with at least one person other than you, or a group – what Today shows. */
+function withOthers(activities: Activity[], selfId: Id): Activity[] {
+  return activities.filter((a) => a.groups.length > 0 || a.participants.some((p) => p.personId !== selfId))
+}
+
+/** “Coming up” on Today: future activities with others or a group. */
 export function upcomingWithOthers(activities: Activity[], selfId: Id, today: IsoDate, limit = 5): Activity[] {
-  const withOthers = activities.filter((a) => a.groups.length > 0 || a.participants.some((p) => p.personId !== selfId))
-  return upcomingActivities(withOthers, today, limit)
+  return upcomingActivities(withOthers(activities, selfId), today, limit)
+}
+
+/** “Ongoing” on Today: ranges with others or a group that include today, most recently started first. */
+export function ongoingWithOthers(activities: Activity[], selfId: Id, today: IsoDate): Activity[] {
+  return ongoingActivities(withOthers(activities, selfId), today)
 }
 
 /** Milestones = effective impact 5, newest first. */
