@@ -1,6 +1,7 @@
 import { clsx } from 'clsx'
 import { CalendarDays, LayoutGrid, type LucideIcon, Settings, Users } from 'lucide-react'
-import { NavLink } from 'react-router'
+import { matchPath, NavLink, useLocation } from 'react-router'
+import { haptic } from '../../app/haptics'
 
 const tabs: { to: string; label: string; icon: LucideIcon; end?: boolean }[] = [
   { to: '/', label: 'Today', icon: CalendarDays, end: true },
@@ -10,11 +11,16 @@ const tabs: { to: string; label: string; icon: LucideIcon; end?: boolean }[] = [
 ]
 
 function Tabs() {
+  const { pathname } = useLocation()
   return tabs.map(({ to, label, icon: Icon, end }) => (
     <NavLink
       key={to}
       to={to}
       end={end}
+      // A tick when switching tabs – not when tapping the one you're in. On touch, not on release
+      onPointerDown={() => {
+        if (!matchPath({ path: to, end: end ?? false }, pathname)) haptic()
+      }}
       className={({ isActive }) =>
         clsx(
           'flex min-h-17 flex-col items-center justify-center gap-1 text-xs no-underline',
