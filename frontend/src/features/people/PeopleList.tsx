@@ -11,8 +11,8 @@ import { PeopleByImpact } from './PeopleByImpact'
 
 /**
  * Everyone active except you, grouped by impact; a link at the bottom leads to the archived ones.
- * Your own profile sits above them as a single row, outside the impact levels.
  * A search field appears once the list is long enough to need one and stays below the top bar while scrolling.
+ * Your own profile sits below it as a single row, outside the impact levels, and hides while searching.
  * The People page on phones, a side column next to the open person on wide screens.
  */
 export function PeopleList() {
@@ -30,7 +30,12 @@ export function PeopleList() {
 
   return (
     <>
-      {self && (
+      {searchShown && (
+        <StickyBar>
+          <SearchField label="Search people" value={query} onChange={setQuery} />
+        </StickyBar>
+      )}
+      {self && !query.trim() && (
         <ListCard>
           <li>
             <NavLink
@@ -46,11 +51,6 @@ export function PeopleList() {
             </NavLink>
           </li>
         </ListCard>
-      )}
-      {searchShown && (
-        <StickyBar>
-          <SearchField label="Search people" value={query} onChange={setQuery} />
-        </StickyBar>
       )}
       {active.length === 0 ? (
         <EmptyState>Nobody here yet.</EmptyState>
