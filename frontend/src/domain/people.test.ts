@@ -16,6 +16,17 @@ describe('names', () => {
     expect(initials('Anna Maria Schulz')).toBe('AS')
     expect(initials('Mira')).toBe('M')
   })
+
+  it('leaves out parentheses and punctuation in initials', () => {
+    expect(initials('Mia (Norway)')).toBe('M')
+    expect(initials('Mia Berg (Oslo)')).toBe('MB')
+    expect(initials('Mia (Norway')).toBe('M')
+    expect(initials('(Mia)')).toBe('M')
+    expect(initials('"Jo" Weber')).toBe('JW')
+    expect(initials('Lena - Hoffmann')).toBe('LH')
+    expect(initials('Élodie Ødegaard')).toBe('ÉØ')
+    expect(initials('  ')).toBe('?')
+  })
 })
 
 describe('participantsText', () => {

@@ -1,6 +1,15 @@
 import { clsx } from 'clsx'
 import { useState } from 'react'
-import { Avatar, BottomSheet, CheckBox, ListCard, listRowStyles, MediaRow, TextInput } from '../../components/ui'
+import {
+  Avatar,
+  BottomSheet,
+  CheckBox,
+  ListCard,
+  listRowStyles,
+  MediaRow,
+  TextInput,
+  useAddSearch,
+} from '../../components/ui'
 import { useSetMembership } from '../../data/queries'
 import { memberPickerOrder } from '../../domain/groups'
 import type { Group, Id, Person, Membership } from '../../domain/model'
@@ -20,7 +29,9 @@ interface Props {
 /** Ticking people in or out of a group; every tap saves immediately, keeping members of a subgroup in its main group. */
 export function MembersSheet({ group, groups, people, memberships, onClose }: Props) {
   const setMembership = useSetMembership()
-  const [query, setQuery] = useState('')
+  const { query, pick, inputProps } = useAddSearch((person: Person) =>
+    setMembership.mutate({ personId: person.id, groupId: group.id, member: true }),
+  )
   const byPerson = new Map(memberships.filter((m) => m.groupId === group.id).map((m) => [m.personId, m]))
   const subgroups = groups.filter((c) => c.parentId === group.id)
   // Order from the time of opening, so rows don't jump while ticking.
@@ -29,18 +40,13 @@ export function MembersSheet({ group, groups, people, memberships, onClose }: Pr
   const shown = memberPickerOrder(people, initialMembers).filter(
     (p) => (!isArchived(p) || initialMembers.has(p.id)) && matchesSearch(query, [p.name, p.nickname]),
   )
+  // Enter adds – never removes – so it skips those already in
+  const top = query.trim() ? shown.find((p) => !byPerson.has(p.id)) : undefined
 
   return (
     <BottomSheet title={`Members of ${group.name}`} onClose={onClose}>
       <div className="sticky top-0 z-10 bg-surface pb-3">
-        <TextInput
-          type="search"
-          aria-label="Search people"
-          placeholder="Search …"
-          autoComplete="off"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <TextInput aria-label="Search people" placeholder="Search …" {...inputProps(top)} />
       </div>
       {shown.length === 0 ? (
         <p className="px-1 py-3 text-md text-muted">No one found.</p>
@@ -60,7 +66,11 @@ export function MembersSheet({ group, groups, people, memberships, onClose }: Pr
                   type="button"
                   role="checkbox"
                   aria-checked={checked}
-                  onClick={() => setMembership.mutate({ personId: person.id, groupId: group.id, member: !checked })}
+                  onClick={() =>
+                    checked
+                      ? setMembership.mutate({ personId: person.id, groupId: group.id, member: false })
+                      : pick(person)
+                  }
                   className={clsx(
                     listRowStyles,
                     'py-2.5 hover:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',

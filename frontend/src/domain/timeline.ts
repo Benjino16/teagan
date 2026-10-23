@@ -1,4 +1,4 @@
-import { byStartAsc, byStartDesc } from './activities'
+import { byStartDesc } from './activities'
 import { dayOf, daysBetween, isFullDate, normalizeEnd, normalizeStart, yearOf } from './dates'
 import type { Activity, Id, Impact, IsoDate, PartialDate } from './model'
 
@@ -24,7 +24,7 @@ const CONTAINER_IMPACT = 3
 export interface TimelineEntry {
   activity: Activity
   impact: Impact
-  /** Nested point events, ascending. */
+  /** Nested point events, newest first like the timeline. */
   during: Activity[]
 }
 
@@ -143,7 +143,7 @@ export function buildTimeline(activities: Activity[], impactOf: ImpactOf): Timel
     if (container) entries.get(container.id)!.during.push(a)
     else items.push({ kind: 'entry', sortKey: a.startDate, entry: entries.get(a.id)! })
   }
-  for (const entry of entries.values()) entry.during.sort(byStartAsc)
+  for (const entry of entries.values()) entry.during.sort(byStartDesc)
 
   // 2. End cards for ranges with a lane
   for (const [id] of laneOf) {

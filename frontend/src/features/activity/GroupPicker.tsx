@@ -1,6 +1,6 @@
 import { clsx } from 'clsx'
 import { ChevronRight, LayoutGrid, Plus } from 'lucide-react'
-import { useId, useRef, useState } from 'react'
+import { useId, useState } from 'react'
 import {
   Field,
   IconBadge,
@@ -11,6 +11,7 @@ import {
   MediaRow,
   RatingInput,
   TextInput,
+  useAddSearch,
 } from '../../components/ui'
 import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
 import { groupPath, isGroupArchived } from '../../domain/groups'
@@ -33,9 +34,10 @@ interface Props {
  * per-group impact that overrides the event's and a note for this group only.
  */
 export function GroupPicker({ groups, links, onChange, impact }: Props) {
-  const [query, setQuery] = useState('')
   const [expanded, setExpanded] = useState<Id | null>(null)
-  const searchRef = useRef<HTMLInputElement>(null)
+  const { query, pick, inputProps } = useAddSearch((group: Group) =>
+    onChange([...links, { groupId: group.id, impact: null, note: null }]),
+  )
 
   const chosen = new Set(links.map((l) => l.groupId))
   // Archived groups can't be added, but stay listed where the event already belongs to them
@@ -52,13 +54,6 @@ export function GroupPicker({ groups, links, onChange, impact }: Props) {
 
   function update(groupId: Id, patch: Partial<ActivityGroup>) {
     onChange(links.map((l) => (l.groupId === groupId ? { ...l, ...patch } : l)))
-  }
-
-  /** Back into the search afterwards, so the next group is just a few keys away. */
-  function add(group: Group) {
-    onChange([...links, { groupId: group.id, impact: null, note: null }])
-    setQuery('')
-    searchRef.current?.focus()
   }
 
   return (
@@ -84,21 +79,7 @@ export function GroupPicker({ groups, links, onChange, impact }: Props) {
         </ListCard>
       )}
 
-      <TextInput
-        ref={searchRef}
-        type="search"
-        aria-label="Add group"
-        placeholder="Add group …"
-        autoComplete="off"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={(e) => {
-          // Enter adds the top result – and must never submit the surrounding form
-          if (e.key !== 'Enter') return
-          e.preventDefault()
-          if (results[0]) add(results[0])
-        }}
-      />
+      <TextInput aria-label="Add group" placeholder="Add group …" {...inputProps(results[0])} />
 
       {query.trim() && (
         <ListCard aria-label="Group search results">
@@ -107,7 +88,7 @@ export function GroupPicker({ groups, links, onChange, impact }: Props) {
             <li key={group.id}>
               <button
                 type="button"
-                onClick={() => add(group)}
+                onClick={() => pick(group)}
                 className={clsx(listRowStyles, 'py-2.5 hover:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent')}
               >
                 <MediaRow

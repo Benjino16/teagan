@@ -194,9 +194,15 @@ export function formatSince(days: number): string {
   return `for ${roughDurationText(days)}`
 }
 
-/** Reconnect rhythm: `every week` · `every 4 weeks` · `every 10 days`. */
+/** The reconnect choices for half a year and a year. */
+export const HALF_YEAR_DAYS = 182
+export const YEAR_DAYS = 365
+
+/** Reconnect rhythm: `every week` · `every 4 weeks` · `every 10 days` · `every 6 months` · `every year`. */
 export function formatRhythm(days: number): string {
   if (days === 1) return 'every day'
+  if (days === HALF_YEAR_DAYS) return 'every 6 months'
+  if (days % YEAR_DAYS === 0) return days === YEAR_DAYS ? 'every year' : `every ${days / YEAR_DAYS} years`
   if (days % 7 !== 0) return `every ${days} days`
   const weeks = days / 7
   return weeks === 1 ? 'every week' : `every ${weeks} weeks`

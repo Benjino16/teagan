@@ -115,10 +115,19 @@ export function upcomingActivities(activities: Activity[], today: IsoDate, limit
     .slice(0, limit)
 }
 
-/** “Coming up” on Today: future activities with at least one person other than you, or a group. */
+/** Activities with at least one person other than you, or a group – what Today shows. */
+function withOthers(activities: Activity[], selfId: Id): Activity[] {
+  return activities.filter((a) => a.groups.length > 0 || a.participants.some((p) => p.personId !== selfId))
+}
+
+/** “Coming up” on Today: future activities with others or a group. */
 export function upcomingWithOthers(activities: Activity[], selfId: Id, today: IsoDate, limit = 5): Activity[] {
-  const withOthers = activities.filter((a) => a.groups.length > 0 || a.participants.some((p) => p.personId !== selfId))
-  return upcomingActivities(withOthers, today, limit)
+  return upcomingActivities(withOthers(activities, selfId), today, limit)
+}
+
+/** “Ongoing” on Today: ranges with others or a group that include today, most recently started first. */
+export function ongoingWithOthers(activities: Activity[], selfId: Id, today: IsoDate): Activity[] {
+  return ongoingActivities(withOthers(activities, selfId), today)
 }
 
 /** Milestones = effective impact 5, newest first. */
@@ -181,12 +190,12 @@ const COLLECTS_FROM_IMPACT = 3
  * Detail view: what happened during a range? Everything that lies entirely within
  * its span and shares at least one person or group with it – ranges included –,
  * unless it lies in a shorter contained range (which then lists it).
- * Independent of a person (unlike the timeline). Ascending.
+ * Independent of a person (unlike the timeline). Newest first, like the timeline.
  */
 export function activitiesDuring(range: Activity, all: Activity[]): Activity[] {
   if (range.endDate === null || maxImpact(range) < COLLECTS_FROM_IMPACT) return []
   // Direct entries only: whatever lies in a contained, shorter range belongs to that one.
-  return all.filter((a) => enclosingActivity(a, all)?.id === range.id).sort(byStartAsc)
+  return all.filter((a) => enclosingActivity(a, all)?.id === range.id).sort(byStartDesc)
 }
 
 /** Counterpart: the shortest range in which the activity took place (“Part of”). */

@@ -15,6 +15,7 @@ import {
   onThisDay,
   participantNote,
   ongoingActivities,
+  ongoingWithOthers,
   upcomingActivities,
   upcomingWithOthers,
 } from './activities'
@@ -123,6 +124,32 @@ describe('status', () => {
   })
 })
 
+describe('ongoingWithOthers', () => {
+  const SELF = 1
+  const ongoing = (id: number, startDate: string, personIds: number[], groupIds: number[] = []): Activity => ({
+    ...byId(1),
+    id,
+    startDate,
+    endDate: '2026-12-31',
+    participants: personIds.map((personId) => ({ personId, impact: null, note: null })),
+    groups: groupIds.map((groupId) => link(groupId)),
+  })
+
+  it('shows ongoing ranges with others or a group, most recently started first', () => {
+    const list = [ongoing(201, '2026-09-01', [SELF, LENA]), ongoing(202, '2026-10-01', [], [FAMILY])]
+    expect(ongoingWithOthers(list, SELF, today).map((a) => a.id)).toEqual([202, 201])
+  })
+
+  it('leaves out ranges with only you, and those not running today', () => {
+    const list = [
+      ongoing(203, '2026-09-01', [SELF]),
+      ongoing(204, '2026-11-01', [LENA]),
+      { ...ongoing(205, '2026-09-01', [LENA]), endDate: '2026-10-12' },
+    ]
+    expect(ongoingWithOthers(list, SELF, today)).toEqual([])
+  })
+})
+
 describe('upcomingWithOthers', () => {
   const SELF = 1
   const future = (id: number, startDate: string, personIds: number[]): Activity => ({
@@ -169,9 +196,9 @@ describe('milestones', () => {
 describe('detail view: meanwhile and part of', () => {
   it('collects what happened with Lena during Interrail', () => {
     expect(names(activitiesDuring(byId(11), db.activities))).toEqual([
-      'Video call from Vienna',
-      'Phone call',
       'Postcard from Ljubljana',
+      'Phone call',
+      'Video call from Vienna',
     ])
   })
 
@@ -181,7 +208,7 @@ describe('detail view: meanwhile and part of', () => {
     expect(during).toContain('Hiking weekend in the Harz')
     expect(during).not.toContain('Day trip to Sintra')
     expect(during).not.toContain('Year abroad in Lisbon')
-    expect(names(activitiesDuring(byId(21), db.activities))).toEqual(['Day trip to Sintra', 'Fado night in the Alfama'])
+    expect(names(activitiesDuring(byId(21), db.activities))).toEqual(['Fado night in the Alfama', 'Day trip to Sintra'])
   })
 
   it('collects nothing for point events and unimportant ranges', () => {

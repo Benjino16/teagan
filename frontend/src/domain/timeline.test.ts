@@ -46,8 +46,8 @@ describe('meanwhile', () => {
     expect(timeline.laneCount).toBe(0)
   })
 
-  it('nests events during Interrail, ascending', () => {
-    expect(ids(entry(timeline, 11)!.during)).toEqual([10, 9, 8])
+  it('nests events during Interrail, newest first', () => {
+    expect(ids(entry(timeline, 11)!.during)).toEqual([8, 9, 10])
     expect(entry(timeline, 10)).toBeUndefined()
   })
 
@@ -101,7 +101,7 @@ describe('lane for ranges that contain other ranges', () => {
   })
 
   it('nests events during the visit into the visit', () => {
-    expect(ids(entry(timeline, 21)!.during)).toEqual([22, 23])
+    expect(ids(entry(timeline, 21)!.during)).toEqual([23, 22])
   })
 
   it('puts the end card at the end of the month for a partial end', () => {
@@ -157,7 +157,7 @@ describe('several events on one day', () => {
 
   it('nests timed events in a range on the same day', () => {
     const t = buildTimeline([range(402, '2026-05-01', '2026-05-10'), party, coffee], impactFor(LENA))
-    expect(ids(entry(t, 402)!.during)).toEqual([401, 400])
+    expect(ids(entry(t, 402)!.during)).toEqual([400, 401])
   })
 
   it('keeps the end of a lane range above timed events of its last day', () => {
