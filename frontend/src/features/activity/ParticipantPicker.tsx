@@ -1,6 +1,6 @@
 import { clsx } from 'clsx'
 import { ChevronRight, Plus } from 'lucide-react'
-import { useId, useRef, useState } from 'react'
+import { useId, useState } from 'react'
 import {
   Avatar,
   Field,
@@ -12,6 +12,7 @@ import {
   RatingInput,
   Switch,
   TextInput,
+  useAddSearch,
 } from '../../components/ui'
 import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
 import type { ActivityParticipant, Id, Impact, Person, PhotoUrls } from '../../domain/model'
@@ -36,9 +37,10 @@ interface Props {
  * per-person impact that overrides the event's and a note for this person only.
  */
 export function ParticipantPicker({ self, people, participants, onChange, impact }: Props) {
-  const [query, setQuery] = useState('')
   const [expanded, setExpanded] = useState<Id | null>(null)
-  const searchRef = useRef<HTMLInputElement>(null)
+  const { query, pick, inputProps } = useAddSearch((person: Person) =>
+    onChange([...participants, { personId: person.id, impact: null, note: null }]),
+  )
   const byId = new Map([self, ...people].map((p) => [p.id, p]))
   const withSelf = participants.some((p) => p.personId === self.id)
 
@@ -52,13 +54,6 @@ export function ParticipantPicker({ self, people, participants, onChange, impact
 
   function update(personId: Id, patch: Partial<ActivityParticipant>) {
     onChange(participants.map((p) => (p.personId === personId ? { ...p, ...patch } : p)))
-  }
-
-  /** Back into the search afterwards, so the next person is just a few keys away. */
-  function add(person: Person) {
-    onChange([...participants, { personId: person.id, impact: null, note: null }])
-    setQuery('')
-    searchRef.current?.focus()
   }
 
   function remove(personId: Id) {
@@ -101,21 +96,7 @@ export function ParticipantPicker({ self, people, participants, onChange, impact
         </ListCard>
       )}
 
-      <TextInput
-        ref={searchRef}
-        type="search"
-        aria-label="Add person"
-        placeholder="Add person …"
-        autoComplete="off"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onKeyDown={(e) => {
-          // Enter adds the top result – and must never submit the surrounding form
-          if (e.key !== 'Enter') return
-          e.preventDefault()
-          if (results[0]) add(results[0])
-        }}
-      />
+      <TextInput aria-label="Add person" placeholder="Add person …" {...inputProps(results[0])} />
 
       {query.trim() && (
         <ListCard aria-label="Search results">
@@ -124,7 +105,7 @@ export function ParticipantPicker({ self, people, participants, onChange, impact
             <li key={person.id}>
               <button
                 type="button"
-                onClick={() => add(person)}
+                onClick={() => pick(person)}
                 className={clsx(listRowStyles, 'py-2.5 hover:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent')}
               >
                 <MediaRow
