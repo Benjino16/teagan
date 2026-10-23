@@ -39,7 +39,6 @@ export function PeopleByImpact({ people, headerOffset = 0 }: Props) {
                     person.name
                   )
                 }
-                subtitle={person.nickname ?? undefined}
                 trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}
               />
             </NavLink>

@@ -18,7 +18,7 @@ interface Props {
   nameRef?: Ref<HTMLHeadingElement>
 }
 
-/** Avatar, name, contact status and groups. */
+/** Avatar, name and nickname, contact status and groups. */
 export function PersonHero({ person, groups, daysSinceContact, today, nameRef }: Props) {
   // Only an approximate age (year known, day not) appears here – subtly instead of its own card.
   // For someone who died, the age at death in `deathText` takes its place.
@@ -35,6 +35,7 @@ export function PersonHero({ person, groups, daysSinceContact, today, nameRef }:
           <h1 id="person-name" ref={nameRef} className="font-display text-3xl leading-[1.1] font-bold tracking-tight">
             {person.name}
           </h1>
+          {person.nickname && <p className="text-md text-muted">Goes by {person.nickname}</p>}
           <p className="text-md text-muted">
             {lastSeenText(daysSinceContact)}
             {approximateAge && ` · ${formatAge(approximateAge)}`}
