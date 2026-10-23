@@ -441,6 +441,19 @@ export function useUpdateActivity(id: Id) {
   })
 }
 
+export function useDeleteActivity(id: Id) {
+  const repo = useRepository()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => repo.deleteActivity(id),
+    // Its open points stay, just without the event.
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.activities })
+      queryClient.invalidateQueries({ queryKey: ['openPoints'] })
+    },
+  })
+}
+
 export function useSetOpenPointDone(personId: Id) {
   const repo = useRepository()
   const queryClient = useQueryClient()
