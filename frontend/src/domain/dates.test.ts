@@ -117,6 +117,9 @@ describe('formatting', () => {
     expect(formatRhythm(7)).toBe('every week')
     expect(formatRhythm(28)).toBe('every 4 weeks')
     expect(formatRhythm(10)).toBe('every 10 days')
+    expect(formatRhythm(182)).toBe('every 6 months')
+    expect(formatRhythm(365)).toBe('every year')
+    expect(formatRhythm(730)).toBe('every 2 years')
   })
 })
 

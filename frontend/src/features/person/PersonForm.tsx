@@ -13,7 +13,7 @@ import {
   TextInput,
 } from '../../components/ui'
 import { ageOf, birthYearFromAge, parseBirthday } from '../../domain/birthday'
-import { MONTH_NAMES } from '../../domain/dates'
+import { HALF_YEAR_DAYS, MONTH_NAMES, YEAR_DAYS } from '../../domain/dates'
 import { PERSON_IMPACT_LEVELS } from '../../domain/people'
 import type { Birthday, Impact, IsoDate, PersonInput, PhotoChange, PhotoUrls } from '../../domain/model'
 import { resizePhoto } from './resizePhoto'
@@ -40,6 +40,8 @@ const RECONNECT_CHOICES = [
   { value: 14, label: '2 weeks' },
   { value: 28, label: '4 weeks' },
   { value: 56, label: '8 weeks' },
+  { value: HALF_YEAR_DAYS, label: '6 months' },
+  { value: YEAR_DAYS, label: '1 year' },
 ] as const
 
 interface Props {
