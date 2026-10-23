@@ -22,13 +22,18 @@ export function displayName(person: Pick<Person, 'name' | 'nickname'>): string {
   return person.nickname?.trim() || person.name
 }
 
-/** `Lena Hoffmann` → `LH`, `Mira` → `M` */
+/**
+ * `Lena Hoffmann` → `LH`, `Mira` → `M`, `Mia (Norway)` → `M`: parentheses tell
+ * people apart and are left out (unless that's all there is), and each word
+ * counts from its first letter or digit.
+ */
 export function initials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean)
+  const letters = (text: string) => text.split(/\s+/).flatMap((word) => word.match(/[\p{L}\p{N}]/u) ?? [])
+  const outside = letters(name.replace(/\([^)]*\)?/g, ' '))
+  const words = outside.length > 0 ? outside : letters(name)
   if (words.length === 0) return '?'
-  const first = words[0]![0]!
-  const last = words.length > 1 ? words.at(-1)![0]! : ''
-  return (first + last).toUpperCase()
+  const last = words.length > 1 ? words.at(-1)! : ''
+  return (words[0]! + last).toUpperCase()
 }
 
 function joinWithAnd(items: string[]): string {
