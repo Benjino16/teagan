@@ -5,16 +5,29 @@ RUN npm ci
 COPY frontend/ ./
 RUN npm run build
 
-FROM rust:1-bookworm AS backend
-RUN apt-get update && apt-get install -y --no-install-recommends sqlite3
+# cargo-chef splits the Rust build in two: the dependencies are compiled in
+# their own layer, which stays cached as long as Cargo.toml and Cargo.lock
+# don't change. https://github.com/LukeMathWalker/cargo-chef
+FROM lukemathwalker/cargo-chef:latest-rust-1-bookworm AS chef
 WORKDIR /app/backend
+
+FROM chef AS planner
+COPY backend/ ./
+RUN cargo chef prepare --recipe-path recipe.json
+
+FROM chef AS backend
+RUN apt-get update && apt-get install -y --no-install-recommends sqlite3
+# `--build-arg FEATURES=demo` for dev stages: adds `teagan demo load`.
+# Never for published release images – the demo account has a public password.
+ARG FEATURES=""
+COPY --from=planner /app/backend/recipe.json recipe.json
+# Same profile and features as the build below, or the cached dependencies
+# don't match and get compiled again
+RUN cargo chef cook --release --features "$FEATURES" --recipe-path recipe.json
 COPY backend/ ./
 COPY --from=frontend /app/frontend/dist /app/frontend/dist
 RUN cat migrations/*.sql | sqlite3 /tmp/build.db
 ENV DATABASE_URL=sqlite:///tmp/build.db
-# `--build-arg FEATURES=demo` for dev stages: adds `teagan demo load`.
-# Never for published release images – the demo account has a public password.
-ARG FEATURES=""
 RUN cargo build --release --features "$FEATURES"
 
 FROM debian:bookworm-slim
