@@ -1,8 +1,19 @@
 import { clsx } from 'clsx'
 import { BookOpen, ChevronRight, CircleCheck, LayoutGrid, ListTodo, type LucideIcon } from 'lucide-react'
 import { type ReactNode, useEffect, useState } from 'react'
-import { Link } from 'react-router'
-import { Avatar, BottomSheet, EmptyState, IconBadge, ListCard, listRowStyles, MediaRow, SearchField } from '../../components/ui'
+import { Link, useNavigate } from 'react-router'
+import {
+  Avatar,
+  BottomSheet,
+  EmptyState,
+  IconBadge,
+  ListCard,
+  listRowStyles,
+  MediaRow,
+  type OptionProps,
+  SearchField,
+  useListNavigation,
+} from '../../components/ui'
 import { usePeople, useGroups, useSearch } from '../../data/queries'
 import { formatDateRangeWithYear } from '../../domain/dates'
 import { groupPath, isGroupArchived } from '../../domain/groups'
@@ -20,7 +31,8 @@ const SLOW_MS = 300
 
 /**
  * Full search over people, groups, events, knowledge and open points. Every hit links to
- * where it lives; following one closes the sheet.
+ * where it lives; following one closes the sheet. The first hit is marked, ↓/↑ move the
+ * mark while focus stays in the field, Enter opens it.
  */
 export function SearchSheet({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('')
@@ -31,10 +43,38 @@ export function SearchSheet({ onClose }: { onClose: () => void }) {
   const people = usePeople().data ?? []
   const groups = useGroups().data ?? []
   const personName = (id: Id) => people.find((p) => p.id === id)?.name ?? ''
+  const navigate = useNavigate()
 
   const result = search.active ? search.data : undefined
   const total = result ? Object.values(result).reduce((sum, hits: SearchHits<unknown>) => sum + hits.total, 0) : 0
   const cut = result ? Object.values(result).some((hits: SearchHits<unknown>) => hits.total > hits.items.length) : false
+
+  // Where each hit leads, in the order shown – the arrow keys walk through this
+  const targets: Target[] = result
+    ? [
+        ...result.people.items.map((p) => ({ key: `person-${p.id}`, to: `/people/${p.id}` })),
+        ...result.groups.items.map((g) => ({ key: `group-${g.id}`, to: `/groups/${g.id}` })),
+        ...result.activities.items.map((a) => ({ key: `activity-${a.id}`, to: `/activities/${a.id}` })),
+        ...result.facts.items.map((f) => ({ key: `fact-${f.id}`, to: `/people/${f.personId}/knowledge` })),
+        ...result.openPoints.items.map((p) => ({ key: `point-${p.id}`, to: `/people/${p.personId}` })),
+      ]
+    : []
+  // Position of each section's first hit in `targets`
+  const shown = (hits: SearchHits<unknown> | undefined) => hits?.items.length ?? 0
+  const start = { people: 0, groups: shown(result?.people), activities: 0, facts: 0, openPoints: 0 }
+  start.activities = start.groups + shown(result?.groups)
+  start.facts = start.activities + shown(result?.activities)
+  start.openPoints = start.facts + shown(result?.facts)
+  const nav = useListNavigation(targets, {
+    key: (target) => target.key,
+    onPick: (target) => {
+      onClose()
+      navigate(target.to)
+    },
+    // Never open a hit from the previous query
+    ready: !search.waiting,
+  })
+  const option = (index: number) => nav.optionProps(targets[index])
 
   return (
     <BottomSheet title="Search" onClose={onClose}>
@@ -48,6 +88,7 @@ export function SearchSheet({ onClose }: { onClose: () => void }) {
           }}
           label="Search everything"
           placeholder="People, events, knowledge …"
+          combobox={nav.inputProps}
         />
 
         {!search.active ? (
@@ -69,64 +110,71 @@ export function SearchSheet({ onClose }: { onClose: () => void }) {
         ) : (
           // Old hits stay while the next ones load, faded only if that takes a while
           <div className={clsx('flex flex-col gap-5 transition-opacity', slow && 'opacity-60')}>
-            <Section title="People" hits={result.people}>
-              {(person) => (
-                <HitLink
-                  to={`/people/${person.id}`}
-                  onClose={onClose}
-                  leading={<Avatar name={person.name} photo={person.photo} size="md" />}
-                  title={person.name}
-                  subtitle={join(person.nickname, isArchived(person) && 'Archived')}
-                />
-              )}
-            </Section>
-            <Section title="Groups" hits={result.groups}>
-              {(group) => (
-                <HitLink
-                  to={`/groups/${group.id}`}
-                  onClose={onClose}
-                  leading={<Badge icon={LayoutGrid} />}
-                  title={group.name}
-                  subtitle={join(
-                    group.parentId !== null && groupPath(group.parentId, groups),
-                    isGroupArchived(group, groups) && 'Archived',
-                  )}
-                />
-              )}
-            </Section>
-            <Section title="Events" hits={result.activities}>
-              {(activity) => (
-                <HitLink
-                  to={`/activities/${activity.id}`}
-                  onClose={onClose}
-                  leading={<Badge icon={activityIcon(activity.icon).Icon} />}
-                  title={activity.name}
-                  subtitle={join(formatDateRangeWithYear(activity.startDate, activity.endDate), activity.location)}
-                />
-              )}
-            </Section>
-            <Section title="Knowledge" hits={result.facts}>
-              {(fact) => (
-                <HitLink
-                  to={`/people/${fact.personId}/knowledge`}
-                  onClose={onClose}
-                  leading={<Badge icon={BookOpen} />}
-                  title={fact.value}
-                  subtitle={join(fact.label, personName(fact.personId))}
-                />
-              )}
-            </Section>
-            <Section title="Open points" hits={result.openPoints}>
-              {(point) => (
-                <HitLink
-                  to={`/people/${point.personId}`}
-                  onClose={onClose}
-                  leading={<Badge icon={point.doneAt ? CircleCheck : ListTodo} />}
-                  title={point.text}
-                  subtitle={join(personName(point.personId), point.doneAt && 'Done')}
-                />
-              )}
-            </Section>
+            <div {...nav.listProps} aria-label="Search results" className="flex flex-col gap-5">
+              <Section title="People" hits={result.people} start={start.people}>
+                {(person, index) => (
+                  <HitLink
+                    option={option(index)}
+                    to={`/people/${person.id}`}
+                    onClose={onClose}
+                    leading={<Avatar name={person.name} photo={person.photo} size="md" />}
+                    title={person.name}
+                    subtitle={join(person.nickname, isArchived(person) && 'Archived')}
+                  />
+                )}
+              </Section>
+              <Section title="Groups" hits={result.groups} start={start.groups}>
+                {(group, index) => (
+                  <HitLink
+                    option={option(index)}
+                    to={`/groups/${group.id}`}
+                    onClose={onClose}
+                    leading={<Badge icon={LayoutGrid} />}
+                    title={group.name}
+                    subtitle={join(
+                      group.parentId !== null && groupPath(group.parentId, groups),
+                      isGroupArchived(group, groups) && 'Archived',
+                    )}
+                  />
+                )}
+              </Section>
+              <Section title="Events" hits={result.activities} start={start.activities}>
+                {(activity, index) => (
+                  <HitLink
+                    option={option(index)}
+                    to={`/activities/${activity.id}`}
+                    onClose={onClose}
+                    leading={<Badge icon={activityIcon(activity.icon).Icon} />}
+                    title={activity.name}
+                    subtitle={join(formatDateRangeWithYear(activity.startDate, activity.endDate), activity.location)}
+                  />
+                )}
+              </Section>
+              <Section title="Knowledge" hits={result.facts} start={start.facts}>
+                {(fact, index) => (
+                  <HitLink
+                    option={option(index)}
+                    to={`/people/${fact.personId}/knowledge`}
+                    onClose={onClose}
+                    leading={<Badge icon={BookOpen} />}
+                    title={fact.value}
+                    subtitle={join(fact.label, personName(fact.personId))}
+                  />
+                )}
+              </Section>
+              <Section title="Open points" hits={result.openPoints} start={start.openPoints}>
+                {(point, index) => (
+                  <HitLink
+                    option={option(index)}
+                    to={`/people/${point.personId}`}
+                    onClose={onClose}
+                    leading={<Badge icon={point.doneAt ? CircleCheck : ListTodo} />}
+                    title={point.text}
+                    subtitle={join(personName(point.personId), point.doneAt && 'Done')}
+                  />
+                )}
+              </Section>
+            </div>
             {cut && limit < LIMIT_ALL && (
               <button
                 type="button"
@@ -141,6 +189,12 @@ export function SearchSheet({ onClose }: { onClose: () => void }) {
       </div>
     </BottomSheet>
   )
+}
+
+/** A hit as the arrow keys see it. */
+interface Target {
+  key: string
+  to: string
 }
 
 /** Whether `value` has been true for at least `ms` – false again as soon as it is. */
@@ -170,29 +224,36 @@ function Badge({ icon }: { icon: LucideIcon }) {
 interface SectionProps<T> {
   title: string
   hits: SearchHits<T>
-  children: (item: T) => ReactNode
+  /** Position of the first hit among all shown hits. */
+  start: number
+  children: (item: T, index: number) => ReactNode
 }
 
-/** One resource's hits as a card; hidden without any. */
-function Section<T extends { id: Id }>({ title, hits, children }: SectionProps<T>) {
+/** One resource's hits as a card, a group of options in the listbox; hidden without any. */
+function Section<T extends { id: Id }>({ title, hits, start, children }: SectionProps<T>) {
   if (hits.total === 0) return null
   const shown = hits.items.length
+  const count = shown < hits.total ? `${shown} of ${hits.total}` : String(hits.total)
   return (
-    <section aria-label={title} className="flex flex-col gap-2">
-      <h3 className="flex items-baseline justify-between gap-3 px-1 text-sm font-semibold text-muted">
+    <div role="group" aria-label={`${title}, ${count}`} className="flex flex-col gap-2">
+      <h3 aria-hidden="true" className="flex items-baseline justify-between gap-3 px-1 text-sm font-semibold text-muted">
         {title}
-        <span className="font-normal">{shown < hits.total ? `${shown} of ${hits.total}` : hits.total}</span>
+        <span className="font-normal">{count}</span>
       </h3>
-      <ListCard>
-        {hits.items.map((item) => (
-          <li key={item.id}>{children(item)}</li>
+      <ListCard role="presentation">
+        {hits.items.map((item, i) => (
+          <li key={item.id} role="presentation">
+            {children(item, start + i)}
+          </li>
         ))}
       </ListCard>
-    </section>
+    </div>
   )
 }
 
 interface HitLinkProps {
+  /** From `useListNavigation`: id, role and the mark. */
+  option: OptionProps
   to: string
   onClose: () => void
   leading: ReactNode
@@ -200,9 +261,14 @@ interface HitLinkProps {
   subtitle?: string
 }
 
-function HitLink({ to, onClose, leading, title, subtitle }: HitLinkProps) {
+function HitLink({ option, to, onClose, leading, title, subtitle }: HitLinkProps) {
   return (
-    <Link to={to} onClick={onClose} className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
+    <Link
+      {...option}
+      to={to}
+      onClick={onClose}
+      className={clsx(listRowStyles, 'text-ink no-underline hover:bg-hover data-active:bg-hover')}
+    >
       <MediaRow
         leading={leading}
         title={<span className="line-clamp-2 break-words">{title}</span>}

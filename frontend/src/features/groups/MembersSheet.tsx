@@ -9,6 +9,7 @@ import {
   MediaRow,
   TextInput,
   useAddSearch,
+  useListNavigation,
 } from '../../components/ui'
 import { useSetMembership } from '../../data/queries'
 import { memberPickerOrder } from '../../domain/groups'
@@ -40,18 +41,19 @@ export function MembersSheet({ group, groups, people, memberships, onClose }: Pr
   const shown = memberPickerOrder(people, initialMembers).filter(
     (p) => (!isArchived(p) || initialMembers.has(p.id)) && matchesSearch(query, [p.name, p.nickname]),
   )
-  // Enter adds – never removes – so it skips those already in
-  const top = query.trim() ? shown.find((p) => !byPerson.has(p.id)) : undefined
+  // Enter adds – never removes – so the keys only walk those not in yet
+  const addable = query.trim() ? shown.filter((p) => !byPerson.has(p.id)) : []
+  const nav = useListNavigation(addable, { key: (p) => p.id, onPick: pick })
 
   return (
     <BottomSheet title={`Members of ${group.name}`} onClose={onClose}>
       <div className="sticky top-0 z-10 bg-surface pb-3">
-        <TextInput aria-label="Search people" placeholder="Search …" {...inputProps(top)} />
+        <TextInput aria-label="Search people" placeholder="Search …" {...inputProps(nav.inputProps)} />
       </div>
       {shown.length === 0 ? (
         <p className="px-1 py-3 text-md text-muted">No one found.</p>
       ) : (
-        <ListCard aria-label="People">
+        <ListCard aria-label="People" {...nav.listProps} aria-multiselectable>
           {shown.map((person) => {
             const membership = byPerson.get(person.id)
             const checked = membership !== undefined
@@ -61,11 +63,12 @@ export function MembersSheet({ group, groups, people, memberships, onClose }: Pr
               .map((g) => g.name)
             const subtitle = alsoIn.length > 0 ? `also in ${alsoIn.join(', ')}` : undefined
             return (
-              <li key={person.id}>
+              <li key={person.id} role="presentation">
                 <button
                   type="button"
-                  role="checkbox"
-                  aria-checked={checked}
+                  {...nav.optionProps(checked ? null : person)}
+                  // In this multi-select list, selected means member
+                  aria-selected={checked}
                   onClick={() =>
                     checked
                       ? setMembership.mutate({ personId: person.id, groupId: group.id, member: false })
@@ -73,7 +76,7 @@ export function MembersSheet({ group, groups, people, memberships, onClose }: Pr
                   }
                   className={clsx(
                     listRowStyles,
-                    'py-2.5 hover:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
+                    'py-2.5 hover:bg-hover data-active:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
                   )}
                 >
                   <MediaRow
