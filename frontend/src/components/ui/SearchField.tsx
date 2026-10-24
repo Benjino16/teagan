@@ -10,10 +10,12 @@ interface Props {
   label: string
   placeholder?: string
   className?: string
+  /** Focus on open inside a `BottomSheet` (via `data-autofocus`). */
+  autoFocus?: boolean
 }
 
 /** Search input with a leading icon and a clear button; Escape clears as well, Enter keeps the query and leaves the field (closing the keyboard on phones). */
-export function SearchField({ value, onChange, label, placeholder = 'Search …', className }: Props) {
+export function SearchField({ value, onChange, label, placeholder = 'Search …', className, autoFocus = false }: Props) {
   const input = useRef<HTMLInputElement>(null)
 
   return (
@@ -22,6 +24,7 @@ export function SearchField({ value, onChange, label, placeholder = 'Search …'
       <input
         ref={input}
         type="search"
+        data-autofocus={autoFocus || undefined}
         aria-label={label}
         placeholder={placeholder}
         autoComplete="off"

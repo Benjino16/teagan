@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { matchesSearch, offersSearch, SEARCH_THRESHOLD } from './search'
+import { isSearchQuery, matchesSearch, offersSearch, SEARCH_THRESHOLD } from './search'
 
 describe('matchesSearch', () => {
   it('searches case-insensitively in all texts', () => {
@@ -27,5 +27,14 @@ describe('offersSearch', () => {
 
   it('stays on while a query is entered', () => {
     expect(offersSearch(0, 'a')).toBe(true)
+  })
+})
+
+describe('isSearchQuery', () => {
+  it('needs two characters after trimming', () => {
+    expect(isSearchQuery('')).toBe(false)
+    expect(isSearchQuery(' a ')).toBe(false)
+    expect(isSearchQuery(' ab ')).toBe(true)
+    expect(isSearchQuery('äö')).toBe(true)
   })
 })
