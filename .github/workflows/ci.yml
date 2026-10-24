@@ -66,5 +66,7 @@ jobs:
         with:
           context: .
           push: false
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Same scope as the amd64 build in release.yml: a release tag can
+          # read the cache of main and starts with the dependencies compiled
+          cache-from: type=gha,scope=linux-amd64
+          cache-to: type=gha,scope=linux-amd64,mode=max
