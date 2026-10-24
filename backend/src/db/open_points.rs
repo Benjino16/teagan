@@ -27,6 +27,25 @@ pub async fn list_for_person(
     .await
 }
 
+/// All points of the user, done ones included. Open first, newest first.
+pub async fn list_all(pool: &SqlitePool, owner_id: i64) -> sqlx::Result<Vec<OpenPointResponse>> {
+    sqlx::query_as!(
+        OpenPointResponse,
+        r#"
+        SELECT id, person_id, activity_id AS "activity_id?", text,
+               done_at AS "done_at?: _",
+               created_at AS "created_at: _",
+               updated_at AS "updated_at: _"
+          FROM open_points
+         WHERE owner_id = ?
+         ORDER BY done_at IS NOT NULL, created_at DESC, id DESC
+        "#,
+        owner_id
+    )
+    .fetch_all(pool)
+    .await
+}
+
 /// All points that came up at an activity, for every person – the event page
 /// is the record of the event. Open first, newest first.
 pub async fn list_for_activity(

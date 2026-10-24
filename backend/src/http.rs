@@ -13,6 +13,7 @@ mod memberships;
 mod open_points;
 mod people;
 mod photos;
+mod search;
 mod setup;
 #[cfg(test)]
 mod tests;
@@ -166,6 +167,7 @@ fn api(state: AppState) -> Router {
             "/groups/{group_id}/activities",
             get(activities::list_for_group),
         )
+        .route("/search", get(search::search))
         // Unknown API paths get a JSON 404 instead of the frontend
         .fallback(|| async { AppError::NotFound })
         .with_state(state)

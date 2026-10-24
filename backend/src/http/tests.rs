@@ -11,6 +11,7 @@ mod groups;
 mod open_points;
 mod people;
 mod photos;
+mod search;
 mod sessions;
 
 use std::{collections::BTreeMap, net::SocketAddr, sync::Mutex};
