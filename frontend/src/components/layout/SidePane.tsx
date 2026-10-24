@@ -34,7 +34,7 @@ export function SidePane({ title, side, action, children }: Props) {
         <h2 className="truncate text-base font-semibold">{title}</h2>
         {action}
       </header>
-      <div className="flex flex-col gap-6 px-5 pt-4 pb-28">{children}</div>
+      <div className="flex flex-col gap-6 px-5 pt-4 pb-44">{children}</div>
     </aside>
   )
 }

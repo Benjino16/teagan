@@ -1,5 +1,5 @@
-import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useRef } from 'react'
+import { keepPreviousData, type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useRef, useState } from 'react'
 import type {
   ActivityInput,
   AuthStatus,
@@ -21,6 +21,7 @@ import type {
 } from '../domain/model'
 import { type MembershipChange, membershipEffects } from '../domain/groups'
 import { openPointChanges, type OpenPointDraft } from '../domain/openPoints'
+import { isSearchQuery } from '../domain/search'
 import { type Repository, RepositoryError } from './repository'
 import { useRepository } from './RepositoryContext'
 
@@ -44,6 +45,7 @@ export const queryKeys = {
   openPointsForActivity: (activityId: Id) => ['openPoints', 'activity', activityId] as const,
   facts: (personId: Id) => ['facts', personId] as const,
   factLabels: ['facts', 'labels'] as const,
+  search: (query: string, limit: number) => ['search', query, limit] as const,
 }
 
 // ── Login ──────────────────────────────────────────────────────────────────
@@ -242,6 +244,37 @@ export function useFacts(personId: Id) {
 export function useFactLabels() {
   const repo = useRepository()
   return useQuery({ queryKey: queryKeys.factLabels, queryFn: () => repo.listFactLabels() })
+}
+
+/** How long typing has to pause before a search goes out – the server answers in a few ms, so short. */
+const SEARCH_DELAY_MS = 80
+
+/**
+ * Searches all resources once typing pauses; too short a query stays idle. Keeps the last
+ * hits while the next ones load, so the list doesn't flicker. Not invalidated by writes –
+ * the search opens fresh each time and refetches then.
+ */
+export function useSearch(query: string, limit: number) {
+  const repo = useRepository()
+  const [settled, setSettled] = useState(query.trim())
+  useEffect(() => {
+    const timer = setTimeout(() => setSettled(query.trim()), SEARCH_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [query])
+  const result = useQuery({
+    queryKey: queryKeys.search(settled, limit),
+    queryFn: () => repo.search(settled, limit),
+    enabled: isSearchQuery(settled),
+    placeholderData: keepPreviousData,
+  })
+  const active = isSearchQuery(query)
+  return {
+    ...result,
+    /** Whether the typed query is long enough – the hits may still be for the previous one. */
+    active,
+    /** Whether the hits for the typed query are still to come (waiting for the pause or the server). */
+    waiting: active && (settled !== query.trim() || result.isPending || result.isPlaceholderData),
+  }
 }
 
 // ── Write ──────────────────────────────────────────────────────────────────

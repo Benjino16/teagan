@@ -2,6 +2,7 @@ import { clsx } from 'clsx'
 import { Search, X } from 'lucide-react'
 import { useRef } from 'react'
 import { inputStyles } from './styles'
+import type { ComboboxInputProps } from './useListNavigation'
 
 interface Props {
   value: string
@@ -10,10 +11,22 @@ interface Props {
   label: string
   placeholder?: string
   className?: string
+  /** Focus on open inside a `BottomSheet` (via `data-autofocus`). */
+  autoFocus?: boolean
+  /** From `useListNavigation`: the arrow keys walk a list below; its keys run before the field's own. */
+  combobox?: ComboboxInputProps
 }
 
 /** Search input with a leading icon and a clear button; Escape clears as well, Enter keeps the query and leaves the field (closing the keyboard on phones). */
-export function SearchField({ value, onChange, label, placeholder = 'Search …', className }: Props) {
+export function SearchField({
+  value,
+  onChange,
+  label,
+  placeholder = 'Search …',
+  className,
+  autoFocus = false,
+  combobox,
+}: Props) {
   const input = useRef<HTMLInputElement>(null)
 
   return (
@@ -22,13 +35,17 @@ export function SearchField({ value, onChange, label, placeholder = 'Search …'
       <input
         ref={input}
         type="search"
+        data-autofocus={autoFocus || undefined}
         aria-label={label}
+        {...combobox}
         placeholder={placeholder}
         autoComplete="off"
         enterKeyHint="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={(e) => {
+          combobox?.onKeyDown(e)
+          if (e.defaultPrevented) return
           if (e.key === 'Enter') {
             e.preventDefault()
             e.currentTarget.blur()

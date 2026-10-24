@@ -20,6 +20,7 @@ import type {
   Membership,
   MembershipInput,
   PersonInput,
+  SearchResult,
   SetupInput,
   TotpSetup,
 } from '../domain/model'
@@ -262,6 +263,14 @@ export class HttpRepository implements Repository {
 
   reorderFacts(personId: Id, orderedIds: Id[]) {
     return this.request<Fact[]>('PUT', `/people/${personId}/facts/order`, { factIds: orderedIds })
+  }
+
+  // ── Search ──────────────────────────────────────────────────────────────
+
+  search(query: string, limit?: number) {
+    const params = new URLSearchParams({ q: query })
+    if (limit !== undefined) params.set('limit', String(limit))
+    return this.request<SearchResult>('GET', `/search?${params}`)
   }
 
   // ── Transport ───────────────────────────────────────────────────────────

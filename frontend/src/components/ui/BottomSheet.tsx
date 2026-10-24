@@ -19,6 +19,7 @@ interface Props {
 export function BottomSheet({ title, onClose, size = 'tall', children }: Props) {
   const ref = useRef<HTMLDialogElement>(null)
   const titleId = useId()
+  const pressedOutside = useRef(false)
 
   // No close() on cleanup: that fires `onClose` (StrictMode would close the overlay right away).
   // When React removes the dialog, it ends anyway.
@@ -35,8 +36,12 @@ export function BottomSheet({ title, onClose, size = 'tall', children }: Props) 
       ref={ref}
       aria-labelledby={titleId}
       onClose={onClose}
-      // Tapping the dimmed area closes
-      onClick={(event) => event.target === event.currentTarget && onClose()}
+      // Tapping the dimmed area closes – only if the press started there too: a drag from
+      // inside (e.g. selecting text) ends with a click on the dialog itself
+      onPointerDown={(event) => {
+        pressedOutside.current = event.target === event.currentTarget
+      }}
+      onClick={(event) => event.target === event.currentTarget && pressedOutside.current && onClose()}
       className={clsx(
         'mx-auto mt-auto mb-0 max-h-[85dvh] w-full max-w-app rounded-t-card bg-surface p-0 text-ink',
         'backdrop:bg-scrim open:flex open:flex-col',

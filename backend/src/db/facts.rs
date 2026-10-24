@@ -26,6 +26,24 @@ pub async fn list_for_person(
     .await
 }
 
+/// All facts of the user, grouped by person in their list order.
+pub async fn list_all(pool: &SqlitePool, owner_id: i64) -> sqlx::Result<Vec<FactResponse>> {
+    sqlx::query_as!(
+        FactResponse,
+        r#"
+        SELECT id, person_id, label, value, sort,
+               created_at AS "created_at: _",
+               updated_at AS "updated_at: _"
+          FROM facts
+         WHERE owner_id = ?
+         ORDER BY person_id, sort, id
+        "#,
+        owner_id
+    )
+    .fetch_all(pool)
+    .await
+}
+
 /// New facts go to the bottom of the person's list.
 pub async fn create_fact(
     pool: &SqlitePool,

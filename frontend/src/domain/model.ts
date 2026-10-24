@@ -147,6 +147,24 @@ export interface Fact extends Timestamps {
   sort: number
 }
 
+/** One resource's hits in a search: the best ones, and how many there are in all. */
+export interface SearchHits<T> {
+  items: T[]
+  total: number
+}
+
+/**
+ * Hits across all resources, best first. Archived people and groups, done points
+ * and entries of archived people come last.
+ */
+export interface SearchResult {
+  people: SearchHits<Person>
+  groups: SearchHits<Group>
+  activities: SearchHits<Activity>
+  facts: SearchHits<Fact>
+  openPoints: SearchHits<OpenPoint>
+}
+
 /** A label used across all people, with its number of uses. */
 export interface FactLabel {
   label: string

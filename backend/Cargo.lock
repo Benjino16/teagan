@@ -1991,6 +1991,7 @@ dependencies = [
  "toml",
  "totp-rs",
  "tower",
+ "unicode-normalization",
  "validator",
 ]
 

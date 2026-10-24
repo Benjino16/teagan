@@ -13,6 +13,7 @@ import {
   Switch,
   TextInput,
   useAddSearch,
+  useListNavigation,
 } from '../../components/ui'
 import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
 import type { ActivityParticipant, Id, Impact, Person, PhotoUrls } from '../../domain/model'
@@ -51,6 +52,7 @@ export function ParticipantPicker({ self, people, participants, onChange, impact
         .filter((p) => !chosen.has(p.id) && !isArchived(p) && matchesSearch(query, [p.name, p.nickname]))
         .slice(0, MAX_RESULTS)
     : []
+  const nav = useListNavigation(results, { key: (p) => p.id, onPick: pick })
 
   function update(personId: Id, patch: Partial<ActivityParticipant>) {
     onChange(participants.map((p) => (p.personId === personId ? { ...p, ...patch } : p)))
@@ -96,17 +98,25 @@ export function ParticipantPicker({ self, people, participants, onChange, impact
         </ListCard>
       )}
 
-      <TextInput aria-label="Add person" placeholder="Add person …" {...inputProps(results[0])} />
+      <TextInput aria-label="Add person" placeholder="Add person …" {...inputProps(nav.inputProps)} />
 
       {query.trim() && (
-        <ListCard aria-label="Search results">
-          {results.length === 0 && <li className="px-4 py-3 text-md text-muted">No one found.</li>}
+        <ListCard aria-label="Search results" {...nav.listProps}>
+          {results.length === 0 && (
+            <li role="presentation" className="px-4 py-3 text-md text-muted">
+              No one found.
+            </li>
+          )}
           {results.map((person) => (
-            <li key={person.id}>
+            <li key={person.id} role="presentation">
               <button
                 type="button"
+                {...nav.optionProps(person)}
                 onClick={() => pick(person)}
-                className={clsx(listRowStyles, 'py-2.5 hover:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent')}
+                className={clsx(
+                  listRowStyles,
+                  'py-2.5 hover:bg-hover data-active:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
+                )}
               >
                 <MediaRow
                   leading={<Avatar name={person.name} photo={person.photo} size="md" />}

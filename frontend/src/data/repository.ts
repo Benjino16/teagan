@@ -20,6 +20,7 @@ import type {
   Membership,
   MembershipInput,
   PersonInput,
+  SearchResult,
   SetupInput,
   TotpSetup,
 } from '../domain/model'
@@ -122,6 +123,10 @@ export interface Repository {
   listFactLabels(): Promise<FactLabel[]>
   /** `orderedIds` must list each of the person's facts once.  /people/:id/facts/order */
   reorderFacts(personId: Id, orderedIds: Id[]): Promise<Fact[]>
+
+  // Search                                         /search
+  /** People, groups, events, knowledge and open points at once; `limit` hits per resource (1–100, default 10). */
+  search(query: string, limit?: number): Promise<SearchResult>
 }
 
 /** The `code` of the backend's error body (`backend/src/http/error.rs`), plus `network`. */

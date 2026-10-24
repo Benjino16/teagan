@@ -12,6 +12,7 @@ import {
   RatingInput,
   TextInput,
   useAddSearch,
+  useListNavigation,
 } from '../../components/ui'
 import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
 import { groupPath, isGroupArchived } from '../../domain/groups'
@@ -51,6 +52,7 @@ export function GroupPicker({ groups, links, onChange, impact }: Props) {
         )
         .slice(0, MAX_RESULTS)
     : []
+  const nav = useListNavigation(results, { key: (c) => c.id, onPick: pick })
 
   function update(groupId: Id, patch: Partial<ActivityGroup>) {
     onChange(links.map((l) => (l.groupId === groupId ? { ...l, ...patch } : l)))
@@ -79,17 +81,25 @@ export function GroupPicker({ groups, links, onChange, impact }: Props) {
         </ListCard>
       )}
 
-      <TextInput aria-label="Add group" placeholder="Add group …" {...inputProps(results[0])} />
+      <TextInput aria-label="Add group" placeholder="Add group …" {...inputProps(nav.inputProps)} />
 
       {query.trim() && (
-        <ListCard aria-label="Group search results">
-          {results.length === 0 && <li className="px-4 py-3 text-md text-muted">No group found.</li>}
+        <ListCard aria-label="Group search results" {...nav.listProps}>
+          {results.length === 0 && (
+            <li role="presentation" className="px-4 py-3 text-md text-muted">
+              No group found.
+            </li>
+          )}
           {results.map((group) => (
-            <li key={group.id}>
+            <li key={group.id} role="presentation">
               <button
                 type="button"
+                {...nav.optionProps(group)}
                 onClick={() => pick(group)}
-                className={clsx(listRowStyles, 'py-2.5 hover:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent')}
+                className={clsx(
+                  listRowStyles,
+                  'py-2.5 hover:bg-hover data-active:bg-hover focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent',
+                )}
               >
                 <MediaRow
                   leading={<IconBadge icon={LayoutGrid} size={44} />}

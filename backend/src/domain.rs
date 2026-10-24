@@ -5,6 +5,7 @@ mod group;
 mod open_point;
 mod person;
 mod photo;
+mod search;
 mod token;
 mod totp;
 mod user;
@@ -20,6 +21,7 @@ pub use person::{PersonArchivedInput, PersonInput, PersonResponse};
 pub use photo::{
     MAX_PARALLEL_PHOTOS, MAX_UPLOAD_BYTES, PhotoSize, PhotoUrls, ProcessedPhoto, process_photo,
 };
+pub use search::{Hits, SearchParams, SearchQuery, SearchResponse, best_hits};
 pub use token::{hash_token, new_token};
 pub use totp::{
     hash_recovery_code, is_totp_code, new_recovery_codes, new_totp_secret, normalize_code,

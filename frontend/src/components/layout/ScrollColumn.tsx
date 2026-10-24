@@ -17,8 +17,8 @@ export function ScrollColumn({ children }: { children: ReactNode }) {
   return (
     <div ref={setRoot} className="h-dvh min-w-0 flex-auto overflow-y-auto overscroll-contain">
       <ScrollRootContext value={root}>
-        {/* Room for the add button in the corner */}
-        <div className="pb-28">{children}</div>
+        {/* Room for the add and search buttons in the corner */}
+        <div className="pb-44">{children}</div>
       </ScrollRootContext>
     </div>
   )

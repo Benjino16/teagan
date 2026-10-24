@@ -393,3 +393,12 @@ PUT {{base}}/people/2/facts/order
 Content-Type: application/json
 
 { "factIds": [3, 1, 2] }
+
+### Search everything (people, groups, events, knowledge, open points)
+GET {{base}}/search?q=berg
+
+### Search with more hits per resource (1–100, default 10)
+GET {{base}}/search?q=an&limit=50
+
+### Too short – finds nothing
+GET {{base}}/search?q=a
