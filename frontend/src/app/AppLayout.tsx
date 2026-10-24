@@ -44,14 +44,18 @@ export function AppLayout() {
         : 'absolute right-6 bottom-[calc(100%+92px)]'
   const [searching, setSearching] = useState(false)
 
-  // “/” or Ctrl/⌘+K opens the search, as on many sites – not while typing or inside an overlay
+  // “/” or Ctrl/⌘+K opens the search, as on many sites – not inside an overlay
   useEffect(() => {
     if (fullscreen) return
     const onKeyDown = (event: KeyboardEvent) => {
-      const shortcut = event.key === '/' || (event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey))
-      if (!shortcut || event.defaultPrevented || event.isComposing) return
+      const slash = event.key === '/'
+      const ctrlK = event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey)
+      if (!(slash || ctrlK) || event.defaultPrevented || event.isComposing) return
       const target = event.target
-      if (target instanceof HTMLElement && target.matches('input, textarea, select, [contenteditable="true"]')) return
+      const typing =
+        target instanceof HTMLElement && target.matches('input, textarea, select, [contenteditable="true"]')
+      // In a text field “/” is just a character; Ctrl/⌘+K has no meaning there, so it works anyway
+      if (slash && typing) return
       if (document.querySelector('dialog[open]')) return
       event.preventDefault()
       setSearching(true)
