@@ -1,6 +1,6 @@
 import { clsx } from 'clsx'
 import { BookOpen, ChevronRight, CircleCheck, LayoutGrid, ListTodo, type LucideIcon } from 'lucide-react'
-import { type ReactNode, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { Avatar, BottomSheet, EmptyState, IconBadge, ListCard, listRowStyles, MediaRow, SearchField } from '../../components/ui'
 import { usePeople, useGroups, useSearch } from '../../data/queries'
@@ -15,6 +15,9 @@ import { activityIcon } from '../../icons/activityIcons'
 const LIMIT = 10
 const LIMIT_ALL = 100
 
+/** Only a wait longer than this shows – a quick answer just swaps the hits, without flicker. */
+const SLOW_MS = 300
+
 /**
  * Full search over people, groups, events, knowledge and open points. Every hit links to
  * where it lives; following one closes the sheet.
@@ -23,6 +26,7 @@ export function SearchSheet({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('')
   const [limit, setLimit] = useState(LIMIT)
   const search = useSearch(query, limit)
+  const slow = useLasting(search.waiting, SLOW_MS)
   // For the names next to knowledge and open points, and the paths of subgroups
   const people = usePeople().data ?? []
   const groups = useGroups().data ?? []
@@ -54,15 +58,17 @@ export function SearchSheet({ onClose }: { onClose: () => void }) {
           <p role="alert" className="px-1 text-md text-danger">
             The search failed. Try again in a moment.
           </p>
-        ) : !result || (total === 0 && search.isPlaceholderData) ? (
-          <p role="status" className="px-1 text-md text-muted">
-            Searching …
-          </p>
+        ) : !result || (total === 0 && search.waiting) ? (
+          slow && (
+            <p role="status" className="px-1 text-md text-muted">
+              Searching …
+            </p>
+          )
         ) : total === 0 ? (
           <EmptyState>Nothing found for “{query.trim()}”.</EmptyState>
         ) : (
-          // Old hits stay while the next ones load, slightly faded
-          <div className={clsx('flex flex-col gap-5 transition-opacity', search.isPlaceholderData && 'opacity-60')}>
+          // Old hits stay while the next ones load, faded only if that takes a while
+          <div className={clsx('flex flex-col gap-5 transition-opacity', slow && 'opacity-60')}>
             <Section title="People" hits={result.people}>
               {(person) => (
                 <HitLink
@@ -135,6 +141,20 @@ export function SearchSheet({ onClose }: { onClose: () => void }) {
       </div>
     </BottomSheet>
   )
+}
+
+/** Whether `value` has been true for at least `ms` – false again as soon as it is. */
+function useLasting(value: boolean, ms: number): boolean {
+  const [lasting, setLasting] = useState(false)
+  useEffect(() => {
+    if (!value) return
+    const timer = setTimeout(() => setLasting(true), ms)
+    return () => {
+      clearTimeout(timer)
+      setLasting(false)
+    }
+  }, [value, ms])
+  return value && lasting
 }
 
 /** The non-empty parts, joined by a dot: `Lena · Done`. */

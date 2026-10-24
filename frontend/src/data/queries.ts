@@ -246,8 +246,8 @@ export function useFactLabels() {
   return useQuery({ queryKey: queryKeys.factLabels, queryFn: () => repo.listFactLabels() })
 }
 
-/** How long typing has to pause before a search goes out. */
-const SEARCH_DELAY_MS = 200
+/** How long typing has to pause before a search goes out – the server answers in a few ms, so short. */
+const SEARCH_DELAY_MS = 80
 
 /**
  * Searches all resources once typing pauses; too short a query stays idle. Keeps the last
@@ -267,8 +267,14 @@ export function useSearch(query: string, limit: number) {
     enabled: isSearchQuery(settled),
     placeholderData: keepPreviousData,
   })
-  /** Whether the typed query is long enough – the hits may still be for the previous one. */
-  return { ...result, active: isSearchQuery(query) }
+  const active = isSearchQuery(query)
+  return {
+    ...result,
+    /** Whether the typed query is long enough – the hits may still be for the previous one. */
+    active,
+    /** Whether the hits for the typed query are still to come (waiting for the pause or the server). */
+    waiting: active && (settled !== query.trim() || result.isPending || result.isPlaceholderData),
+  }
 }
 
 // ── Write ──────────────────────────────────────────────────────────────────
