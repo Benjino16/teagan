@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM login_challenges WHERE token_hash = ? AND attempts >= ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "6c01dc819e284ea078c287d8ef662969fd572f8f4de3f9eea25ab0799d3c7adf"
+}

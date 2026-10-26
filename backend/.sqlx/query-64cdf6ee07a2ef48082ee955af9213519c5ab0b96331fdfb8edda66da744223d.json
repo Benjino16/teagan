@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE user_totp\n           SET confirmed_at = CURRENT_TIMESTAMP, last_used_step = ?\n         WHERE user_id = ? AND confirmed_at IS NULL\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "64cdf6ee07a2ef48082ee955af9213519c5ab0b96331fdfb8edda66da744223d"
+}

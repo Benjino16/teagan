@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        WITH doomed AS (\n          SELECT id FROM groups WHERE owner_id = ? AND (id = ? OR parent_id = ?)\n        )\n        DELETE FROM activities\n         WHERE owner_id = ?\n           AND id IN (SELECT activity_id FROM activity_groups\n                       WHERE owner_id = ? AND group_id IN (SELECT id FROM doomed))\n           AND NOT EXISTS (SELECT 1 FROM activity_people ap WHERE ap.activity_id = activities.id)\n           AND NOT EXISTS (SELECT 1 FROM activity_groups ac\n                            WHERE ac.activity_id = activities.id\n                              AND ac.group_id NOT IN (SELECT id FROM doomed))\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "91db60976d94f3b1e7ba5254198cf6f8e2956cda55634ee1d059c7a3f862bc6b"
+}

@@ -1,0 +1,98 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        INSERT INTO\n        facts (owner_id, person_id, label, value, sort)\n        VALUES (?1, ?2, ?3, ?4,\n                (SELECT COALESCE(MAX(sort), -1) + 1 FROM facts WHERE owner_id = ?1 AND person_id = ?2))\n        RETURNING id AS \"id!\", person_id, label, value, sort,\n        created_at AS \"created_at: _\",\n        updated_at AS \"updated_at: _\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "person_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "name": "label",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "name": "value",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "value"
+          }
+        }
+      },
+      {
+        "name": "sort",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "sort"
+          }
+        }
+      },
+      {
+        "name": "created_at: _",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "name": "updated_at: _",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": [
+      null,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "aa8dface2c6ccf4b5e1b97cd2900b3f626f8d91056c8c813c1dffdac4119cdee"
+}

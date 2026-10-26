@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        INSERT OR IGNORE INTO person_groups (owner_id, person_id, group_id)\n        SELECT owner_id, ?, id\n          FROM groups\n         WHERE owner_id = ?\n           AND id IN (?, (SELECT parent_id FROM groups WHERE owner_id = ? AND id = ?))\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "cf660e9eac06140b1fcf645c0c7c41e538842c38425b759d6c134f0baf5b1263"
+}

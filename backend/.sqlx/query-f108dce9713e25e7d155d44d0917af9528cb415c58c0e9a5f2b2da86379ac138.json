@@ -1,0 +1,50 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT person_id, group_id,\n               created_at AS \"created_at: _\"\n          FROM person_groups\n         WHERE owner_id = ? AND person_id = ?\n         ORDER BY group_id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "person_id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "person_groups",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "name": "group_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "person_groups",
+            "name": "group_id"
+          }
+        }
+      },
+      {
+        "name": "created_at: _",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "person_groups",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f108dce9713e25e7d155d44d0917af9528cb415c58c0e9a5f2b2da86379ac138"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        DELETE FROM person_groups\n         WHERE owner_id = ? AND person_id = ?\n           AND (group_id = ?\n                OR group_id IN (SELECT id FROM groups WHERE owner_id = ? AND parent_id = ?))\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "7f0c6a1234af3edf3a5a3168785957f8f8d39b226e5328aedba51139f841944d"
+}

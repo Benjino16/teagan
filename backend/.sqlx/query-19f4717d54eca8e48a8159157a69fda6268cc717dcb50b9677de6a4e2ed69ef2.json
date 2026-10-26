@@ -1,0 +1,33 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT label, COUNT(*) AS \"count!: i64\"\n          FROM facts\n         WHERE owner_id = ?\n         GROUP BY label\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "label",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "name": "count!: i64",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "19f4717d54eca8e48a8159157a69fda6268cc717dcb50b9677de6a4e2ed69ef2"
+}

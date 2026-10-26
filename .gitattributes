@@ -1,0 +1,2 @@
+# Query data written by `cargo sqlx prepare`, collapsed in GitHub diffs
+backend/.sqlx/** linguist-generated=true

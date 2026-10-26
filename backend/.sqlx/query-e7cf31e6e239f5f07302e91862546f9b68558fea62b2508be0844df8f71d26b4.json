@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            UPDATE facts\n               SET sort = ?, updated_at = CURRENT_TIMESTAMP\n             WHERE owner_id = ? AND person_id = ? AND id = ? AND sort IS NOT ?\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "e7cf31e6e239f5f07302e91862546f9b68558fea62b2508be0844df8f71d26b4"
+}

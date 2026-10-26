@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "INSERT INTO people (owner_id, name, is_self) VALUES (?, ?, 1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "0ec0ab3e9967cb173bde49d0caf65862b2ac6d0501db5a24ca8f4de15361d518"
+}

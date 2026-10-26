@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n            INSERT INTO activity_people (owner_id, activity_id, person_id, impact, note)\n            VALUES (?, ?, ?, ?, ?)\n            ON CONFLICT (activity_id, person_id) DO UPDATE\n               SET impact = excluded.impact, note = excluded.note, updated_at = CURRENT_TIMESTAMP\n             WHERE impact IS NOT excluded.impact OR note IS NOT excluded.note\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "363d57b4d42ed52ca8ce83cf01cd32ef715fdd805f85cb0e25d7211f407e0f96"
+}

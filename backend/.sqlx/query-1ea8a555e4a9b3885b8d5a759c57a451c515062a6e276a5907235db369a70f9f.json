@@ -1,0 +1,146 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT id, name, icon, start_date,\n               end_date AS \"end_date?\", description AS \"description?\",\n               location AS \"location?\", impact,\n               reminder AS \"reminder: bool\",\n               created_at AS \"created_at: _\",\n               updated_at AS \"updated_at: _\"\n          FROM activities\n         WHERE owner_id = ?\n           AND id IN (SELECT activity_id\n                        FROM activity_groups\n                       WHERE owner_id = ?\n                         AND group_id IN (SELECT id FROM groups\n                                             WHERE owner_id = ? AND (id = ? OR parent_id = ?)))\n         ORDER BY start_date DESC, id DESC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "activities",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "activities",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "icon",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "activities",
+            "name": "icon"
+          }
+        }
+      },
+      {
+        "name": "start_date",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "activities",
+            "name": "start_date"
+          }
+        }
+      },
+      {
+        "name": "end_date?",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "activities",
+            "name": "end_date"
+          }
+        }
+      },
+      {
+        "name": "description?",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "activities",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "name": "location?",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "activities",
+            "name": "location"
+          }
+        }
+      },
+      {
+        "name": "impact",
+        "ordinal": 7,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "activities",
+            "name": "impact"
+          }
+        }
+      },
+      {
+        "name": "reminder: bool",
+        "ordinal": 8,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "activities",
+            "name": "reminder"
+          }
+        }
+      },
+      {
+        "name": "created_at: _",
+        "ordinal": 9,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "activities",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "name": "updated_at: _",
+        "ordinal": 10,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "activities",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1ea8a555e4a9b3885b8d5a759c57a451c515062a6e276a5907235db369a70f9f"
+}

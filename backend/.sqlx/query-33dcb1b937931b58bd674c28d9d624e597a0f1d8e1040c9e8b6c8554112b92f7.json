@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE users\n           SET password_hash = ?, updated_at = CURRENT_TIMESTAMP\n         WHERE username = ?\n        RETURNING id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "33dcb1b937931b58bd674c28d9d624e597a0f1d8e1040c9e8b6c8554112b92f7"
+}

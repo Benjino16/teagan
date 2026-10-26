@@ -1,0 +1,98 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT id, person_id, label, value, sort,\n               created_at AS \"created_at: _\",\n               updated_at AS \"updated_at: _\"\n          FROM facts\n         WHERE owner_id = ?\n         ORDER BY person_id, sort, id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "person_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "name": "label",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "label"
+          }
+        }
+      },
+      {
+        "name": "value",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "value"
+          }
+        }
+      },
+      {
+        "name": "sort",
+        "ordinal": 4,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "sort"
+          }
+        }
+      },
+      {
+        "name": "created_at: _",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "name": "updated_at: _",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "facts",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "c783dbf3c04201221672582b770f1b40c41dd58af520ef08b2f4e77adee79263"
+}

@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT large FROM person_photos WHERE owner_id = ? AND person_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "large",
+        "ordinal": 0,
+        "type_info": "Blob",
+        "origin": {
+          "Table": {
+            "table": "person_photos",
+            "name": "large"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4e3b2f59ad777c40cf6a2d1930e57f4a90a08ace09cad6a25b1f858dffb08ba7"
+}

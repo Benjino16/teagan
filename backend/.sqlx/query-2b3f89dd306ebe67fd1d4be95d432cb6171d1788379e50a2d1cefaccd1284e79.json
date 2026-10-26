@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM facts WHERE owner_id = ? AND id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "2b3f89dd306ebe67fd1d4be95d432cb6171d1788379e50a2d1cefaccd1284e79"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE recovery_codes\n           SET used_at = CURRENT_TIMESTAMP\n         WHERE user_id = ? AND code_hash = ? AND used_at IS NULL\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "2fb0fc0e354c657b7abfc477d8dd8763b288782ee46511fec428b8d0fb4a89f8"
+}

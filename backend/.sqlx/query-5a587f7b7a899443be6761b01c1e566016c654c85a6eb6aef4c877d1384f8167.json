@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        INSERT INTO login_challenges (token_hash, user_id, expires_at)\n        VALUES (?, ?, datetime('now', '+5 minutes'))\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "5a587f7b7a899443be6761b01c1e566016c654c85a6eb6aef4c877d1384f8167"
+}

@@ -1,0 +1,62 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT activity_id, group_id, impact AS \"impact?\", note AS \"note?\"\n          FROM activity_groups\n         WHERE owner_id = ? AND activity_id IN (SELECT value FROM json_each(?))\n         ORDER BY activity_id, group_id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "activity_id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "activity_groups",
+            "name": "activity_id"
+          }
+        }
+      },
+      {
+        "name": "group_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "activity_groups",
+            "name": "group_id"
+          }
+        }
+      },
+      {
+        "name": "impact?",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "activity_groups",
+            "name": "impact"
+          }
+        }
+      },
+      {
+        "name": "note?",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "activity_groups",
+            "name": "note"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "01947a346e5d76fd8bd2bdcd478dcf7f452556003ec51465e9fef916c67deb70"
+}

@@ -1,0 +1,33 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT secret, confirmed_at IS NOT NULL AS \"confirmed!: bool\"\n          FROM user_totp\n         WHERE user_id = ?\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "secret",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "user_totp",
+            "name": "secret"
+          }
+        }
+      },
+      {
+        "name": "confirmed!: bool",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "8272c5da935f69c6fb89e1730baae6aa9b50bcf2e6a9f8a839ad417428ae4426"
+}

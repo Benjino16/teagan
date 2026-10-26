@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM groups WHERE owner_id = ? AND id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "b9b9c9901df0143e6a264056d42b37ec490062e8d5feddcb4d9dc2d618b89837"
+}
