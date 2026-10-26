@@ -1,0 +1,45 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT u.username,\n               t.confirmed_at IS NOT NULL AS \"totp_enabled!: bool\",\n               u.created_at AS \"created_at: _\"\n          FROM users u\n          LEFT JOIN user_totp t ON t.user_id = u.id\n         ORDER BY u.username\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "username",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "username"
+          }
+        }
+      },
+      {
+        "name": "totp_enabled!: bool",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": "Expression"
+      },
+      {
+        "name": "created_at: _",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "created_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "1007a5d47d3bc24d96dd2c3161af33f13d4f9eeb7162247afb2d79cabdcbdbcd"
+}

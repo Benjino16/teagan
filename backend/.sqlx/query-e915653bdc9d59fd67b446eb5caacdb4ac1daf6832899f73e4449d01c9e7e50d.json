@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE user_totp\n           SET last_used_step = ?\n         WHERE user_id = ? AND confirmed_at IS NOT NULL\n           AND (last_used_step IS NULL OR last_used_step < ?)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "e915653bdc9d59fd67b446eb5caacdb4ac1daf6832899f73e4449d01c9e7e50d"
+}

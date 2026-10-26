@@ -1,0 +1,33 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT user_id,\n               expires_at < datetime('now', '+15 days') AS \"renew!: bool\"\n          FROM sessions\n         WHERE token_hash = ? AND expires_at > CURRENT_TIMESTAMP\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "user_id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "sessions",
+            "name": "user_id"
+          }
+        }
+      },
+      {
+        "name": "renew!: bool",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "5febbc8a352c57ee76331ae18467637f10fbda13f4486d9a2033fe162da234c2"
+}

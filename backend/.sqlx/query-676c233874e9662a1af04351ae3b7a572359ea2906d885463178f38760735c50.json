@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        INSERT INTO user_totp (user_id, secret) VALUES (?, ?)\n        ON CONFLICT (user_id) DO UPDATE\n           SET secret = excluded.secret, created_at = CURRENT_TIMESTAMP\n         WHERE confirmed_at IS NULL\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "676c233874e9662a1af04351ae3b7a572359ea2906d885463178f38760735c50"
+}

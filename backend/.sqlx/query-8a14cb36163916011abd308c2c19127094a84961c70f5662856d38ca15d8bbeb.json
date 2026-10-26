@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        DELETE FROM activities\n         WHERE owner_id = ?\n           AND id IN (SELECT activity_id FROM activity_people\n                       WHERE owner_id = ? AND person_id = ?)\n           AND NOT EXISTS (SELECT 1 FROM activity_people ap\n                            WHERE ap.activity_id = activities.id AND ap.person_id <> ?)\n           AND NOT EXISTS (SELECT 1 FROM activity_groups ac WHERE ac.activity_id = activities.id)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "8a14cb36163916011abd308c2c19127094a84961c70f5662856d38ca15d8bbeb"
+}

@@ -1,0 +1,98 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT id, person_id, activity_id AS \"activity_id?\", text,\n               done_at AS \"done_at?: _\",\n               created_at AS \"created_at: _\",\n               updated_at AS \"updated_at: _\"\n          FROM open_points\n         WHERE owner_id = ? AND person_id = ?\n         ORDER BY done_at IS NOT NULL, created_at DESC, id DESC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "open_points",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "person_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "open_points",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "name": "activity_id?",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "open_points",
+            "name": "activity_id"
+          }
+        }
+      },
+      {
+        "name": "text",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "open_points",
+            "name": "text"
+          }
+        }
+      },
+      {
+        "name": "done_at?: _",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "open_points",
+            "name": "done_at"
+          }
+        }
+      },
+      {
+        "name": "created_at: _",
+        "ordinal": 5,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "open_points",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "name": "updated_at: _",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "open_points",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "17b4ed6e1b215e10df5f4ac95edffd6137b45c3c68d39fccc68e50ee409862af"
+}

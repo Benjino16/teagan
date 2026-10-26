@@ -16,7 +16,6 @@ COPY backend/ ./
 RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS backend
-RUN apt-get update && apt-get install -y --no-install-recommends sqlite3
 # `--build-arg FEATURES=demo` for dev stages: adds `teagan demo load`.
 # Never for published release images – the demo account has a public password.
 ARG FEATURES=""
@@ -26,8 +25,8 @@ COPY --from=planner /app/backend/recipe.json recipe.json
 RUN cargo chef cook --release --features "$FEATURES" --recipe-path recipe.json
 COPY backend/ ./
 COPY --from=frontend /app/frontend/dist /app/frontend/dist
-RUN cat migrations/*.sql | sqlite3 /tmp/build.db
-ENV DATABASE_URL=sqlite:///tmp/build.db
+# The sqlx macros check the queries against the committed .sqlx/ data
+ENV SQLX_OFFLINE=true
 RUN cargo build --release --features "$FEATURES"
 
 FROM debian:bookworm-slim

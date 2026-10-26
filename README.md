@@ -41,16 +41,12 @@ Every option is an environment variable (or a command-line flag, see `teagan --h
 ## Development
 
 ```sh
-# backend (needs DATABASE_URL, e.g. in .env)
-cd backend && cargo run
-
-# frontend, proxies /api to localhost:3000
-cd frontend && npm install && npm run dev
+cd backend && cargo run                           # API on localhost:3000
+cd frontend && npm install && npm run dev         # proxies /api to localhost:3000
 ```
 
-`cargo demo` loads a demo account with realistic data. A server built with the `demo` feature then offers "Try the demo" on the login screen and keeps the demo account from changing its password or two-factor login – `DEMO_ACCOUNT_CHANGES=true` allows it, e.g. to show the setup in a presentation.
-
-To build the Docker image locally instead of pulling it: `COMPOSE_FILE=compose.yaml:compose.build.yaml docker compose up -d --build`.
+Setup, the demo account, changing SQL queries and the checks before a pull request:
+see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 

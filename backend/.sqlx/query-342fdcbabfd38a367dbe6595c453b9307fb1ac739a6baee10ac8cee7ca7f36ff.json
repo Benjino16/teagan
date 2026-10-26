@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        DELETE FROM activity_groups\n         WHERE owner_id = ? AND activity_id = ?\n           AND group_id NOT IN (SELECT value FROM json_each(?))\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "342fdcbabfd38a367dbe6595c453b9307fb1ac739a6baee10ac8cee7ca7f36ff"
+}

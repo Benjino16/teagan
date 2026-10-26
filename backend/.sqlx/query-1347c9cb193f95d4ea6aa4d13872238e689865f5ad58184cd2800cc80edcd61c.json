@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        DELETE FROM activity_people\n         WHERE owner_id = ? AND activity_id = ?\n           AND person_id NOT IN (SELECT value FROM json_each(?))\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": []
+  },
+  "hash": "1347c9cb193f95d4ea6aa4d13872238e689865f5ad58184cd2800cc80edcd61c"
+}

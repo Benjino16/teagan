@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        INSERT INTO person_photos (owner_id, person_id, hash, thumb, large)\n        VALUES (?, ?, ?, ?, ?)\n        ON CONFLICT (person_id) DO UPDATE\n           SET hash = excluded.hash, thumb = excluded.thumb, large = excluded.large,\n               updated_at = CURRENT_TIMESTAMP\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 5
+    },
+    "nullable": []
+  },
+  "hash": "d4760a4ce4a1b7de54752688935827063e2a95948a339651f93b8cddd9bec82e"
+}

@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "UPDATE sessions SET expires_at = datetime('now', '+30 days') WHERE token_hash = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": []
+  },
+  "hash": "e00173cb300ccb37f0c500f44276331113c1a1dd4882e4c1d2daf8b9e2f16145"
+}

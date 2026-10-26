@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT thumb FROM person_photos WHERE owner_id = ? AND person_id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "thumb",
+        "ordinal": 0,
+        "type_info": "Blob",
+        "origin": {
+          "Table": {
+            "table": "person_photos",
+            "name": "thumb"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2c422c1593d28e0361efb93a89c7c12a1411abe56ca54ad7ac3aff170047810d"
+}

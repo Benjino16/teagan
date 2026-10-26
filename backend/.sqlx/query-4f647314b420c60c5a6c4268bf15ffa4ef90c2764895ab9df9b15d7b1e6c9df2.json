@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT person_id\n          FROM activity_people\n         WHERE owner_id = ? AND activity_id = ? AND person_id = ?\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "person_id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "activity_people",
+            "name": "person_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 3
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "4f647314b420c60c5a6c4268bf15ffa4ef90c2764895ab9df9b15d7b1e6c9df2"
+}

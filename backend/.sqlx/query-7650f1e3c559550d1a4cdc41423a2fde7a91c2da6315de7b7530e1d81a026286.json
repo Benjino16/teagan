@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE groups\n           SET name = ?, parent_id = ?, updated_at = CURRENT_TIMESTAMP\n         WHERE owner_id = ? AND id = ?\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 4
+    },
+    "nullable": []
+  },
+  "hash": "7650f1e3c559550d1a4cdc41423a2fde7a91c2da6315de7b7530e1d81a026286"
+}

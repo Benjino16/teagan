@@ -1,0 +1,194 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE people\n           SET name = ?, nickname = ?, birthday = ?, birthday_note = ?,\n               reconnect_days = ?, impact = ?, focus = ?, deceased = ?, died_on = ?,\n               updated_at = CURRENT_TIMESTAMP\n         WHERE owner_id = ? AND id = ?\n        RETURNING id AS \"id!\", name,\n                  nickname AS \"nickname?\", birthday AS \"birthday?\",\n                  birthday_note AS \"birthday_note?\", reconnect_days AS \"reconnect_days?\",\n                  impact,\n                  is_self AS \"is_self: bool\",\n                  focus AS \"focus: bool\",\n                  deceased AS \"deceased: bool\", died_on AS \"died_on?\",\n                  archived_at AS \"archived_at?: _\",\n                  (SELECT hash FROM person_photos WHERE person_id = people.id) AS \"photo_hash?: String\",\n                  created_at AS \"created_at: _\",\n                  updated_at AS \"updated_at: _\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "name",
+        "ordinal": 1,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "name": "nickname?",
+        "ordinal": 2,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "nickname"
+          }
+        }
+      },
+      {
+        "name": "birthday?",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "birthday"
+          }
+        }
+      },
+      {
+        "name": "birthday_note?",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "birthday_note"
+          }
+        }
+      },
+      {
+        "name": "reconnect_days?",
+        "ordinal": 5,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "reconnect_days"
+          }
+        }
+      },
+      {
+        "name": "impact",
+        "ordinal": 6,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "impact"
+          }
+        }
+      },
+      {
+        "name": "is_self: bool",
+        "ordinal": 7,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "is_self"
+          }
+        }
+      },
+      {
+        "name": "focus: bool",
+        "ordinal": 8,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "focus"
+          }
+        }
+      },
+      {
+        "name": "deceased: bool",
+        "ordinal": 9,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "deceased"
+          }
+        }
+      },
+      {
+        "name": "died_on?",
+        "ordinal": 10,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "died_on"
+          }
+        }
+      },
+      {
+        "name": "archived_at?: _",
+        "ordinal": 11,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "archived_at"
+          }
+        }
+      },
+      {
+        "name": "photo_hash?: String",
+        "ordinal": 12,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "person_photos",
+            "name": "hash"
+          }
+        }
+      },
+      {
+        "name": "created_at: _",
+        "ordinal": 13,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "name": "updated_at: _",
+        "ordinal": 14,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "people",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 11
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "f34b6cb09ab0a1e48e4f982b39114755ad79b3689f41be4e7201d159b43b006e"
+}
