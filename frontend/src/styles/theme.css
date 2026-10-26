@@ -51,15 +51,14 @@
   --color-warm-line: light-dark(#f1dcc0, #46371f); /* Dividers on warm background */
 
   /*
-   * Mood of an activity, 1 = very bad … 5 = very good. Diverging from raspberry
-   * over grey to teal, strongest at the ends – not red/green, and no blue so it
-   * never reads as the accent.
+   * Mood of an activity, 1 = very bad … 5 = very good: deep red, apricot,
+   * sand, light green, deep green – strong at the ends, soft in between.
    */
-  --color-mood-1: light-dark(#c0365f, #ff6f8e);
-  --color-mood-2: light-dark(#df8a3a, #d99a5c);
-  --color-mood-3: light-dark(#a3a8b2, #6b717c);
-  --color-mood-4: light-dark(#4fb39c, #5ab3a0);
-  --color-mood-5: light-dark(#14806a, #3fd0ac);
+  --color-mood-1: light-dark(#c62828, #ef5350);
+  --color-mood-2: light-dark(#f4a27a, #e8956c);
+  --color-mood-3: light-dark(#b8b2a7, #7d776d);
+  --color-mood-4: light-dark(#a5d68c, #7fa86c);
+  --color-mood-5: light-dark(#2e7d32, #4cc055);
 
   /* Danger (errors, delete) */
   --color-danger: light-dark(#6e2606, #ff9f80);

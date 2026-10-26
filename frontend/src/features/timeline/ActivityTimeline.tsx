@@ -58,10 +58,19 @@ const stretchedLink =
 
 const plannedCard = clsx(cardStyles({ variant: 'dashed', padding: 'sm', radius: 'sm' }), 'flex flex-col gap-1')
 
-/** Mood as a ring in its color around the icon; the offset hides the rail behind it. */
+/**
+ * Mood as a thin ring in its color around the icon. Lifted above the rail so the
+ * line below doesn't cut it; the offset hides the rail behind it.
+ */
 function moodRing(mood: Mood | null, offset = true): string | undefined {
   if (mood === null) return undefined
-  return clsx('ring-2', moodStyles[mood].ring, offset && 'ring-offset-2 ring-offset-canvas')
+  return clsx('relative z-1 ring-[1.5px]', moodStyles[mood].ring, offset && 'ring-offset-2 ring-offset-canvas')
+}
+
+/** From impact 4 on the card itself takes on the mood: a tint, or a blend and an edge on the filled card. */
+function moodCard(impact: Impact, mood: Mood | null): string | undefined {
+  if (mood === null || impact < 4) return undefined
+  return impact === 5 ? clsx(moodStyles[mood].blend, moodStyles[mood].edge) : moodStyles[mood].tint
 }
 
 /** The ring is decorative, so screen readers get the mood with the date. */
@@ -319,7 +328,7 @@ function TimelineItem({
         </Rail>
 
         <div className={clsx('min-w-0 flex-auto', entryGap(sameDay))}>
-          <article className={clsx('relative', planned ? plannedCard : look.card)}>
+          <article className={clsx('relative', planned ? plannedCard : [look.card, moodCard(impact, mood)])}>
             <p className={clsx('text-xs font-medium', metaColor)}>
               {date}
               <MoodText mood={mood} />

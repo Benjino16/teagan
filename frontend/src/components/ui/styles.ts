@@ -65,11 +65,52 @@ export const inputStyles = clsx(
   'placeholder:text-faint focus:border-accent focus:outline-2 focus:outline-accent-soft',
 )
 
-/** Classes per mood – spelled out so Tailwind finds them. */
-export const moodStyles: Record<Mood, { fill: string; input: string; ring: string }> = {
-  1: { fill: 'bg-mood-1', input: 'border-mood-1 bg-mood-1', ring: 'ring-mood-1' },
-  2: { fill: 'bg-mood-2', input: 'border-mood-2 bg-mood-2', ring: 'ring-mood-2' },
-  3: { fill: 'bg-mood-3', input: 'border-mood-3 bg-mood-3', ring: 'ring-mood-3' },
-  4: { fill: 'bg-mood-4', input: 'border-mood-4 bg-mood-4', ring: 'ring-mood-4' },
-  5: { fill: 'bg-mood-5', input: 'border-mood-5 bg-mood-5', ring: 'ring-mood-5' },
+/**
+ * Classes per mood – spelled out so Tailwind finds them. `ring` is muted towards
+ * grey so it doesn't stand out too much. `tint` washes a light
+ * card from the left. A filled accent card gets a `blend` towards the mood at
+ * the bottom right (35 % keeps white text readable) and an `edge` – mixed into
+ * the blue alone, red and violet would both turn purple.
+ */
+export const moodStyles: Record<Mood, { fill: string; input: string; ring: string; tint: string; edge: string; blend: string }> = {
+  1: {
+    fill: 'bg-mood-1',
+    input: 'border-mood-1 bg-mood-1',
+    ring: 'ring-[color:color-mix(in_oklab,var(--color-mood-1),var(--color-muted)_35%)]',
+    tint: 'bg-linear-to-r from-mood-1/15 to-surface to-70%',
+    edge: 'ring-2 ring-mood-1',
+    blend: 'bg-linear-to-br from-accent from-40% to-[color-mix(in_oklab,var(--color-accent),var(--color-mood-1)_35%)]',
+  },
+  2: {
+    fill: 'bg-mood-2',
+    input: 'border-mood-2 bg-mood-2',
+    ring: 'ring-[color:color-mix(in_oklab,var(--color-mood-2),var(--color-muted)_35%)]',
+    tint: 'bg-linear-to-r from-mood-2/15 to-surface to-70%',
+    edge: 'ring-2 ring-mood-2',
+    blend: 'bg-linear-to-br from-accent from-40% to-[color-mix(in_oklab,var(--color-accent),var(--color-mood-2)_35%)]',
+  },
+  3: {
+    fill: 'bg-mood-3',
+    input: 'border-mood-3 bg-mood-3',
+    ring: 'ring-[color:color-mix(in_oklab,var(--color-mood-3),var(--color-muted)_35%)]',
+    tint: 'bg-linear-to-r from-mood-3/15 to-surface to-70%',
+    edge: 'ring-2 ring-mood-3',
+    blend: 'bg-linear-to-br from-accent from-40% to-[color-mix(in_oklab,var(--color-accent),var(--color-mood-3)_35%)]',
+  },
+  4: {
+    fill: 'bg-mood-4',
+    input: 'border-mood-4 bg-mood-4',
+    ring: 'ring-[color:color-mix(in_oklab,var(--color-mood-4),var(--color-muted)_35%)]',
+    tint: 'bg-linear-to-r from-mood-4/15 to-surface to-70%',
+    edge: 'ring-2 ring-mood-4',
+    blend: 'bg-linear-to-br from-accent from-40% to-[color-mix(in_oklab,var(--color-accent),var(--color-mood-4)_35%)]',
+  },
+  5: {
+    fill: 'bg-mood-5',
+    input: 'border-mood-5 bg-mood-5',
+    ring: 'ring-[color:color-mix(in_oklab,var(--color-mood-5),var(--color-muted)_35%)]',
+    tint: 'bg-linear-to-r from-mood-5/15 to-surface to-70%',
+    edge: 'ring-2 ring-mood-5',
+    blend: 'bg-linear-to-br from-accent from-40% to-[color-mix(in_oklab,var(--color-accent),var(--color-mood-5)_35%)]',
+  },
 }
