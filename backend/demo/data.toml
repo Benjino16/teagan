@@ -173,6 +173,7 @@ name = "Dinner at Jonas & Sophie's"
 icon = "utensils"
 start = "-9d 19:30"
 impact = 4
+mood = 5
 location = "Barmbek"
 people = ["me", { key = "jonas", note = "Finally showed me the new apartment" }]
 open_points = [{ person = "jonas", text = "Send him the hostel link for Lisbon" }]
@@ -181,6 +182,7 @@ open_points = [{ person = "jonas", text = "Send him the hostel link for Lisbon" 
 name = "Bouldering"
 icon = "dumbbell"
 start = "-23d"
+mood = 3
 people = ["me", "jonas"]
 groups = ["climbing"]
 
@@ -188,7 +190,7 @@ groups = ["climbing"]
 name = "Phone call"
 icon = "phone"
 start = "-40d"
-people = ["me", "jonas"]
+people = ["me", { key = "jonas", mood = 2, note = "Sounded stressed" }]
 
 [[activities]]
 name = "Interrail through Italy"
@@ -196,6 +198,7 @@ icon = "train"
 start = "-850d"
 end = "-834d"
 impact = 5
+mood = 5
 description = """
 Milan → Florence → Rome → Naples, with a detour to Cinque Terre.
 
@@ -218,6 +221,7 @@ name = "Moved to Hamburg"
 icon = "home"
 start = "today-4y"
 impact = 5
+mood = 4
 description = "Jonas drove the van, Mama brought soup for everyone."
 people = ["me", "jonas", "mama"]
 
@@ -256,7 +260,8 @@ icon = "home"
 start = "-45d"
 end = "-44d"
 impact = 4
-people = ["me", "mama", "papa"]
+mood = 4
+people = ["me", "mama", { key = "papa", mood = 2, note = "Argued about the garden again" }]
 groups = ["family"]
 
 [[activities]]
@@ -272,9 +277,10 @@ name = "Farewell to Opa"
 icon = "flower"
 start = "-422d"
 impact = 5
+mood = 1
 location = "St. Johannis, Lüneburg"
 people = ["me", "mama", "papa"]
-groups = [{ key = "family", note = "The whole family came" }]
+groups = [{ key = "family", mood = 3, note = "The whole family came" }]
 
 # Mira
 [[activities]]

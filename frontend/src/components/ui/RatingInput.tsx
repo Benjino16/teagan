@@ -10,8 +10,13 @@ interface Props {
   label: string
   /** Levels 1 to N, index 0 = level 1. */
   levels: readonly RatingLevel[]
+  /** 0 = nothing chosen yet. */
   value: number
   onChange: (value: number) => void
+  /** Classes of the filled dots, default the accent. */
+  fill?: string
+  /** Focuses the selected dot (the first while nothing is chosen) on mount. */
+  autoFocus?: boolean
   className?: string
 }
 
@@ -19,8 +24,18 @@ interface Props {
  * Scale as tappable dots (●●●○○). Below it, name and explanation of the selected
  * level, so nobody has to know what a “3” means.
  */
-export function RatingInput({ label, levels, value, onChange, className }: Props) {
+export function RatingInput({
+  label,
+  levels,
+  value,
+  onChange,
+  fill = 'border-accent bg-accent',
+  autoFocus = false,
+  className,
+}: Props) {
   const current = levels[value - 1]
+  // Keyboard users reach the group through the first dot while nothing is chosen
+  const focusable = Math.max(1, value)
 
   function onKeyDown(event: KeyboardEvent) {
     const delta = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[event.key] ?? 0
@@ -44,7 +59,8 @@ export function RatingInput({ label, levels, value, onChange, className }: Props
               role="radio"
               aria-checked={step === value}
               aria-label={`${step} – ${level.label}`}
-              tabIndex={step === value ? 0 : -1}
+              tabIndex={step === focusable ? 0 : -1}
+              autoFocus={autoFocus && step === focusable}
               onClick={() => onChange(step)}
               onKeyDown={onKeyDown}
               className="flex size-11 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-accent"
@@ -53,7 +69,7 @@ export function RatingInput({ label, levels, value, onChange, className }: Props
                 aria-hidden="true"
                 className={clsx(
                   'size-5 rounded-full border-2 transition-colors',
-                  step <= value ? 'border-accent bg-accent' : 'border-control bg-surface',
+                  step <= value ? fill : 'border-control bg-surface',
                 )}
               />
             </button>

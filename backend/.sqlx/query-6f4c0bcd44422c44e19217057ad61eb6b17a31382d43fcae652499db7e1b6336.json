@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE activities\n           SET name = ?, icon = ?, start_date = ?, end_date = ?, description = ?,\n               location = ?, impact = ?, mood = ?, reminder = ?, updated_at = CURRENT_TIMESTAMP\n         WHERE owner_id = ? AND id = ?\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 11
+    },
+    "nullable": []
+  },
+  "hash": "6f4c0bcd44422c44e19217057ad61eb6b17a31382d43fcae652499db7e1b6336"
+}

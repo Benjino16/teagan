@@ -1,6 +1,6 @@
 import { PageError, PageLoading } from '../../components/layout/PageStatus'
 import { useActivitiesForGroup, useSelf } from '../../data/queries'
-import { groupImpact, groupNote } from '../../domain/activities'
+import { groupImpact, groupMood, groupNote } from '../../domain/activities'
 import type { Group, Id, Person } from '../../domain/model'
 import { displayName, participantsText } from '../../domain/people'
 import { getToday } from '../../domain/today'
@@ -12,7 +12,7 @@ interface Props {
   personById: Map<Id, Person>
 }
 
-/** A group's timeline: its own and its subgroups' events, with the impact and notes for this group. */
+/** A group's timeline: its own and its subgroups' events, with the impact, mood and notes for this group. */
 export function GroupTimeline({ groupId, groups, personById }: Props) {
   const self = useSelf()
   const activities = useActivitiesForGroup(groupId)
@@ -30,6 +30,7 @@ export function GroupTimeline({ groupId, groups, personById }: Props) {
     <ActivityTimeline
       activities={activities.data}
       impactOf={(activity) => groupImpact(activity, groupId, groups)}
+      moodOf={(activity) => groupMood(activity, groupId, groups)}
       details={(activity) => ({
         others: participantsText(activity, { selfId, nameOf }),
         note: groupNote(activity, groupId, groups),

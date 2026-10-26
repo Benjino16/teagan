@@ -9,15 +9,17 @@ import {
   ListCard,
   listRowStyles,
   MediaRow,
+  MoodDots,
   RatingInput,
   TextInput,
   useAddSearch,
   useListNavigation,
 } from '../../components/ui'
-import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
+import { ACTIVITY_IMPACT_LEVELS, MOOD_LEVELS } from '../../domain/activities'
 import { groupPath, isGroupArchived } from '../../domain/groups'
-import type { ActivityGroup, Group, Id, Impact } from '../../domain/model'
+import type { ActivityGroup, Group, Id, Impact, Mood } from '../../domain/model'
 import { matchesSearch } from '../../domain/search'
+import { MoodField } from './MoodField'
 
 const MAX_RESULTS = 6
 const IMPACT_LEVELS = Object.values(ACTIVITY_IMPACT_LEVELS)
@@ -28,16 +30,18 @@ interface Props {
   onChange: (links: ActivityGroup[]) => void
   /** Impact of the event – applies to every group without its own value. */
   impact: Impact
+  /** Mood of the event, `null` = none – applies to every group without its own. */
+  mood: Mood | null
 }
 
 /**
  * Groups the event belongs to, like the participants: the chevron expands a
- * per-group impact that overrides the event's and a note for this group only.
+ * per-group impact and mood that override the event's and a note for this group only.
  */
-export function GroupPicker({ groups, links, onChange, impact }: Props) {
+export function GroupPicker({ groups, links, onChange, impact, mood }: Props) {
   const [expanded, setExpanded] = useState<Id | null>(null)
   const { query, pick, inputProps } = useAddSearch((group: Group) =>
-    onChange([...links, { groupId: group.id, impact: null, note: null }]),
+    onChange([...links, { groupId: group.id, impact: null, mood: null, note: null }]),
   )
 
   const chosen = new Set(links.map((l) => l.groupId))
@@ -70,10 +74,13 @@ export function GroupPicker({ groups, links, onChange, impact }: Props) {
               name={groups.some((c) => c.id === link.groupId) ? groupPath(link.groupId, groups) : 'Unknown'}
               override={link.impact}
               impact={impact}
+              ownMood={link.mood}
+              mood={mood}
               note={link.note ?? ''}
               open={expanded === link.groupId}
               onToggle={() => setExpanded(expanded === link.groupId ? null : link.groupId)}
               onImpactChange={(value) => update(link.groupId, { impact: value })}
+              onMoodChange={(value) => update(link.groupId, { mood: value })}
               onNoteChange={(value) => update(link.groupId, { note: value })}
               onRemove={() => onChange(links.filter((l) => l.groupId !== link.groupId))}
             />
@@ -120,16 +127,33 @@ interface RowProps {
   name: string
   override: Impact | null
   impact: Impact
+  ownMood: Mood | null
+  /** The event's mood, `null` = none. */
+  mood: Mood | null
   /** Raw input – trimmed on submit. */
   note: string
   open: boolean
   onToggle: () => void
   onImpactChange: (value: Impact | null) => void
+  onMoodChange: (value: Mood | null) => void
   onNoteChange: (value: string) => void
   onRemove: () => void
 }
 
-function GroupRow({ name, override, impact, note, open, onToggle, onImpactChange, onNoteChange, onRemove }: RowProps) {
+function GroupRow({
+  name,
+  override,
+  impact,
+  ownMood,
+  mood,
+  note,
+  open,
+  onToggle,
+  onImpactChange,
+  onMoodChange,
+  onNoteChange,
+  onRemove,
+}: RowProps) {
   const panelId = useId()
 
   return (
@@ -148,8 +172,13 @@ function GroupRow({ name, override, impact, note, open, onToggle, onImpactChange
           leading={<IconBadge icon={LayoutGrid} size={44} />}
           title={name}
           subtitle={
-            override !== null ? (
-              <ImpactDots value={override} label={`Own impact: ${ACTIVITY_IMPACT_LEVELS[override].label}`} className="py-1" />
+            override !== null || ownMood !== null ? (
+              <span className="flex items-center gap-3 py-1">
+                {override !== null && (
+                  <ImpactDots value={override} label={`Own impact: ${ACTIVITY_IMPACT_LEVELS[override].label}`} />
+                )}
+                {ownMood !== null && <MoodDots value={ownMood} label={`Own mood: ${MOOD_LEVELS[ownMood].label}`} />}
+              </span>
             ) : null
           }
           trailing={
@@ -174,6 +203,14 @@ function GroupRow({ name, override, impact, note, open, onToggle, onImpactChange
             value={override ?? impact}
             onChange={(value) => onImpactChange(value as Impact)}
           />
+          <MoodField
+            label={`Mood for ${name}`}
+            addLabel={`${mood !== null ? 'Own' : 'Add'} mood for ${name}`}
+            removeLabel={`Remove mood for ${name}`}
+            value={ownMood}
+            onChange={onMoodChange}
+            hint={mood !== null ? `Otherwise as the event: ${MOOD_LEVELS[mood].label}` : undefined}
+          />
           <Field label={`Note for ${name}`} hint="Only shown on this event and in the group's timeline.">
             {(id) => (
               <textarea
@@ -188,7 +225,7 @@ function GroupRow({ name, override, impact, note, open, onToggle, onImpactChange
           <div className="-mx-2 flex flex-wrap gap-1">
             {override !== null && (
               <button type="button" onClick={() => onImpactChange(null)} className={textButton}>
-                Same as event
+                Same impact as event
               </button>
             )}
             <button type="button" onClick={onRemove} className={clsx(textButton, 'text-danger')}>

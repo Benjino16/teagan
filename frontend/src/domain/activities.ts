@@ -1,5 +1,5 @@
 import { dayOf, daysBetween, isFullDate, isLeapYear, normalizeEnd, normalizeStart, yearOf } from './dates'
-import type { Activity, Group, Id, Impact, ImpactLevel, IsoDate } from './model'
+import type { Activity, Group, Id, Impact, ImpactLevel, IsoDate, Mood, MoodLevel } from './model'
 
 /** Impact levels for activities, with an explanation for the form. */
 export const ACTIVITY_IMPACT_LEVELS: Record<Impact, ImpactLevel> = {
@@ -11,6 +11,38 @@ export const ACTIVITY_IMPACT_LEVELS: Record<Impact, ImpactLevel> = {
     label: 'Life event',
     description: 'Changed something in life, e.g. a wedding or moving abroad. Shows up as a milestone.',
   },
+}
+
+/** Moods for activities, with an explanation for the form. */
+export const MOOD_LEVELS: Record<Mood, MoodLevel> = {
+  1: { label: 'Very bad', description: 'Hard or painful, e.g. a fight or a farewell.' },
+  2: { label: 'Bad', description: 'Tense or disappointing.' },
+  3: { label: 'Neutral', description: 'Neither good nor bad.' },
+  4: { label: 'Good', description: 'A nice time.' },
+  5: { label: 'Very good', description: 'Wonderful, one to keep.' },
+}
+
+/** Mood for this person, otherwise the activity's. `null` = none. */
+export function effectiveMood(activity: Activity, personId: Id): Mood | null {
+  const own = activity.participants.find((p) => p.personId === personId)?.mood
+  return own ?? activity.mood
+}
+
+/**
+ * Mood in the group's timeline: its own value if the activity belongs to the group
+ * directly, otherwise that of its subgroups if they agree. Without one the activity's.
+ */
+export function groupMood(activity: Activity, groupId: Id, groups: Group[]): Mood | null {
+  const direct = activity.groups.find((c) => c.groupId === groupId)
+  if (direct) return direct.mood ?? activity.mood
+  const subgroups = new Set(groups.filter((c) => c.parentId === groupId).map((c) => c.id))
+  const moods = new Set(
+    activity.groups.flatMap((c) => {
+      const mood = subgroups.has(c.groupId) ? (c.mood ?? activity.mood) : null
+      return mood === null ? [] : [mood]
+    }),
+  )
+  return moods.size === 1 ? [...moods][0]! : activity.mood
 }
 
 /** Impact for this person, otherwise the global value. */

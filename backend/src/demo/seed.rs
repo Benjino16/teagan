@@ -262,6 +262,7 @@ async fn seed_activity(
         "description": activity.description,
         "location": activity.location,
         "impact": activity.impact,
+        "mood": activity.mood,
         "reminder": activity.reminder,
         "participants": participants,
         "groups": groups,
@@ -297,7 +298,8 @@ async fn seed_activity(
     Ok(())
 }
 
-/// Links as the API expects them: `{ "<id_field>": 7, "impact": …, "note": … }`.
+/// Links as the API expects them:
+/// `{ "<id_field>": 7, "impact": …, "mood": …, "note": … }`.
 fn links(
     links: &[Link],
     id: impl Fn(&str) -> anyhow::Result<i64>,
@@ -306,7 +308,8 @@ fn links(
     links
         .iter()
         .map(|link| {
-            let mut value = json!({ "impact": link.impact(), "note": link.note() });
+            let mut value =
+                json!({ "impact": link.impact(), "mood": link.mood(), "note": link.note() });
             value[id_field] = json!(id(link.key())?);
             Ok(value)
         })

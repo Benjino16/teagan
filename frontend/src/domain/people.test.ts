@@ -46,7 +46,7 @@ describe('participantsText', () => {
   it('counts from four others on', () => {
     const many: Activity = {
       ...activity(7),
-      participants: [1, 2, 3, 4, 5, 6].map((personId) => ({ personId, impact: null, note: null })),
+      participants: [1, 2, 3, 4, 5, 6].map((personId) => ({ personId, impact: null, mood: null, note: null })),
     }
     const names = (id: number) => (id === 6 ? 'Sam' : nameOf(id))
     expect(participantsText(many, { ...opts, nameOf: names })).toBe('you and 4 others')
@@ -60,8 +60,8 @@ describe('companyText', () => {
   const company = { selfId: 1, nameOf, groupNameOf }
   const among = (people: number[], groups: number[] = []): Activity => ({
     ...activity(1),
-    participants: people.map((personId) => ({ personId, impact: null, note: null })),
-    groups: groups.map((groupId) => ({ groupId, impact: null, note: null })),
+    participants: people.map((personId) => ({ personId, impact: null, mood: null, note: null })),
+    groups: groups.map((groupId) => ({ groupId, impact: null, mood: null, note: null })),
   })
 
   it('says “with” only when you take part', () => {

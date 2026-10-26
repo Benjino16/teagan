@@ -9,16 +9,18 @@ import {
   ListCard,
   listRowStyles,
   MediaRow,
+  MoodDots,
   RatingInput,
   Switch,
   TextInput,
   useAddSearch,
   useListNavigation,
 } from '../../components/ui'
-import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
-import type { ActivityParticipant, Id, Impact, Person, PhotoUrls } from '../../domain/model'
+import { ACTIVITY_IMPACT_LEVELS, MOOD_LEVELS } from '../../domain/activities'
+import type { ActivityParticipant, Id, Impact, Mood, Person, PhotoUrls } from '../../domain/model'
 import { displayName, isArchived } from '../../domain/people'
 import { matchesSearch } from '../../domain/search'
+import { MoodField } from './MoodField'
 
 const MAX_RESULTS = 6
 const IMPACT_LEVELS = Object.values(ACTIVITY_IMPACT_LEVELS)
@@ -31,16 +33,18 @@ interface Props {
   onChange: (participants: ActivityParticipant[]) => void
   /** Impact of the event – applies to everyone without their own value. */
   impact: Impact
+  /** Mood of the event, `null` = none – applies to everyone without their own. */
+  mood: Mood | null
 }
 
 /**
  * Participants as a list like in the detail view. The chevron expands a
- * per-person impact that overrides the event's and a note for this person only.
+ * per-person impact and mood that override the event's and a note for this person only.
  */
-export function ParticipantPicker({ self, people, participants, onChange, impact }: Props) {
+export function ParticipantPicker({ self, people, participants, onChange, impact, mood }: Props) {
   const [expanded, setExpanded] = useState<Id | null>(null)
   const { query, pick, inputProps } = useAddSearch((person: Person) =>
-    onChange([...participants, { personId: person.id, impact: null, note: null }]),
+    onChange([...participants, { personId: person.id, impact: null, mood: null, note: null }]),
   )
   const byId = new Map([self, ...people].map((p) => [p.id, p]))
   const withSelf = participants.some((p) => p.personId === self.id)
@@ -69,7 +73,7 @@ export function ParticipantPicker({ self, people, participants, onChange, impact
       <Switch
         label="I was there"
         checked={withSelf}
-        onChange={(on) => (on ? onChange([{ personId: self.id, impact: null, note: null }, ...participants]) : remove(self.id))}
+        onChange={(on) => (on ? onChange([{ personId: self.id, impact: null, mood: null, note: null }, ...participants]) : remove(self.id))}
       />
 
       {participants.length > 0 && (
@@ -86,10 +90,13 @@ export function ParticipantPicker({ self, people, participants, onChange, impact
                 forName={isSelf ? 'you' : person ? displayName(person) : name}
                 override={participant.impact}
                 impact={impact}
+                ownMood={participant.mood}
+                mood={mood}
                 note={participant.note ?? ''}
                 open={expanded === participant.personId}
                 onToggle={() => setExpanded(expanded === participant.personId ? null : participant.personId)}
                 onImpactChange={(value) => update(participant.personId, { impact: value })}
+                onMoodChange={(value) => update(participant.personId, { mood: value })}
                 onNoteChange={(value) => update(participant.personId, { note: value })}
                 onRemove={() => remove(participant.personId)}
               />
@@ -139,11 +146,15 @@ interface RowProps {
   forName: string
   override: Impact | null
   impact: Impact
+  ownMood: Mood | null
+  /** The event's mood, `null` = none. */
+  mood: Mood | null
   /** Raw input – trimmed on submit. */
   note: string
   open: boolean
   onToggle: () => void
   onImpactChange: (value: Impact | null) => void
+  onMoodChange: (value: Mood | null) => void
   onNoteChange: (value: string) => void
   onRemove: () => void
 }
@@ -154,10 +165,13 @@ function ParticipantRow({
   forName,
   override,
   impact,
+  ownMood,
+  mood,
   note,
   open,
   onToggle,
   onImpactChange,
+  onMoodChange,
   onNoteChange,
   onRemove,
 }: RowProps) {
@@ -179,8 +193,13 @@ function ParticipantRow({
           leading={<Avatar name={name} photo={photo} size="md" />}
           title={name}
           subtitle={
-            override !== null ? (
-              <ImpactDots value={override} label={`Own impact: ${ACTIVITY_IMPACT_LEVELS[override].label}`} className="py-1" />
+            override !== null || ownMood !== null ? (
+              <span className="flex items-center gap-3 py-1">
+                {override !== null && (
+                  <ImpactDots value={override} label={`Own impact: ${ACTIVITY_IMPACT_LEVELS[override].label}`} />
+                )}
+                {ownMood !== null && <MoodDots value={ownMood} label={`Own mood: ${MOOD_LEVELS[ownMood].label}`} />}
+              </span>
             ) : null
           }
           trailing={
@@ -205,6 +224,14 @@ function ParticipantRow({
             value={override ?? impact}
             onChange={(value) => onImpactChange(value as Impact)}
           />
+          <MoodField
+            label={`Mood for ${forName}`}
+            addLabel={`${mood !== null ? 'Own' : 'Add'} mood for ${forName}`}
+            removeLabel={`Remove mood for ${forName}`}
+            value={ownMood}
+            onChange={onMoodChange}
+            hint={mood !== null ? `Otherwise as the event: ${MOOD_LEVELS[mood].label}` : undefined}
+          />
           <Field label={`Note for ${forName}`} hint={`Only shown on this event and in ${forName === 'you' ? 'your' : `${forName}'s`} timeline.`}>
             {(id) => (
               <textarea
@@ -219,7 +246,7 @@ function ParticipantRow({
           <div className="-mx-2 flex flex-wrap gap-1">
             {override !== null && (
               <button type="button" onClick={() => onImpactChange(null)} className={textButton}>
-                Same as event
+                Same impact as event
               </button>
             )}
             <button type="button" onClick={onRemove} className={clsx(textButton, 'text-danger')}>

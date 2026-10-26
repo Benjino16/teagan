@@ -28,6 +28,15 @@ export interface ImpactLevel {
   description: string
 }
 
+/** How an activity felt: 1 = very bad, 3 = neutral, 5 = very good. */
+export type Mood = 1 | 2 | 3 | 4 | 5
+
+/** Name and explanation of a mood. */
+export interface MoodLevel {
+  label: string
+  description: string
+}
+
 export interface Timestamps {
   createdAt: Timestamp
   updatedAt: Timestamp
@@ -97,6 +106,8 @@ export interface ActivityParticipant {
   personId: Id
   /** Impact for this person only, `null` = the activity's global value. */
   impact: Impact | null
+  /** Mood for this person only, `null` = the activity's mood (which may be none). */
+  mood: Mood | null
   /** Note for this person only, `null` = none. */
   note: string | null
 }
@@ -106,6 +117,8 @@ export interface ActivityGroup {
   groupId: Id
   /** Impact for this group only, `null` = the activity's global value. */
   impact: Impact | null
+  /** Mood for this group only, `null` = the activity's mood (which may be none). */
+  mood: Mood | null
   /** Note for this group only, `null` = none. */
   note: string | null
 }
@@ -122,6 +135,8 @@ export interface Activity extends Timestamps {
   /** Free text, e.g. “Café Fritz”, `null` = none. */
   location: string | null
   impact: Impact
+  /** Optional, `null` = no mood. People and groups can have their own even then. */
+  mood: Mood | null
   /** Reminder on the start day, only with a full start date. */
   reminder: boolean
   /** At least one person or group. */

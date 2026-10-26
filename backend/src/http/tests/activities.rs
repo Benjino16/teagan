@@ -195,7 +195,7 @@ async fn group_event_without_people(pool: SqlitePool) {
     assert_eq!(status, StatusCode::OK, "{gathering}");
     assert_eq!(
         gathering["groups"],
-        json!([{ "groupId": family, "impact": 5, "note": "Grandma's 90th" }])
+        json!([{ "groupId": family, "impact": 5, "mood": null, "note": "Grandma's 90th" }])
     );
     assert_eq!(gathering["participants"], json!([]));
     let uri = format!("/api/activities/{}", gathering["id"]);
@@ -215,8 +215,65 @@ async fn group_event_without_people(pool: SqlitePool) {
     assert_eq!(status, StatusCode::OK);
     assert_eq!(
         updated["groups"],
-        json!([{ "groupId": friends, "impact": null, "note": null }])
+        json!([{ "groupId": friends, "impact": null, "mood": null, "note": null }])
     );
+}
+
+/// Mood is optional on the activity; people and groups can have their own,
+/// also when the activity has none.
+#[sqlx::test]
+async fn mood_on_activity_and_links(pool: SqlitePool) {
+    let app = TestApp::new(pool).await;
+    let lena = app.create_person("Lena").await;
+    let family = app.create_group("Family", None).await;
+
+    let (status, dinner) = app
+        .post(
+            "/api/activities",
+            json!({
+                "name": "Dinner",
+                "startDate": "2026-10-12",
+                "impact": 3,
+                "participants": [{ "personId": lena, "mood": 5 }],
+                "groups": [{ "groupId": family, "mood": 2 }]
+            }),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK, "{dinner}");
+    assert_eq!(dinner["mood"], json!(null), "no mood unless given");
+    assert_eq!(dinner["participants"][0]["mood"], 5);
+    assert_eq!(dinner["groups"][0]["mood"], 2);
+    let uri = format!("/api/activities/{}", dinner["id"]);
+
+    // Set on the activity, cleared on the links
+    let (status, updated) = app
+        .put(
+            &uri,
+            json!({
+                "name": "Dinner",
+                "startDate": "2026-10-12",
+                "impact": 3,
+                "mood": 4,
+                "participants": [{ "personId": lena }],
+                "groups": [{ "groupId": family, "mood": null }]
+            }),
+        )
+        .await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(updated["mood"], 4);
+    assert_eq!(updated["participants"][0]["mood"], json!(null));
+    assert_eq!(updated["groups"][0]["mood"], json!(null));
+    assert_eq!(app.get(&uri).await.1, updated);
+
+    for body in [
+        json!({ "name": "Dinner", "startDate": "2026-10-12", "impact": 3, "mood": 0,
+                "participants": [{ "personId": lena }] }),
+        json!({ "name": "Dinner", "startDate": "2026-10-12", "impact": 3,
+                "participants": [{ "personId": lena, "mood": 6 }] }),
+    ] {
+        let (status, _) = app.put(&uri, body).await;
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+    }
 }
 
 #[sqlx::test]

@@ -19,6 +19,7 @@ struct ActivityRow {
     description: Option<String>,
     location: Option<String>,
     impact: i64,
+    mood: Option<i64>,
     reminder: bool,
     created_at: DateTime<Utc>,
     updated_at: DateTime<Utc>,
@@ -28,6 +29,7 @@ struct ParticipantRow {
     activity_id: i64,
     person_id: i64,
     impact: Option<i64>,
+    mood: Option<i64>,
     note: Option<String>,
 }
 
@@ -35,6 +37,7 @@ struct GroupRow {
     activity_id: i64,
     group_id: i64,
     impact: Option<i64>,
+    mood: Option<i64>,
     note: Option<String>,
 }
 
@@ -87,7 +90,7 @@ pub async fn list(pool: &SqlitePool, owner_id: i64) -> sqlx::Result<Vec<Activity
         r#"
         SELECT id, name, icon, start_date,
                end_date AS "end_date?", description AS "description?",
-               location AS "location?", impact,
+               location AS "location?", impact, mood AS "mood?",
                reminder AS "reminder: bool",
                created_at AS "created_at: _",
                updated_at AS "updated_at: _"
@@ -114,7 +117,7 @@ pub async fn list_for_person(
         r#"
         SELECT id, name, icon, start_date,
                end_date AS "end_date?", description AS "description?",
-               location AS "location?", impact,
+               location AS "location?", impact, mood AS "mood?",
                reminder AS "reminder: bool",
                created_at AS "created_at: _",
                updated_at AS "updated_at: _"
@@ -144,7 +147,7 @@ pub async fn list_for_group(
         r#"
         SELECT id, name, icon, start_date,
                end_date AS "end_date?", description AS "description?",
-               location AS "location?", impact,
+               location AS "location?", impact, mood AS "mood?",
                reminder AS "reminder: bool",
                created_at AS "created_at: _",
                updated_at AS "updated_at: _"
@@ -179,7 +182,7 @@ pub async fn get(
         r#"
         SELECT id, name, icon, start_date,
                end_date AS "end_date?", description AS "description?",
-               location AS "location?", impact,
+               location AS "location?", impact, mood AS "mood?",
                reminder AS "reminder: bool",
                created_at AS "created_at: _",
                updated_at AS "updated_at: _"
@@ -207,8 +210,9 @@ pub async fn create(
     let activity_id = sqlx::query_scalar!(
         r#"
         INSERT INTO
-        activities (owner_id, name, icon, start_date, end_date, description, location, impact, reminder)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        activities (owner_id, name, icon, start_date, end_date, description, location, impact, mood,
+                    reminder)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         RETURNING id AS "id!"
         "#,
         owner_id,
@@ -219,6 +223,7 @@ pub async fn create(
         activity.description,
         activity.location,
         activity.impact,
+        activity.mood,
         activity.reminder
     )
     .fetch_one(&mut *tx)
@@ -246,7 +251,7 @@ pub async fn update(
         r#"
         UPDATE activities
            SET name = ?, icon = ?, start_date = ?, end_date = ?, description = ?,
-               location = ?, impact = ?, reminder = ?, updated_at = CURRENT_TIMESTAMP
+               location = ?, impact = ?, mood = ?, reminder = ?, updated_at = CURRENT_TIMESTAMP
          WHERE owner_id = ? AND id = ?
         "#,
         activity.name,
@@ -256,6 +261,7 @@ pub async fn update(
         activity.description,
         activity.location,
         activity.impact,
+        activity.mood,
         activity.reminder,
         owner_id,
         activity_id
@@ -304,7 +310,7 @@ pub async fn update(
 }
 
 /// Inserts new links and updates existing ones; `updated_at` only changes
-/// when impact or note actually differ.
+/// when impact, mood or note actually differ.
 async fn upsert_participants(
     conn: &mut SqliteConnection,
     owner_id: i64,
@@ -314,16 +320,19 @@ async fn upsert_participants(
     for participant in participants {
         sqlx::query!(
             r#"
-            INSERT INTO activity_people (owner_id, activity_id, person_id, impact, note)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO activity_people (owner_id, activity_id, person_id, impact, mood, note)
+            VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT (activity_id, person_id) DO UPDATE
-               SET impact = excluded.impact, note = excluded.note, updated_at = CURRENT_TIMESTAMP
-             WHERE impact IS NOT excluded.impact OR note IS NOT excluded.note
+               SET impact = excluded.impact, mood = excluded.mood, note = excluded.note,
+                   updated_at = CURRENT_TIMESTAMP
+             WHERE impact IS NOT excluded.impact OR mood IS NOT excluded.mood
+                OR note IS NOT excluded.note
             "#,
             owner_id,
             activity_id,
             participant.person_id,
             participant.impact,
+            participant.mood,
             participant.note
         )
         .execute(&mut *conn)
@@ -332,8 +341,8 @@ async fn upsert_participants(
     Ok(())
 }
 
-/// Like `upsert_participants`: `updated_at` only changes when impact or note
-/// actually differ.
+/// Like `upsert_participants`: `updated_at` only changes when impact, mood or
+/// note actually differ.
 async fn upsert_groups(
     conn: &mut SqliteConnection,
     owner_id: i64,
@@ -343,16 +352,19 @@ async fn upsert_groups(
     for group in groups {
         sqlx::query!(
             r#"
-            INSERT INTO activity_groups (owner_id, activity_id, group_id, impact, note)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO activity_groups (owner_id, activity_id, group_id, impact, mood, note)
+            VALUES (?, ?, ?, ?, ?, ?)
             ON CONFLICT (activity_id, group_id) DO UPDATE
-               SET impact = excluded.impact, note = excluded.note, updated_at = CURRENT_TIMESTAMP
-             WHERE impact IS NOT excluded.impact OR note IS NOT excluded.note
+               SET impact = excluded.impact, mood = excluded.mood, note = excluded.note,
+                   updated_at = CURRENT_TIMESTAMP
+             WHERE impact IS NOT excluded.impact OR mood IS NOT excluded.mood
+                OR note IS NOT excluded.note
             "#,
             owner_id,
             activity_id,
             group.group_id,
             group.impact,
+            group.mood,
             group.note
         )
         .execute(&mut *conn)
@@ -392,7 +404,7 @@ async fn with_links(
     let participants = sqlx::query_as!(
         ParticipantRow,
         r#"
-        SELECT activity_id, person_id, impact AS "impact?", note AS "note?"
+        SELECT activity_id, person_id, impact AS "impact?", mood AS "mood?", note AS "note?"
           FROM activity_people
          WHERE owner_id = ? AND activity_id IN (SELECT value FROM json_each(?))
          ORDER BY activity_id, person_id
@@ -406,7 +418,7 @@ async fn with_links(
     let groups = sqlx::query_as!(
         GroupRow,
         r#"
-        SELECT activity_id, group_id, impact AS "impact?", note AS "note?"
+        SELECT activity_id, group_id, impact AS "impact?", mood AS "mood?", note AS "note?"
           FROM activity_groups
          WHERE owner_id = ? AND activity_id IN (SELECT value FROM json_each(?))
          ORDER BY activity_id, group_id
@@ -435,6 +447,7 @@ fn assemble(
             .push(ParticipantResponse {
                 person_id: p.person_id,
                 impact: p.impact,
+                mood: p.mood,
                 note: p.note,
             });
     }
@@ -446,6 +459,7 @@ fn assemble(
             .push(ActivityGroupResponse {
                 group_id: c.group_id,
                 impact: c.impact,
+                mood: c.mood,
                 note: c.note,
             });
     }
@@ -462,6 +476,7 @@ fn assemble(
             description: row.description,
             location: row.location,
             impact: row.impact,
+            mood: row.mood,
             reminder: row.reminder,
             created_at: row.created_at,
             updated_at: row.updated_at,

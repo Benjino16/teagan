@@ -50,6 +50,17 @@
   --color-warm-icon: light-dark(#8a4a0e, #f0b46c);
   --color-warm-line: light-dark(#f1dcc0, #46371f); /* Dividers on warm background */
 
+  /*
+   * Mood of an activity, 1 = very bad … 5 = very good. Diverging from raspberry
+   * over grey to teal, strongest at the ends – not red/green, and no blue so it
+   * never reads as the accent.
+   */
+  --color-mood-1: light-dark(#c0365f, #ff6f8e);
+  --color-mood-2: light-dark(#df8a3a, #d99a5c);
+  --color-mood-3: light-dark(#a3a8b2, #6b717c);
+  --color-mood-4: light-dark(#4fb39c, #5ab3a0);
+  --color-mood-5: light-dark(#14806a, #3fd0ac);
+
   /* Danger (errors, delete) */
   --color-danger: light-dark(#6e2606, #ff9f80);
   --color-danger-soft: light-dark(#fde3d3, #3d1e14); /* Error message background, hover of delete */

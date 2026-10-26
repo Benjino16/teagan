@@ -1,6 +1,6 @@
 {
   "db_name": "SQLite",
-  "query": "\n        SELECT activity_id, group_id, impact AS \"impact?\", note AS \"note?\"\n          FROM activity_groups\n         WHERE owner_id = ? AND activity_id IN (SELECT value FROM json_each(?))\n         ORDER BY activity_id, group_id\n        ",
+  "query": "\n        SELECT activity_id, person_id, impact AS \"impact?\", mood AS \"mood?\", note AS \"note?\"\n          FROM activity_people\n         WHERE owner_id = ? AND activity_id IN (SELECT value FROM json_each(?))\n         ORDER BY activity_id, person_id\n        ",
   "describe": {
     "columns": [
       {
@@ -9,19 +9,19 @@
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "activity_groups",
+            "table": "activity_people",
             "name": "activity_id"
           }
         }
       },
       {
-        "name": "group_id",
+        "name": "person_id",
         "ordinal": 1,
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "activity_groups",
-            "name": "group_id"
+            "table": "activity_people",
+            "name": "person_id"
           }
         }
       },
@@ -31,18 +31,29 @@
         "type_info": "Integer",
         "origin": {
           "Table": {
-            "table": "activity_groups",
+            "table": "activity_people",
             "name": "impact"
           }
         }
       },
       {
-        "name": "note?",
+        "name": "mood?",
         "ordinal": 3,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "activity_people",
+            "name": "mood"
+          }
+        }
+      },
+      {
+        "name": "note?",
+        "ordinal": 4,
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "activity_groups",
+            "table": "activity_people",
             "name": "note"
           }
         }
@@ -55,8 +66,9 @@
       false,
       false,
       true,
+      true,
       true
     ]
   },
-  "hash": "01947a346e5d76fd8bd2bdcd478dcf7f452556003ec51465e9fef916c67deb70"
+  "hash": "38ef6f3d460859376b0fd200d69a7132d7620dd991eec239fa6004d4932d9a84"
 }

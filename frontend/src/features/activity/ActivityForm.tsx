@@ -3,11 +3,12 @@ import { type FormEvent, useRef, useState } from 'react'
 import { Button, Field, IconButton, inputStyles, RatingInput, Switch, TextButton, TextInput } from '../../components/ui'
 import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
 import { joinPartialDate, splitPartialDate } from '../../domain/dates'
-import type { ActivityGroup, ActivityInput, ActivityParticipant, Group, Impact, OpenPoint, Person } from '../../domain/model'
+import type { ActivityGroup, ActivityInput, ActivityParticipant, Group, Impact, Mood, OpenPoint, Person } from '../../domain/model'
 import type { OpenPointDraft } from '../../domain/openPoints'
 import { DateInput } from './DateInput'
 import { GroupPicker } from './GroupPicker'
 import { IconPicker } from './IconPicker'
+import { MoodField } from './MoodField'
 import { type OpenPointRow, OpenPointsEditor } from './OpenPointsEditor'
 import { ParticipantPicker } from './ParticipantPicker'
 
@@ -48,6 +49,7 @@ export function ActivityForm({
   // `null` = no field yet, only “Add location”
   const [location, setLocation] = useState(initial.location)
   const [impact, setImpact] = useState<Impact>(initial.impact)
+  const [mood, setMood] = useState<Mood | null>(initial.mood)
   // You first, as in the detail view
   const [participants, setParticipants] = useState<ActivityParticipant[]>(() => [
     ...initial.participants.filter((p) => p.personId === self.id),
@@ -121,6 +123,7 @@ export function ActivityForm({
       description: description.trim() || null,
       location: location?.trim() || null,
       impact,
+      mood,
       reminder: reminderPossible && reminder,
       participants: participants.map((p) => ({ ...p, note: p.note?.trim() || null })),
       groups: groupLinks.map((g) => ({ ...g, note: g.note?.trim() || null })),
@@ -194,7 +197,10 @@ export function ActivityForm({
         )}
       </Field>
 
-      <RatingInput label="Impact" levels={IMPACT_LEVELS} value={impact} onChange={(v) => setImpact(v as Impact)} />
+      <div className="flex flex-col gap-3">
+        <RatingInput label="Impact" levels={IMPACT_LEVELS} value={impact} onChange={(v) => setImpact(v as Impact)} />
+        <MoodField label="Mood" addLabel="Add mood" removeLabel="Remove mood" value={mood} onChange={setMood} />
+      </div>
 
       <ParticipantPicker
         self={self}
@@ -202,9 +208,10 @@ export function ActivityForm({
         participants={participants}
         onChange={changeParticipants}
         impact={impact}
+        mood={mood}
       />
 
-      <GroupPicker groups={groups} links={groupLinks} onChange={setGroupLinks} impact={impact} />
+      <GroupPicker groups={groups} links={groupLinks} onChange={setGroupLinks} impact={impact} mood={mood} />
 
       <OpenPointsEditor
         rows={points}

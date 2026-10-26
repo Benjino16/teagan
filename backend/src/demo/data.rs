@@ -134,6 +134,7 @@ pub struct Activity {
     pub location: Option<String>,
     #[serde(default = "default_activity_impact")]
     pub impact: i64,
+    pub mood: Option<i64>,
     #[serde(default)]
     pub reminder: bool,
     /// Person keys, `me` included when you were there – only then it counts
@@ -147,8 +148,8 @@ pub struct Activity {
     pub open_points: Vec<ActivityPoint>,
 }
 
-/// `"lena"`, or `{ key = "lena", impact = 5, note = "…" }` for an own impact
-/// or note on this person or group.
+/// `"lena"`, or `{ key = "lena", impact = 5, mood = 4, note = "…" }` for an
+/// own impact, mood or note on this person or group.
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub enum Link {
@@ -156,6 +157,7 @@ pub enum Link {
     Detailed {
         key: String,
         impact: Option<i64>,
+        mood: Option<i64>,
         note: Option<String>,
     },
 }
@@ -171,6 +173,13 @@ impl Link {
         match self {
             Link::Key(_) => None,
             Link::Detailed { impact, .. } => *impact,
+        }
+    }
+
+    pub fn mood(&self) -> Option<i64> {
+        match self {
+            Link::Key(_) => None,
+            Link::Detailed { mood, .. } => *mood,
         }
     }
 

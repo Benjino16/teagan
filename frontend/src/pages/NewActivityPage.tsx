@@ -62,11 +62,12 @@ function newActivity(selfId: number, personId: number | null, groupId: number | 
     description: null,
     location: null,
     impact: 2,
+    mood: null,
     reminder: false,
     participants: [
-      { personId: selfId, impact: null, note: null },
-      ...(personId && personId !== selfId ? [{ personId, impact: null, note: null }] : []),
+      { personId: selfId, impact: null, mood: null, note: null },
+      ...(personId && personId !== selfId ? [{ personId, impact: null, mood: null, note: null }] : []),
     ],
-    groups: groupId ? [{ groupId: groupId, impact: null, note: null }] : [],
+    groups: groupId ? [{ groupId: groupId, impact: null, mood: null, note: null }] : [],
   }
 }

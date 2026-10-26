@@ -296,6 +296,7 @@ fn activities(rng: &mut Rng, circle: &Circle, people: &[String]) -> Vec<Activity
                 description: None,
                 location: None,
                 impact: 2,
+                mood: None,
                 reminder: false,
                 people: links,
                 groups: group.map(Link::from).into_iter().collect(),

@@ -15,6 +15,7 @@ import {
   ListCard,
   listRowStyles,
   MediaRow,
+  MoodDots,
   SectionHeader,
 } from '../components/ui'
 import type { IconBadgeTone } from '../components/ui/IconBadge'
@@ -26,7 +27,7 @@ import {
   usePeople,
   useSetOpenPointDone,
 } from '../data/queries'
-import { ACTIVITY_IMPACT_LEVELS, activitiesDuring, activityStatus, enclosingActivity, maxImpact } from '../domain/activities'
+import { ACTIVITY_IMPACT_LEVELS, MOOD_LEVELS, activitiesDuring, activityStatus, enclosingActivity, maxImpact } from '../domain/activities'
 import {
   daysBetween,
   formatDate,
@@ -40,7 +41,7 @@ import {
   yearOf,
 } from '../domain/dates'
 import { groupPath } from '../domain/groups'
-import type { Activity, Group, Id, Impact, IsoDate, OpenPoint, Person } from '../domain/model'
+import type { Activity, Group, Id, Impact, IsoDate, Mood, OpenPoint, Person } from '../domain/model'
 import { displayName } from '../domain/people'
 import { getToday } from '../domain/today'
 import { activityIcon, LocationIcon, ReminderIcon } from '../icons/activityIcons'
@@ -179,6 +180,7 @@ function ActivityHero({
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <ImpactDots value={activity.impact} />
+        {activity.mood !== null && <MoodDots value={activity.mood} />}
         {activity.reminder && status === 'planned' && (
           <span className="flex items-center gap-1.5 text-sm font-medium text-accent-ink">
             <ReminderIcon aria-hidden="true" size={14} />
@@ -208,21 +210,13 @@ function Participants({ activity, personById }: { activity: Activity; personById
     <section aria-labelledby="participants" className="flex flex-col gap-2.5">
       <SectionHeader id="participants" title="Participants" aside={participants.length} />
       <ListCard>
-        {participants.map(({ person, impact, note }) => {
+        {participants.map(({ person, impact, mood, note }) => {
           const forName = person.isSelf ? 'you' : displayName(person)
           const row = (
             <MediaRow
               leading={<Avatar name={person.isSelf ? 'You' : person.name} photo={person.photo} size="md" />}
               title={person.isSelf ? 'You' : person.name}
-              subtitle={
-                impact !== null ? (
-                  <ImpactDots
-                    value={impact}
-                    label={`Impact for ${forName}: ${ACTIVITY_IMPACT_LEVELS[impact].label}`}
-                    className="py-1"
-                  />
-                ) : null
-              }
+              subtitle={<OwnScales impact={impact} mood={mood} forName={forName} />}
               trailing={
                 !person.isSelf && <ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />
               }
@@ -260,21 +254,13 @@ function Groups({ activity, groups }: { activity: Activity; groups: Group[] }) {
     <section aria-labelledby="groups" className="flex flex-col gap-2.5">
       <SectionHeader id="groups" title="Groups" aside={rows.length} />
       <ListCard>
-        {rows.map(({ groupId, impact, note, name }) => (
+        {rows.map(({ groupId, impact, mood, note, name }) => (
           <li key={groupId}>
             <Link to={`/groups/${groupId}`} className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
               <MediaRow
                 leading={<IconBadge icon={LayoutGrid} size={44} />}
                 title={name}
-                subtitle={
-                  impact !== null ? (
-                    <ImpactDots
-                      value={impact}
-                      label={`Impact for ${name}: ${ACTIVITY_IMPACT_LEVELS[impact].label}`}
-                      className="py-1"
-                    />
-                  ) : null
-                }
+                subtitle={<OwnScales impact={impact} mood={mood} forName={name} />}
                 trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}
               >
                 {/* Note for this group only */}
@@ -285,6 +271,19 @@ function Groups({ activity, groups }: { activity: Activity; groups: Group[] }) {
         ))}
       </ListCard>
     </section>
+  )
+}
+
+/** Impact and mood of one participant or group, where they differ from the event's. */
+function OwnScales({ impact, mood, forName }: { impact: Impact | null; mood: Mood | null; forName: string }) {
+  if (impact === null && mood === null) return null
+  return (
+    <span className="flex items-center gap-3 py-1">
+      {impact !== null && (
+        <ImpactDots value={impact} label={`Impact for ${forName}: ${ACTIVITY_IMPACT_LEVELS[impact].label}`} />
+      )}
+      {mood !== null && <MoodDots value={mood} label={`Mood for ${forName}: ${MOOD_LEVELS[mood].label}`} />}
+    </span>
   )
 }
 

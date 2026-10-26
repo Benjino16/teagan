@@ -30,7 +30,7 @@ describe('last contact', () => {
   })
 
   it('counts a timed event of today, and reports only the date', () => {
-    const coffee = { ...db.activities[0]!, id: 900, startDate: `${today}T09:00`, endDate: null, participants: [{ personId: 2, impact: null, note: null }, { personId: SELF, impact: null, note: null }] }
+    const coffee = { ...db.activities[0]!, id: 900, startDate: `${today}T09:00`, endDate: null, participants: [{ personId: 2, impact: null, mood: null, note: null }, { personId: SELF, impact: null, mood: null, note: null }] }
     expect(lastContactDate([...db.activities, coffee], 2, SELF, today)).toBe(today)
   })
 

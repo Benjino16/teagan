@@ -31,7 +31,7 @@ const range = (id: number, startDate: string, endDate: string, impact: Impact = 
   startDate,
   endDate,
   impact,
-  participants: [{ personId: LENA, impact: null, note: null }],
+  participants: [{ personId: LENA, impact: null, mood: null, note: null }],
 })
 const point = (id: number, startDate: string): Activity => ({ ...byId(3), id, startDate, endDate: null })
 

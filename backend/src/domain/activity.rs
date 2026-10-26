@@ -30,6 +30,9 @@ pub struct ActivityInput {
     pub location: Option<String>,
     #[validate(range(min = 1, max = 5))]
     pub impact: i64,
+    /// 1 = very bad … 5 = very good, `None` = no mood.
+    #[validate(range(min = 1, max = 5))]
+    pub mood: Option<i64>,
     #[serde(default)]
     pub reminder: bool,
     #[validate(nested)]
@@ -39,8 +42,8 @@ pub struct ActivityInput {
     pub groups: Vec<ActivityGroupInput>,
 }
 
-/// A person linked to an activity, with an optional impact and note for
-/// this person only.
+/// A person linked to an activity, with an optional impact, mood and note
+/// for this person only.
 /// `Serialize` only because the `length` rule on the list requires it.
 #[derive(Deserialize, Serialize, Validate)]
 #[serde(rename_all = "camelCase")]
@@ -49,12 +52,15 @@ pub struct ParticipantInput {
     /// `None` = the activity's impact applies.
     #[validate(range(min = 1, max = 5))]
     pub impact: Option<i64>,
+    /// `None` = the activity's mood applies – allowed when it has none.
+    #[validate(range(min = 1, max = 5))]
+    pub mood: Option<i64>,
     #[validate(length(min = 1, max = 1000))]
     pub note: Option<String>,
 }
 
-/// A group the activity belongs to, with an optional impact and note for
-/// this group only.
+/// A group the activity belongs to, with an optional impact, mood and note
+/// for this group only.
 #[derive(Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct ActivityGroupInput {
@@ -62,6 +68,9 @@ pub struct ActivityGroupInput {
     /// `None` = the activity's impact applies.
     #[validate(range(min = 1, max = 5))]
     pub impact: Option<i64>,
+    /// `None` = the activity's mood applies – allowed when it has none.
+    #[validate(range(min = 1, max = 5))]
+    pub mood: Option<i64>,
     #[validate(length(min = 1, max = 1000))]
     pub note: Option<String>,
 }
@@ -187,6 +196,7 @@ pub struct ActivityResponse {
     pub description: Option<String>,
     pub location: Option<String>,
     pub impact: i64,
+    pub mood: Option<i64>,
     pub reminder: bool,
     pub participants: Vec<ParticipantResponse>,
     pub groups: Vec<ActivityGroupResponse>,
@@ -199,6 +209,7 @@ pub struct ActivityResponse {
 pub struct ParticipantResponse {
     pub person_id: i64,
     pub impact: Option<i64>,
+    pub mood: Option<i64>,
     pub note: Option<String>,
 }
 
@@ -207,6 +218,7 @@ pub struct ParticipantResponse {
 pub struct ActivityGroupResponse {
     pub group_id: i64,
     pub impact: Option<i64>,
+    pub mood: Option<i64>,
     pub note: Option<String>,
 }
 
@@ -227,6 +239,7 @@ mod tests {
             description: None,
             location: None,
             impact: 2,
+            mood: None,
             reminder: false,
             participants: vec![participant(2)],
             groups: vec![],
@@ -237,6 +250,7 @@ mod tests {
         ParticipantInput {
             person_id,
             impact: None,
+            mood: None,
             note: None,
         }
     }
@@ -245,6 +259,7 @@ mod tests {
         ActivityGroupInput {
             group_id,
             impact: None,
+            mood: None,
             note: None,
         }
     }
@@ -366,11 +381,13 @@ mod tests {
             description: Some("Interrail".to_string()),
             location: Some("Europe".to_string()),
             impact: 5,
+            mood: Some(4),
             reminder: true,
             participants: vec![
                 participant(1),
                 ParticipantInput {
                     impact: Some(4),
+                    mood: Some(2),
                     note: Some("Plan".to_string()),
                     ..participant(2)
                 },
@@ -461,6 +478,57 @@ mod tests {
                 "should reject {impact}"
             );
         }
+    }
+
+    #[test]
+    fn mood_range() {
+        for mood in [None, Some(1), Some(5)] {
+            assert!(
+                ActivityInput { mood, ..input() }.validate().is_ok(),
+                "should accept {mood:?}"
+            );
+        }
+        for mood in [Some(0), Some(6)] {
+            assert_eq!(
+                invalid_fields(&ActivityInput { mood, ..input() }),
+                ["mood"],
+                "should reject {mood:?}"
+            );
+        }
+    }
+
+    /// A person or group can have a mood even when the activity has none.
+    #[test]
+    fn link_mood_without_activity_mood() {
+        let activity = ActivityInput {
+            mood: None,
+            participants: vec![ParticipantInput {
+                mood: Some(5),
+                ..participant(2)
+            }],
+            groups: vec![ActivityGroupInput {
+                mood: Some(1),
+                ..group(4)
+            }],
+            ..input()
+        };
+        assert!(activity.validate().is_ok());
+    }
+
+    #[test]
+    fn invalid_link_mood_is_reported() {
+        let activity = ActivityInput {
+            participants: vec![ParticipantInput {
+                mood: Some(6),
+                ..participant(2)
+            }],
+            groups: vec![ActivityGroupInput {
+                mood: Some(0),
+                ..group(4)
+            }],
+            ..input()
+        };
+        assert_eq!(invalid_fields(&activity), ["groups", "participants"]);
     }
 
     #[test]
@@ -625,20 +693,24 @@ mod tests {
             "description": "Lisbon to Rome",
             "location": "Europe",
             "impact": 4,
+            "mood": 5,
             "reminder": true,
-            "participants": [{ "personId": 2, "impact": 5, "note": "her idea" }],
-            "groups": [{ "groupId": 4, "impact": 3, "note": "first one" }]
+            "participants": [{ "personId": 2, "impact": 5, "mood": 3, "note": "her idea" }],
+            "groups": [{ "groupId": 4, "impact": 3, "mood": 4, "note": "first one" }]
         }))
         .unwrap();
 
         assert_eq!(activity.start_date, "2026-07-01");
         assert_eq!(activity.end_date.as_deref(), Some("2026-08-15"));
         assert_eq!(activity.location.as_deref(), Some("Europe"));
+        assert_eq!(activity.mood, Some(5));
         assert!(activity.reminder);
         assert_eq!(activity.participants[0].person_id, 2);
         assert_eq!(activity.participants[0].impact, Some(5));
+        assert_eq!(activity.participants[0].mood, Some(3));
         assert_eq!(activity.groups[0].group_id, 4);
         assert_eq!(activity.groups[0].impact, Some(3));
+        assert_eq!(activity.groups[0].mood, Some(4));
         assert_eq!(activity.groups[0].note.as_deref(), Some("first one"));
     }
 
@@ -653,10 +725,12 @@ mod tests {
         .unwrap();
 
         assert_eq!(activity.icon, "star");
+        assert_eq!(activity.mood, None);
         assert!(!activity.reminder);
         assert_eq!(activity.end_date, None);
         assert_eq!(activity.location, None);
         assert_eq!(activity.participants[0].impact, None);
+        assert_eq!(activity.participants[0].mood, None);
         assert_eq!(activity.participants[0].note, None);
         assert!(activity.groups.is_empty());
     }
@@ -685,15 +759,18 @@ mod tests {
             description: None,
             location: Some("Café Fritz".to_string()),
             impact: 2,
+            mood: None,
             reminder: true,
             participants: vec![ParticipantResponse {
                 person_id: 2,
                 impact: Some(4),
+                mood: Some(5),
                 note: None,
             }],
             groups: vec![ActivityGroupResponse {
                 group_id: 4,
                 impact: None,
+                mood: None,
                 note: Some("first one".to_string()),
             }],
             created_at: time,
@@ -711,9 +788,10 @@ mod tests {
                 "description": null,
                 "location": "Café Fritz",
                 "impact": 2,
+                "mood": null,
                 "reminder": true,
-                "participants": [{ "personId": 2, "impact": 4, "note": null }],
-                "groups": [{ "groupId": 4, "impact": null, "note": "first one" }],
+                "participants": [{ "personId": 2, "impact": 4, "mood": 5, "note": null }],
+                "groups": [{ "groupId": 4, "impact": null, "mood": null, "note": "first one" }],
                 "createdAt": "2026-10-15T12:00:00Z",
                 "updatedAt": "2026-10-15T12:00:00Z"
             })

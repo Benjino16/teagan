@@ -6,7 +6,9 @@ import {
   activityStatus,
   enclosingActivity,
   effectiveImpact,
+  effectiveMood,
   groupImpact,
+  groupMood,
   groupNote,
   maxImpact,
   milestones,
@@ -19,7 +21,7 @@ import {
   upcomingActivities,
   upcomingWithOthers,
 } from './activities'
-import type { Activity, ActivityGroup, Group, Impact } from './model'
+import type { Activity, ActivityGroup, Group, Impact, Mood } from './model'
 
 const today = '2026-10-13'
 const db = createTestDatabase()
@@ -36,9 +38,15 @@ const FLATMATES = 12
 const FAMILY = 20
 const group = (id: number, parentId: number | null): Group => ({ ...db.groups[0]!, id, parentId })
 const groups = [group(UNI, null), group(FRESHERS, UNI), group(FLATMATES, UNI), group(FAMILY, null)]
-const link = (groupId: number, impact: Impact | null = null, note: string | null = null): ActivityGroup => ({
+const link = (
+  groupId: number,
+  impact: Impact | null = null,
+  note: string | null = null,
+  mood: Mood | null = null,
+): ActivityGroup => ({
   groupId,
   impact,
+  mood,
   note,
 })
 /** A copy of a fixture activity with these groups and people. */
@@ -46,7 +54,7 @@ const withGroups = (id: number, base: Activity, groups: ActivityGroup[], personI
   ...base,
   id,
   groups,
-  participants: personIds.map((personId) => ({ personId, impact: null, note: null })),
+  participants: personIds.map((personId) => ({ personId, impact: null, mood: null, note: null })),
 })
 
 describe('effectiveImpact', () => {
@@ -79,6 +87,52 @@ describe('groupImpact', () => {
 
   it('counts a group value for the highest impact', () => {
     expect(maxImpact(withGroups(804, base, [link(FAMILY, 5)]))).toBe(5)
+  })
+})
+
+describe('effectiveMood', () => {
+  const base = byId(1)
+  const withMoods = (mood: Mood | null, own: Mood | null): Activity => ({
+    ...base,
+    mood,
+    participants: [
+      { personId: LENA, impact: null, mood: own, note: null },
+      { personId: TIM, impact: null, mood: null, note: null },
+    ],
+  })
+
+  it('uses the per-person mood, otherwise the activity’s', () => {
+    expect(effectiveMood(withMoods(4, 2), LENA)).toBe(2)
+    expect(effectiveMood(withMoods(4, 2), TIM)).toBe(4)
+  })
+
+  it('allows an own mood when the activity has none', () => {
+    expect(effectiveMood(withMoods(null, 5), LENA)).toBe(5)
+    expect(effectiveMood(withMoods(null, 5), TIM)).toBeNull()
+  })
+})
+
+describe('groupMood', () => {
+  const base = { ...byId(1), mood: 3 as Mood }
+
+  it('uses the own value of a direct link, otherwise the activity’s', () => {
+    expect(groupMood(withGroups(850, base, [link(UNI, null, null, 5)]), UNI, groups)).toBe(5)
+    expect(groupMood(withGroups(851, base, [link(UNI)]), UNI, groups)).toBe(3)
+    expect(groupMood(withGroups(852, { ...base, mood: null }, [link(UNI)]), UNI, groups)).toBeNull()
+  })
+
+  it('takes the subgroups’ mood in the main group when they agree', () => {
+    const agree = withGroups(853, base, [link(FRESHERS, null, null, 5), link(FLATMATES, null, null, 5)])
+    expect(groupMood(agree, UNI, groups)).toBe(5)
+    const disagree = withGroups(854, base, [link(FRESHERS, null, null, 5), link(FLATMATES, null, null, 1)])
+    expect(groupMood(disagree, UNI, groups)).toBe(3)
+  })
+
+  it('counts a subgroup without its own mood with the activity’s', () => {
+    const mixed = withGroups(855, base, [link(FRESHERS, null, null, 5), link(FLATMATES)])
+    expect(groupMood(mixed, UNI, groups)).toBe(3)
+    const noMood = { ...base, mood: null }
+    expect(groupMood(withGroups(856, noMood, [link(FRESHERS, null, null, 5), link(FLATMATES)]), UNI, groups)).toBe(5)
   })
 })
 
@@ -131,7 +185,7 @@ describe('ongoingWithOthers', () => {
     id,
     startDate,
     endDate: '2026-12-31',
-    participants: personIds.map((personId) => ({ personId, impact: null, note: null })),
+    participants: personIds.map((personId) => ({ personId, impact: null, mood: null, note: null })),
     groups: groupIds.map((groupId) => link(groupId)),
   })
 
@@ -157,7 +211,7 @@ describe('upcomingWithOthers', () => {
     id,
     startDate,
     endDate: null,
-    participants: personIds.map((personId) => ({ personId, impact: null, note: null })),
+    participants: personIds.map((personId) => ({ personId, impact: null, mood: null, note: null })),
   })
 
   it('shows future entries with others, even without you (fixture)', () => {
@@ -244,7 +298,7 @@ describe('detail view with groups', () => {
 describe('onlyWith', () => {
   it('keeps only events where nobody else took part', () => {
     const base = byId(16)
-    const participant = (personId: number) => ({ personId, impact: null, note: null })
+    const participant = (personId: number) => ({ personId, impact: null, mood: null, note: null })
     const solo = { ...base, id: 901, participants: [participant(TIM)] }
     const withSelf = { ...base, id: 902, participants: [participant(TIM), participant(1)] }
     const empty = { ...base, id: 903, participants: [] }
@@ -303,7 +357,7 @@ describe('onThisDay', () => {
   })
 
   it('counts a participant’s higher impact', () => {
-    const personal = { ...at(1, '2019-10-13', 2), participants: [{ personId: LENA, impact: 5 as Impact, note: null }] }
+    const personal = { ...at(1, '2019-10-13', 2), participants: [{ personId: LENA, impact: 5 as Impact, mood: null, note: null }] }
     expect(ids(onThisDay([at(2, '2024-10-13', 3), personal], today))).toEqual([1, 2])
   })
 

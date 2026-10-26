@@ -1,4 +1,5 @@
 import { clsx } from 'clsx'
+import type { Mood } from '../../domain/model'
 
 /*
  * Reusable class recipes for elements that should look like a building block
@@ -63,3 +64,12 @@ export const inputStyles = clsx(
   'min-h-11 w-full rounded-tile border border-line bg-surface px-3.5 text-base text-ink',
   'placeholder:text-faint focus:border-accent focus:outline-2 focus:outline-accent-soft',
 )
+
+/** Classes per mood – spelled out so Tailwind finds them. */
+export const moodStyles: Record<Mood, { fill: string; input: string; ring: string }> = {
+  1: { fill: 'bg-mood-1', input: 'border-mood-1 bg-mood-1', ring: 'ring-mood-1' },
+  2: { fill: 'bg-mood-2', input: 'border-mood-2 bg-mood-2', ring: 'ring-mood-2' },
+  3: { fill: 'bg-mood-3', input: 'border-mood-3 bg-mood-3', ring: 'ring-mood-3' },
+  4: { fill: 'bg-mood-4', input: 'border-mood-4 bg-mood-4', ring: 'ring-mood-4' },
+  5: { fill: 'bg-mood-5', input: 'border-mood-5 bg-mood-5', ring: 'ring-mood-5' },
+}

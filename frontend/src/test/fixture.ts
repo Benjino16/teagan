@@ -56,10 +56,12 @@ export function createTestDatabase(): Database {
       description: a.description ?? null,
       location: 'location' in a ? (a.location ?? null) : null,
       impact: a.impact as Impact,
+      mood: null,
       reminder: a.reminder,
       participants: a.people.map((p) => ({
         personId: p.personId,
         impact: ('impact' in p ? (p.impact ?? null) : null) as Impact | null,
+        mood: null,
         note: 'note' in p ? (p.note ?? null) : null,
       })),
       groups: [],

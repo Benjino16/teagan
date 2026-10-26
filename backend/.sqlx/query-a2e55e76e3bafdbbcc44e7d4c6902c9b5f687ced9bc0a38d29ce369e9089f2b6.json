@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        INSERT INTO\n        activities (owner_id, name, icon, start_date, end_date, description, location, impact, mood,\n                    reminder)\n        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)\n        RETURNING id AS \"id!\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id!",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "activities",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 10
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a2e55e76e3bafdbbcc44e7d4c6902c9b5f687ced9bc0a38d29ce369e9089f2b6"
+}

@@ -1,10 +1,10 @@
 import { clsx } from 'clsx'
 import type { ReactNode } from 'react'
-import { EmptyState, IconBadge, cardStyles } from '../../components/ui'
+import { EmptyState, IconBadge, cardStyles, moodStyles } from '../../components/ui'
 import type { IconBadgeSize, IconBadgeTone } from '../../components/ui/IconBadge'
-import { activityStatus } from '../../domain/activities'
+import { activityStatus, MOOD_LEVELS } from '../../domain/activities'
 import { daysBetween, formatDate, formatDateRange, formatDayMonth, formatRelativeFuture, normalizeEnd, timeOf } from '../../domain/dates'
-import type { Activity, Impact, IsoDate } from '../../domain/model'
+import type { Activity, Impact, IsoDate, Mood } from '../../domain/model'
 import { buildTimeline, type ImpactOf, type Lanes, type SameDay, type TimelineEntry } from '../../domain/timeline'
 import { Link } from 'react-router'
 import { activityIcon, LocationIcon, ReminderIcon } from '../../icons/activityIcons'
@@ -58,6 +58,17 @@ const stretchedLink =
 
 const plannedCard = clsx(cardStyles({ variant: 'dashed', padding: 'sm', radius: 'sm' }), 'flex flex-col gap-1')
 
+/** Mood as a ring in its color around the icon; the offset hides the rail behind it. */
+function moodRing(mood: Mood | null, offset = true): string | undefined {
+  if (mood === null) return undefined
+  return clsx('ring-2', moodStyles[mood].ring, offset && 'ring-offset-2 ring-offset-canvas')
+}
+
+/** The ring is decorative, so screen readers get the mood with the date. */
+function MoodText({ mood }: { mood: Mood | null }) {
+  return mood !== null ? <span className="sr-only"> · Mood: {MOOD_LEVELS[mood].label}</span> : null
+}
+
 /** What an entry shows besides the activity itself. */
 export interface EntryDetails {
   /** Who else was there, without “with” (see `participantsText`). */
@@ -69,12 +80,14 @@ export interface EntryDetails {
 interface Props {
   activities: Activity[]
   impactOf: ImpactOf
+  /** Mood per person or group, `null` = none. */
+  moodOf: (activity: Activity) => Mood | null
   details: (activity: Activity) => EntryDetails
   today: IsoDate
 }
 
 /** A person's or a group's timeline, for remembering what happened. */
-export function ActivityTimeline({ activities, impactOf, details, today }: Props) {
+export function ActivityTimeline({ activities, impactOf, moodOf, details, today }: Props) {
   const { rows } = buildTimeline(activities, impactOf)
 
   if (rows.length === 0) return <EmptyState>No entries yet.</EmptyState>
@@ -96,12 +109,21 @@ export function ActivityTimeline({ activities, impactOf, details, today }: Props
           )
         }
         if (row.entry.impact === 1 && activityStatus(row.entry.activity, today) !== 'planned') {
-          return <CompactItem key={row.entry.activity.id} activity={row.entry.activity} lanes={row.lanes} sameDay={row.sameDay} />
+          return (
+            <CompactItem
+              key={row.entry.activity.id}
+              activity={row.entry.activity}
+              mood={moodOf(row.entry.activity)}
+              lanes={row.lanes}
+              sameDay={row.sameDay}
+            />
+          )
         }
         return (
           <TimelineItem
             key={row.entry.activity.id}
             entry={row.entry}
+            moodOf={moodOf}
             lanes={row.lanes}
             sameDay={row.sameDay}
             details={details(row.entry.activity)}
@@ -210,13 +232,29 @@ function EndItem({ activity, impact, lanes, today }: { activity: Activity; impac
 }
 
 /** Side note (impact 1): one line with title and date, without description. */
-function CompactItem({ activity, lanes, sameDay }: { activity: Activity; lanes: Lanes; sameDay: SameDay }) {
+function CompactItem({
+  activity,
+  mood,
+  lanes,
+  sameDay,
+}: {
+  activity: Activity
+  mood: Mood | null
+  lanes: Lanes
+  sameDay: SameDay
+}) {
   return (
     <li className="flex items-stretch">
       <LaneColumns lanes={lanes} anchor={14} bubble={28} />
       <div className="flex min-w-0 flex-auto gap-3">
         <Rail sameDay={sameDay.below}>
-          <IconBadge icon={activityIcon(activity.icon).Icon} size={28} shape="circle" tone="subtle" />
+          <IconBadge
+            icon={activityIcon(activity.icon).Icon}
+            size={28}
+            shape="circle"
+            tone="subtle"
+            className={moodRing(mood)}
+          />
         </Rail>
         <div
           className={clsx(
@@ -229,7 +267,10 @@ function CompactItem({ activity, lanes, sameDay }: { activity: Activity; lanes: 
               {activity.name}
             </Link>
           </h4>
-          <span className="text-xs whitespace-nowrap text-muted">{entryDate(activity, sameDay)}</span>
+          <span className="text-xs whitespace-nowrap text-muted">
+            {entryDate(activity, sameDay)}
+            <MoodText mood={mood} />
+          </span>
         </div>
       </div>
     </li>
@@ -238,12 +279,14 @@ function CompactItem({ activity, lanes, sameDay }: { activity: Activity; lanes: 
 
 function TimelineItem({
   entry,
+  moodOf,
   lanes,
   sameDay,
   details,
   today,
 }: {
   entry: TimelineEntry
+  moodOf: (activity: Activity) => Mood | null
   lanes: Lanes
   sameDay: SameDay
   details: EntryDetails
@@ -259,18 +302,28 @@ function TimelineItem({
     entryDate(activity, sameDay) +
     (status === 'planned' ? ' · planned' : status === 'ongoing' ? ' · ongoing' : '')
   const metaColor = planned ? 'text-accent-ink' : look.meta
+  const mood = moodOf(activity)
 
   return (
     <li className="flex items-stretch">
       <LaneColumns lanes={lanes} anchor={look.bubble.size / 2} bubble={look.bubble.size} />
       <div className="flex min-w-0 flex-auto gap-3">
         <Rail sameDay={sameDay.below}>
-          <IconBadge icon={activityIcon(activity.icon).Icon} shape="circle" iconSize={18} {...look.bubble} />
+          <IconBadge
+            icon={activityIcon(activity.icon).Icon}
+            shape="circle"
+            iconSize={18}
+            {...look.bubble}
+            className={moodRing(mood)}
+          />
         </Rail>
 
         <div className={clsx('min-w-0 flex-auto', entryGap(sameDay))}>
           <article className={clsx('relative', planned ? plannedCard : look.card)}>
-            <p className={clsx('text-xs font-medium', metaColor)}>{date}</p>
+            <p className={clsx('text-xs font-medium', metaColor)}>
+              {date}
+              <MoodText mood={mood} />
+            </p>
             <h4 className={planned ? looks[3].title : look.title}>
               <Link to={`/activities/${activity.id}`} className={stretchedLink}>
                 {activity.name}
@@ -306,7 +359,7 @@ function TimelineItem({
                 Reminder on the day
               </p>
             )}
-            {during.length > 0 && <During activities={during} inverted={inverted} />}
+            {during.length > 0 && <During activities={during} moodOf={moodOf} inverted={inverted} />}
           </article>
         </div>
       </div>
@@ -315,7 +368,15 @@ function TimelineItem({
 }
 
 /** Nested events within a range. */
-function During({ activities, inverted }: { activities: Activity[]; inverted: boolean }) {
+function During({
+  activities,
+  moodOf,
+  inverted,
+}: {
+  activities: Activity[]
+  moodOf: (activity: Activity) => Mood | null
+  inverted: boolean
+}) {
   return (
     <div className={clsx('mt-2 flex flex-col gap-1 border-t pt-2.5', inverted ? 'border-on-accent-muted' : 'border-line')}>
       <p
@@ -327,18 +388,28 @@ function During({ activities, inverted }: { activities: Activity[]; inverted: bo
         Meanwhile
       </p>
       <ul>
-        {activities.map((activity) => (
+        {activities.map((activity) => {
+          const mood = moodOf(activity)
+          return (
           <li key={activity.id}>
             <Link
               to={`/activities/${activity.id}`}
               className="relative z-10 flex items-start gap-2.5 rounded-tile-sm py-1.5 text-inherit no-underline focus-visible:outline-2 focus-visible:outline-accent"
             >
-              <IconBadge icon={activityIcon(activity.icon).Icon} size={28} shape="circle" tone="neutral" />
+              {/* No offset: on a card it would show the canvas color */}
+              <IconBadge
+                icon={activityIcon(activity.icon).Icon}
+                size={28}
+                shape="circle"
+                tone="neutral"
+                className={moodRing(mood, false)}
+              />
               <div className="flex min-w-0 flex-auto flex-col gap-0.5">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-md font-semibold">{activity.name}</span>
                   <span className={clsx('text-xs whitespace-nowrap', inverted ? 'text-on-accent-muted' : 'text-muted')}>
                     {formatDayMonth(activity.startDate)}
+                    <MoodText mood={mood} />
                   </span>
                 </div>
                 {activity.description && (
@@ -349,7 +420,8 @@ function During({ activities, inverted }: { activities: Activity[]; inverted: bo
               </div>
             </Link>
           </li>
-        ))}
+          )
+        })}
       </ul>
     </div>
   )
