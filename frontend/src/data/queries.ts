@@ -22,7 +22,7 @@ import type {
   SettingsPatch,
 } from '../domain/model'
 import { type MembershipChange, membershipEffects } from '../domain/groups'
-import { entryDateFor, type LedgerDraft, ledgerChanges } from '../domain/ledger'
+import { entryDateFor, type LedgerDraft, ledgerChanges, type Money, moneyIn } from '../domain/ledger'
 import { openPointChanges, type OpenPointDraft } from '../domain/openPoints'
 import { isSearchQuery } from '../domain/search'
 import { getToday } from '../domain/today'
@@ -127,6 +127,13 @@ export function useAccount() {
 export function useSettings() {
   const repo = useRepository()
   return useQuery({ queryKey: queryKeys.settings, queryFn: () => repo.getSettings() })
+}
+
+/** Amounts in the user's currency. Below `AuthGate`, which waits for the settings. */
+export function useMoney(): Money {
+  const settings = useSettings()
+  // Only before the settings are loaded – same default as the backend
+  return moneyIn(settings.data?.currency ?? 'EUR')
 }
 
 /** The answer holds every setting, so it replaces the cached ones without a refetch. */

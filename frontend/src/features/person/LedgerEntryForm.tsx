@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react'
 import { Button, ChoiceGroup, ConfirmDelete, Field, inputStyles, TextInput } from '../../components/ui'
-import { amountInputText, CURRENCY_SYMBOL, parseAmount, type Payer, payerOf, signedCents } from '../../domain/ledger'
+import { useMoney } from '../../data/queries'
+import { type Payer, payerOf, signedCents } from '../../domain/ledger'
 import type { LedgerEntryInput } from '../../domain/model'
 
 interface Props {
@@ -31,11 +32,12 @@ export function LedgerEntryForm({
   onDelete,
   deleting = false,
 }: Props) {
+  const money = useMoney()
   const isNew = !onDelete
   const prefilled = initial.amountCents !== 0
   // Most entries are money you laid out
   const [payer, setPayer] = useState<Payer>(prefilled ? payerOf(initial.amountCents) : 'you')
-  const [amount, setAmount] = useState(prefilled ? amountInputText(initial.amountCents) : '')
+  const [amount, setAmount] = useState(prefilled ? money.inputText(initial.amountCents) : '')
   const [date, setDate] = useState(initial.date)
   const [note, setNote] = useState(initial.note ?? '')
   const [problem, setProblem] = useState<string | null>(null)
@@ -43,8 +45,8 @@ export function LedgerEntryForm({
 
   function submit(event: FormEvent) {
     event.preventDefault()
-    const cents = parseAmount(amount)
-    const missing = cents === null ? 'Enter an amount, e.g. 12.50.' : !date ? 'Date is missing.' : null
+    const cents = money.parse(amount)
+    const missing = cents === null ? `Enter an amount, e.g. ${money.example}.` : !date ? 'Date is missing.' : null
     setProblem(missing)
     if (missing || cents === null) return
     onSubmit({ amountCents: signedCents(cents, payer), date, note: note.trim() || null, activityId: initial.activityId })
@@ -65,13 +67,13 @@ export function LedgerEntryForm({
         hint={payer === 'you' ? `For ${name}, or back to them.` : `For you, or back to you.`}
       />
 
-      <Field label={`Amount (${CURRENCY_SYMBOL})`} hint={source}>
+      <Field label={`Amount (${money.symbol})`} hint={source}>
         {(id) => (
           <TextInput
             id={id}
             inputMode="decimal"
             autoComplete="off"
-            placeholder="0.00"
+            placeholder={money.placeholder}
             autoFocus={isNew && !prefilled}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}

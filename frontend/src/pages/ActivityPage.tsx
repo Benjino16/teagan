@@ -26,6 +26,7 @@ import {
   useOpenPointsForActivity,
   usePeople,
   useSetOpenPointDone,
+  useMoney,
 } from '../data/queries'
 import { ACTIVITY_IMPACT_LEVELS, activitiesDuring, activityStatus, enclosingActivity, maxImpact } from '../domain/activities'
 import {
@@ -352,6 +353,7 @@ function SourcePoint({ point, person }: { point: OpenPoint; person: Person | und
 }
 
 function SourceLedger({ entries, personById }: { entries: LedgerEntry[]; personById: Map<Id, Person> }) {
+  const money = useMoney()
   return (
     <section aria-labelledby="source-ledger" className="flex flex-col gap-2.5">
       <SectionHeader id="source-ledger" title="Money" />
@@ -368,7 +370,7 @@ function SourceLedger({ entries, personById }: { entries: LedgerEntry[]; personB
                 <MediaRow
                   leading={<Avatar name={person?.name ?? name} photo={person?.photo ?? null} size="md" />}
                   title={name}
-                  subtitle={[entryText(entry.amountCents, name), entry.note].filter(Boolean).join(' · ')}
+                  subtitle={[entryText(entry.amountCents, name, money), entry.note].filter(Boolean).join(' · ')}
                   trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}
                 />
               </Link>

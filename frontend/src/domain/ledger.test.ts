@@ -1,18 +1,23 @@
 import { describe, expect, it } from 'vitest'
 import {
-  amountInputText,
   balanceOf,
   balanceRowText,
   balanceText,
   entryDateFor,
   entryText,
   ledgerChanges,
+  moneyIn,
   overallText,
-  parseAmount,
   settlingCents,
   signedCents,
 } from './ledger'
 import type { LedgerEntry } from './model'
+
+const eur = moneyIn('EUR', 'en')
+const de = moneyIn('EUR', 'de')
+const yen = moneyIn('JPY', 'en')
+/** `Intl` puts a no-break space between amount and symbol in some locales. */
+const plain = (text: string) => text.replace(/\u00a0/g, ' ')
 
 const entry = (id: number, patch: Partial<LedgerEntry> = {}): LedgerEntry => ({
   id,
@@ -34,15 +39,15 @@ describe('balance', () => {
   })
 
   it('says who owes whom, without a sign', () => {
-    expect(balanceText(-700, 'Lena')).toBe('Lena owes you 7 €')
-    expect(balanceText(550, 'Lena')).toBe('You owe Lena 5.50 €')
-    expect(balanceText(0, 'Lena')).toBe('All settled')
+    expect(balanceText(-700, 'Lena', eur)).toBe('Lena owes you €7')
+    expect(balanceText(550, 'Lena', eur)).toBe('You owe Lena €5.50')
+    expect(balanceText(0, 'Lena', eur)).toBe('All settled')
   })
 
   it('names who paid', () => {
-    expect(entryText(-2500, 'Lena')).toBe('You paid 25 €')
-    expect(entryText(123456, 'Lena')).toBe('Lena paid 1,234.56 €')
-    expect(entryText(5, 'Lena')).toBe('Lena paid 0.05 €')
+    expect(entryText(-2500, 'Lena', eur)).toBe('You paid €25')
+    expect(entryText(123456, 'Lena', eur)).toBe('Lena paid €1,234.56')
+    expect(entryText(5, 'Lena', eur)).toBe('Lena paid €0.05')
     expect(signedCents(2500, 'you')).toBe(-2500)
     expect(signedCents(2500, 'them')).toBe(2500)
   })
@@ -52,14 +57,14 @@ describe('overallText', () => {
   const of = (...cents: number[]) => cents.map((balanceCents, i) => ({ personId: i + 1, balanceCents }))
 
   it('nets everyone into one direction', () => {
-    expect(overallText(of(-7000, 3000))).toBe("Overall you're owed 40 €")
-    expect(overallText(of(-2000, 3000))).toBe('Overall you owe 10 €')
-    expect(overallText(of(-3000, 3000))).toBe('Even overall')
+    expect(overallText(of(-7000, 3000), eur)).toBe("Overall you're owed €40")
+    expect(overallText(of(-2000, 3000), eur)).toBe('Overall you owe €10')
+    expect(overallText(of(-3000, 3000), eur)).toBe('Even overall')
   })
 
   it('words a row', () => {
-    expect(balanceRowText(-700)).toBe('owes you 7 €')
-    expect(balanceRowText(550)).toBe('you owe 5.50 €')
+    expect(balanceRowText(-700, eur)).toBe('owes you €7')
+    expect(balanceRowText(550, eur)).toBe('you owe €5.50')
   })
 })
 
@@ -72,26 +77,57 @@ describe('settlingCents', () => {
   })
 })
 
-describe('parseAmount', () => {
+describe('moneyIn', () => {
+  it('writes amounts the way the locale does', () => {
+    expect(plain(de.format(-123456))).toBe('1.234,56 €')
+    expect(plain(de.format(700))).toBe('7 €')
+    expect(plain(moneyIn('CHF', 'en').format(700))).toBe('CHF 7')
+    expect(yen.format(120000)).toBe('¥1,200')
+  })
+
+  it('keeps cents from before a switch to a currency without', () => {
+    expect(yen.format(1250)).toBe('¥12.50')
+    // Three decimals are more than hundredths hold
+    expect(plain(moneyIn('KWD', 'en').format(150))).toBe('KWD 1.50')
+  })
+
+  it('labels the amount field', () => {
+    expect(eur.symbol).toBe('€')
+    expect(moneyIn('CHF', 'en').symbol).toBe('CHF')
+    expect([eur.placeholder, eur.example]).toEqual(['0.00', '12.50'])
+    expect([de.placeholder, de.example]).toEqual(['0,00', '12,50'])
+    expect([yen.placeholder, yen.example]).toEqual(['0', '12'])
+  })
+})
+
+describe('parse', () => {
   it('reads dot and comma, up to two decimals', () => {
-    expect(parseAmount('12')).toBe(1200)
-    expect(parseAmount(' 12.5 ')).toBe(1250)
-    expect(parseAmount('12,50')).toBe(1250)
-    expect(parseAmount('0,05')).toBe(5)
-    expect(parseAmount('12.')).toBe(1200)
-    expect(parseAmount('10000000')).toBe(1_000_000_000)
+    expect(eur.parse('12')).toBe(1200)
+    expect(eur.parse(' 12.5 ')).toBe(1250)
+    expect(eur.parse('12,50')).toBe(1250)
+    expect(eur.parse('0,05')).toBe(5)
+    expect(eur.parse('12.')).toBe(1200)
+    expect(eur.parse('10000000')).toBe(1_000_000_000)
   })
 
   it('rejects anything else', () => {
     for (const text of ['', '0', '0,00', '-5', '+5', '1.234', '1,234,00', '12.345', 'abc', '10000000.01']) {
-      expect(parseAmount(text), text).toBeNull()
+      expect(eur.parse(text), text).toBeNull()
     }
   })
 
+  it('takes no cents for a currency without', () => {
+    expect(yen.parse('1200')).toBe(120000)
+    expect(yen.parse('12.')).toBe(1200)
+    expect(yen.parse('12.5')).toBeNull()
+  })
+
   it('round-trips through the input text', () => {
-    expect(amountInputText(-1250)).toBe('12.50')
-    expect(amountInputText(1200)).toBe('12')
-    expect(parseAmount(amountInputText(-5))).toBe(5)
+    expect(eur.inputText(-1250)).toBe('12.50')
+    expect(de.inputText(-1250)).toBe('12,50')
+    expect(eur.inputText(1200)).toBe('12')
+    expect(eur.parse(eur.inputText(-5))).toBe(5)
+    expect(de.parse(de.inputText(-5))).toBe(5)
   })
 })
 

@@ -4,6 +4,7 @@ import { ActivityPage } from '../pages/ActivityPage'
 import { AppearancePage } from '../pages/AppearancePage'
 import { ArchivedGroupsPage } from '../pages/ArchivedGroupsPage'
 import { ArchivedPeoplePage } from '../pages/ArchivedPeoplePage'
+import { CurrencyPage } from '../pages/CurrencyPage'
 import { EditActivityPage } from '../pages/EditActivityPage'
 import { EditFactPage } from '../pages/EditFactPage'
 import { EditGroupPage } from '../pages/EditGroupPage'
@@ -134,6 +135,7 @@ export const router = createBrowserRouter([
       { path: '/settings/password', element: <ChangePasswordPage />, handle: { fullscreen: true } satisfies RouteHandle },
       { path: '/settings/two-factor', element: <TwoFactorPage />, handle: { fullscreen: true } satisfies RouteHandle },
       { path: '/settings/appearance', element: <AppearancePage />, handle: { fullscreen: true } satisfies RouteHandle },
+      { path: '/settings/currency', element: <CurrencyPage />, handle: { fullscreen: true } satisfies RouteHandle },
       { path: '*', element: <NotFoundPage /> },
     ],
   },

@@ -1,27 +1,73 @@
 import { dayOf, isFullDate } from './dates'
 import type { Balance, Id, IsoDate, LedgerEntry, PartialDate } from './model'
 
-/**
- * Display only, for now – a setting later. Amounts are stored in hundredths of
- * whatever currency this is, so changing it only relabels them.
- */
-export const CURRENCY = 'EUR'
-
 /** Same bound as the backend, either way: 10 million. */
 const MAX_AMOUNT_CENTS = 1_000_000_000
 
-/** `€` for the labels; the code itself if there's no symbol. */
-export const CURRENCY_SYMBOL =
-  new Intl.NumberFormat('en', { style: 'currency', currency: CURRENCY })
-    .formatToParts(0)
-    .find((part) => part.type === 'currency')?.value ?? CURRENCY
-const whole = new Intl.NumberFormat('en', { maximumFractionDigits: 0 })
-const withCents = new Intl.NumberFormat('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+/**
+ * Amounts in one currency, written the way the locale does. Amounts are
+ * hundredths of whatever the currency is, so changing it only relabels them.
+ */
+export interface Money {
+  /** Without sign – the words say who owes whom. Cents only when there are some: `25 €` · `€12.50` · `CHF 7`. */
+  format(cents: number): string
+  /** `€` for the labels; the code itself if there's no symbol. */
+  symbol: string
+  /** For the empty amount field: `0.00` · `0,00` · `0` for a currency without cents (JPY). */
+  placeholder: string
+  /** For hints, in the same shape: `12.50` · `12,50` · `12`. */
+  example: string
+  /**
+   * A typed amount in hundredths: `12`, `12.5`, `12,50` – no cents for a
+   * currency without. `null` if it isn't one, is zero or exceeds the bound.
+   * No sign – who paid is chosen separately.
+   */
+  parse(text: string): number | null
+  /** The amount for the input field, without sign: `12.50` · `12,50` · `12`. */
+  inputText(cents: number): string
+}
 
-/** Without sign – the words say who owes whom. Cents only when there are some: `25 €` · `12.50 €`. */
-export function formatMoney(cents: number): string {
-  const abs = Math.abs(cents)
-  return `${(abs % 100 === 0 ? whole : withCents).format(abs / 100)} ${CURRENCY_SYMBOL}`
+const moneyByKey = new Map<string, Money>()
+
+/** `locale` only for tests – the app uses the browser's. Built once per currency, `Intl` formats aren't cheap. */
+export function moneyIn(currency: string, locale?: string): Money {
+  const key = `${currency} ${locale ?? ''}`
+  let money = moneyByKey.get(key)
+  if (!money) {
+    money = createMoney(currency, locale)
+    moneyByKey.set(key, money)
+  }
+  return money
+}
+
+function createMoney(currency: string, locale: string | undefined): Money {
+  const style = { style: 'currency', currency } as const
+  const whole = new Intl.NumberFormat(locale, { ...style, minimumFractionDigits: 0, maximumFractionDigits: 0 })
+  // Two even where the currency has three (KWD) or none (JPY, cents from before a switch)
+  const withCents = new Intl.NumberFormat(locale, { ...style, minimumFractionDigits: 2, maximumFractionDigits: 2 })
+  // Hundredths can't hold a third digit
+  const decimals = Math.min(2, new Intl.NumberFormat(locale, style).resolvedOptions().maximumFractionDigits ?? 2)
+  const separator = new Intl.NumberFormat(locale).formatToParts(1.5).find((part) => part.type === 'decimal')?.value ?? '.'
+
+  return {
+    format(cents) {
+      const abs = Math.abs(cents)
+      return (abs % 100 === 0 ? whole : withCents).format(abs / 100)
+    },
+    symbol: whole.formatToParts(0).find((part) => part.type === 'currency')?.value ?? currency,
+    placeholder: decimals === 0 ? '0' : `0${separator}00`,
+    example: decimals === 0 ? '12' : `12${separator}50`,
+    parse(text) {
+      const match = /^(\d+)(?:[.,](\d{0,2}))?$/.exec(text.trim())
+      if (!match || (match[2] ?? '').length > decimals) return null
+      const cents = Number(match[1]) * 100 + Number((match[2] ?? '').padEnd(2, '0'))
+      return cents > 0 && cents <= MAX_AMOUNT_CENTS ? cents : null
+    },
+    inputText(cents) {
+      const abs = Math.abs(cents)
+      return abs % 100 === 0 ? String(abs / 100) : (abs / 100).toFixed(2).replace('.', separator)
+    },
+  }
 }
 
 /** Below zero they owe you, above zero you owe them. */
@@ -30,9 +76,9 @@ export function balanceOf(entries: LedgerEntry[]): number {
 }
 
 /** `Lena owes you 7 €` · `You owe Lena 5.50 €` · `All settled`. */
-export function balanceText(balance: number, name: string): string {
-  if (balance < 0) return `${name} owes you ${formatMoney(balance)}`
-  if (balance > 0) return `You owe ${name} ${formatMoney(balance)}`
+export function balanceText(balance: number, name: string, money: Money): string {
+  if (balance < 0) return `${name} owes you ${money.format(balance)}`
+  if (balance > 0) return `You owe ${name} ${money.format(balance)}`
   return 'All settled'
 }
 
@@ -41,16 +87,16 @@ export function balanceText(balance: number, name: string): string {
  * `Overall you're owed 40 €` · `Overall you owe 10 €` · `Even overall` – the
  * last isn't “settled”, there is still money open with each of them.
  */
-export function overallText(balances: Balance[]): string {
+export function overallText(balances: Balance[], money: Money): string {
   const net = balances.reduce((sum, b) => sum + b.balanceCents, 0)
-  if (net < 0) return `Overall you're owed ${formatMoney(net)}`
-  if (net > 0) return `Overall you owe ${formatMoney(net)}`
+  if (net < 0) return `Overall you're owed ${money.format(net)}`
+  if (net > 0) return `Overall you owe ${money.format(net)}`
   return 'Even overall'
 }
 
 /** For a row that already names the person: `owes you 7 €` · `you owe 5.50 €`. */
-export function balanceRowText(balance: number): string {
-  return balance < 0 ? `owes you ${formatMoney(balance)}` : `you owe ${formatMoney(balance)}`
+export function balanceRowText(balance: number, money: Money): string {
+  return balance < 0 ? `owes you ${money.format(balance)}` : `you owe ${money.format(balance)}`
 }
 
 /** Who paid: you (negative amount) or the other person (positive). */
@@ -66,25 +112,8 @@ export function signedCents(cents: number, payer: Payer): number {
 }
 
 /** `You paid 25 €` · `Lena paid 25 €`. */
-export function entryText(cents: number, name: string): string {
-  return `${payerOf(cents) === 'you' ? 'You' : name} paid ${formatMoney(cents)}`
-}
-
-/**
- * A typed amount in hundredths: `12`, `12.5`, `12,50`. `null` if it isn't one,
- * is zero or exceeds the bound. No sign – who paid is chosen separately.
- */
-export function parseAmount(text: string): number | null {
-  const match = /^(\d+)(?:[.,](\d{0,2}))?$/.exec(text.trim())
-  if (!match) return null
-  const cents = Number(match[1]) * 100 + Number((match[2] ?? '').padEnd(2, '0'))
-  return cents > 0 && cents <= MAX_AMOUNT_CENTS ? cents : null
-}
-
-/** The amount for the input field, without sign: `12.50` · `12`. */
-export function amountInputText(cents: number): string {
-  const abs = Math.abs(cents)
-  return abs % 100 === 0 ? String(abs / 100) : (abs / 100).toFixed(2)
+export function entryText(cents: number, name: string, money: Money): string {
+  return `${payerOf(cents) === 'you' ? 'You' : name} paid ${money.format(cents)}`
 }
 
 /** The entry that brings the balance to zero: whoever owes pays it back. */

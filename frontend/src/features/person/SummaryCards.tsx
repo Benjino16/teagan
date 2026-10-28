@@ -4,6 +4,7 @@ import { Card, cardStyles, IconBadge, MediaRow, ProgressBar } from '../../compon
 import { ongoingActivities, upcomingActivities } from '../../domain/activities'
 import { birthdayCardText, nextBirthday } from '../../domain/birthday'
 import { reconnectStatus } from '../../domain/contact'
+import { useMoney } from '../../data/queries'
 import { balanceOf, balanceText } from '../../domain/ledger'
 import type { Activity, IsoDate, LedgerEntry, Person } from '../../domain/model'
 import { displayName, isContactPaused } from '../../domain/people'
@@ -21,6 +22,7 @@ interface Props {
 
 /** Cards below the header: reconnect, birthday, balance, death anniversary, currently, coming up. */
 export function SummaryCards({ person, activities, ledger, daysSinceContact, today }: Props) {
+  const money = useMoney()
   const nextBday = person.birthday ? nextBirthday(person.birthday, today) : null
   const birthday = nextBday && birthdayCardText(nextBday, person.deceased)
   const nextAnniversary = person.diedOn ? nextDeathAnniversary(person.diedOn, today) : null
@@ -44,7 +46,7 @@ export function SummaryCards({ person, activities, ledger, daysSinceContact, tod
         <Link to={`/people/${person.id}/money`} className={`${cardStyles()} block no-underline hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`}>
           <MediaRow
             leading={<IconBadge icon={HandCoins} />}
-            title={balanceText(balance, displayName(person))}
+            title={balanceText(balance, displayName(person), money)}
             subtitle={`${ledger.length} ${ledger.length === 1 ? 'entry' : 'entries'}`}
             trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}
           />

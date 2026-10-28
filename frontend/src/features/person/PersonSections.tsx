@@ -2,6 +2,7 @@ import { BookOpen, ChevronRight, HandCoins, History } from 'lucide-react'
 import { Link } from 'react-router'
 import { IconBadge, ListCard, listRowStyles, MediaRow } from '../../components/ui'
 import { milestones } from '../../domain/activities'
+import { useMoney } from '../../data/queries'
 import { balanceOf, balanceText } from '../../domain/ledger'
 import { displayName } from '../../domain/people'
 import type { PersonViewData } from './usePersonView'
@@ -19,20 +20,21 @@ interface Props {
 /** Entry points to the Timeline, Knowledge and Money subpages. */
 export function PersonSections({ data, onlyMoney = false }: Props) {
   const { person, activities, facts, ledger } = data
+  const money = useMoney()
   const firstYear = activities.reduce<string | null>(
     (min, a) => (min === null || a.startDate < min ? a.startDate : min),
     null,
   )
   const lifeEvents = milestones(activities, person.id).length
 
-  const money = {
+  const moneySection = {
     to: `/people/${person.id}/money`,
     icon: HandCoins,
     title: 'Money',
-    subtitle: ledger.length === 0 ? 'No entries' : balanceText(balanceOf(ledger), displayName(person)),
+    subtitle: ledger.length === 0 ? 'No entries' : balanceText(balanceOf(ledger), displayName(person), money),
   }
   // No money with yourself
-  const sections = onlyMoney ? (person.isSelf ? [] : [money]) : [
+  const sections = onlyMoney ? (person.isSelf ? [] : [moneySection]) : [
     {
       to: `/people/${person.id}/timeline`,
       icon: History,
@@ -48,7 +50,7 @@ export function PersonSections({ data, onlyMoney = false }: Props) {
         count(facts.length, 'note', 'notes') +
         (lifeEvents > 0 ? ` · ${count(lifeEvents, 'milestone', 'milestones')}` : ''),
     },
-    ...(person.isSelf ? [] : [money]),
+    ...(person.isSelf ? [] : [moneySection]),
   ]
   if (sections.length === 0) return null
 

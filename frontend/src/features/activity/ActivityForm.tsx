@@ -3,7 +3,8 @@ import { type FormEvent, useRef, useState } from 'react'
 import { Button, Field, IconButton, inputStyles, RatingInput, Switch, TextButton, TextInput } from '../../components/ui'
 import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
 import { joinPartialDate, splitPartialDate } from '../../domain/dates'
-import { amountInputText, type LedgerDraft, parseAmount, payerOf, signedCents } from '../../domain/ledger'
+import { useMoney } from '../../data/queries'
+import { type LedgerDraft, payerOf, signedCents } from '../../domain/ledger'
 import type {
   ActivityGroup,
   ActivityInput,
@@ -53,6 +54,7 @@ export function ActivityForm({
   error,
   onSubmit,
 }: Props) {
+  const money = useMoney()
   const [name, setName] = useState(initial.name)
   const [icon, setIcon] = useState(initial.icon)
   const [start, setStart] = useState(() => splitPartialDate(initial.startDate))
@@ -81,7 +83,7 @@ export function ActivityForm({
         id: e.id,
         personId: e.personId,
         payer: payerOf(e.amountCents),
-        amount: amountInputText(e.amountCents),
+        amount: money.inputText(e.amountCents),
       })),
   )
   const nextKey = useRef(0)
@@ -127,7 +129,7 @@ export function ActivityForm({
     const result: LedgerDraft[] = []
     for (const row of ledger) {
       if (!row.amount.trim()) continue
-      const cents = parseAmount(row.amount)
+      const cents = money.parse(row.amount)
       const personId = row.personId ?? fallback
       if (cents === null || personId === null) return null
       result.push({ id: row.id, personId, amountCents: signedCents(cents, row.payer) })

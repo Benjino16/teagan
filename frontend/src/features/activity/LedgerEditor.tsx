@@ -1,6 +1,7 @@
 import { Plus, X } from 'lucide-react'
 import { Button, IconButton, inputStyles, TextInput } from '../../components/ui'
-import { CURRENCY_SYMBOL, type Payer } from '../../domain/ledger'
+import { useMoney } from '../../data/queries'
+import type { Payer } from '../../domain/ledger'
 import type { Id, Person } from '../../domain/model'
 import { displayName } from '../../domain/people'
 
@@ -26,6 +27,7 @@ interface Props {
 
 /** Who paid what at the event. Each row is an entry with one person. */
 export function LedgerEditor({ rows, onChange, candidates, personById, newKey }: Props) {
+  const money = useMoney()
   const candidateIds = new Set(candidates.map((p) => p.id))
 
   function update(key: string, patch: Partial<LedgerRow>) {
@@ -49,9 +51,9 @@ export function LedgerEditor({ rows, onChange, candidates, personById, newKey }:
           <div key={row.key} className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
               <TextInput
-                aria-label={`Amount (${CURRENCY_SYMBOL})`}
+                aria-label={`Amount (${money.symbol})`}
                 inputMode="decimal"
-                placeholder="0.00"
+                placeholder={money.placeholder}
                 autoComplete="off"
                 // New rows come from “Add money”
                 autoFocus={row.id === null && row.amount === ''}

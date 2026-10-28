@@ -2,6 +2,7 @@ import { clsx } from 'clsx'
 import { HandCoins } from 'lucide-react'
 import { Link } from 'react-router'
 import { Avatar, cardStyles, IconBadge, listRowStyles, MediaRow, ShowMore, usePreview } from '../../components/ui'
+import { useMoney } from '../../data/queries'
 import { balanceRowText, overallText } from '../../domain/ledger'
 import type { Balance, Id, Person } from '../../domain/model'
 import { TODAY_PREVIEW } from './preview'
@@ -14,6 +15,7 @@ interface Props {
 
 /** Everyone with money open on “Today”, with the overall direction on top. */
 export function BalancesBox({ balances, personById }: Props) {
+  const money = useMoney()
   const rows = balances.flatMap((b) => {
     const person = personById.get(b.personId)
     return person ? [{ person, balance: b.balanceCents }] : []
@@ -29,7 +31,7 @@ export function BalancesBox({ balances, personById }: Props) {
           Money
         </h2>
       </div>
-      <p className="px-4 pt-1 pb-3 text-md font-medium text-ink-2">{overallText(balances)}</p>
+      <p className="px-4 pt-1 pb-3 text-md font-medium text-ink-2">{overallText(balances, money)}</p>
       <ul className="divide-y divide-divider border-t border-divider">
         {preview.shown.map(({ person, balance }) => (
           <li key={person.id}>
@@ -40,7 +42,7 @@ export function BalancesBox({ balances, personById }: Props) {
               <MediaRow
                 leading={<Avatar name={person.name} photo={person.photo} size="md" />}
                 title={person.name}
-                subtitle={balanceRowText(balance)}
+                subtitle={balanceRowText(balance, money)}
               />
             </Link>
           </li>
