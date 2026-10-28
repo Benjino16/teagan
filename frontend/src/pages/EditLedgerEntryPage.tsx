@@ -4,6 +4,7 @@ import { PageHeader } from '../components/layout/PageHeader'
 import { PageError, PageLoading } from '../components/layout/PageStatus'
 import { useActivity, useDeleteLedgerEntry, useLedgerEntries, usePerson, useUpdateLedgerEntry } from '../data/queries'
 import { formatDateRange } from '../domain/dates'
+import { getToday } from '../domain/today'
 import { displayName } from '../domain/people'
 import { LedgerEntryForm } from '../features/person/LedgerEntryForm'
 
@@ -41,7 +42,7 @@ export function EditLedgerEntryPage() {
             initial={entry}
             name={displayName(person.data)}
             source={
-              source.data ? `from ${source.data.name} · ${formatDateRange(source.data.startDate, source.data.endDate)}` : undefined
+              source.data ? `from ${source.data.name} · ${formatDateRange(source.data.startDate, source.data.endDate, getToday())}` : undefined
             }
             submitLabel="Save"
             submitting={updateEntry.isPending}

@@ -1,7 +1,7 @@
 import { ChevronRight, HandCoins } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { Button, Card, EmptyState, IconBadge, ListCard, listRowStyles, MediaRow, SectionHeader } from '../../components/ui'
-import { formatDateRangeWithYear, formatDayMonth, yearOf } from '../../domain/dates'
+import { formatDate, formatDateRangeWithYear, yearOf } from '../../domain/dates'
 import { useMoney } from '../../data/queries'
 import { balanceOf, balanceText, entryText, settlingCents } from '../../domain/ledger'
 import { displayName } from '../../domain/people'
@@ -42,7 +42,7 @@ export function PersonMoney({ data }: { data: PersonViewData }) {
         ) : (
           <ListCard>
             {ledger.map((entry) => {
-              const date = yearOf(entry.date) === yearOf(today) ? formatDayMonth(entry.date) : formatDateRangeWithYear(entry.date, null)
+              const date = yearOf(entry.date) === yearOf(today) ? formatDate(entry.date, today) : formatDateRangeWithYear(entry.date, null, today)
               const source = entry.activityId === null ? undefined : activityById.get(entry.activityId)
               return (
                 <li key={entry.id}>

@@ -11,7 +11,7 @@ import type { PersonViewData } from './usePersonView'
 
 /** Knowledge fields and derived milestones. */
 export function PersonKnowledge({ data }: { data: PersonViewData }) {
-  const { person, facts, activities } = data
+  const { person, facts, activities, today } = data
   const lifeEvents = milestones(activities, person.id)
   const reorder = useReorderFacts(person.id)
   const [sorting, setSorting] = useState(false)
@@ -70,7 +70,7 @@ export function PersonKnowledge({ data }: { data: PersonViewData }) {
                   <IconBadge icon={activityIcon(activity.icon).Icon} size={36} shape="circle" tone="accent" />
                   <span className="min-w-0 flex-auto text-base font-semibold">{activity.name}</span>
                   <span className="flex-none text-sm whitespace-nowrap text-muted">
-                    {formatDateRange(activity.startDate, activity.endDate)}
+                    {formatDateRange(activity.startDate, activity.endDate, today)}
                   </span>
                 </Link>
               </li>

@@ -122,12 +122,23 @@ function withTime(text: string, date: PartialDate): string {
   return time ? `${text}, ${time}` : text
 }
 
-/** By precision: `2024` · `May 2025` · `Mar 14` · `Mar 14, 20:00`. */
-export function formatDate(date: PartialDate): string {
+const RELATIVE_DAY_NAMES: Record<number, string> = { [-1]: 'Yesterday', 0: 'Today', 1: 'Tomorrow' }
+
+/** `Yesterday` · `Today` · `Tomorrow` for a full date (time ignored) next to today, otherwise `null`. */
+export function relativeDayName(date: PartialDate, today: IsoDate): string | null {
+  const day = dayOf(date)
+  return isFullDate(day) ? (RELATIVE_DAY_NAMES[daysBetween(today, day)] ?? null) : null
+}
+
+/**
+ * By precision: `2024` · `May 2025` · `Mar 14` · `Mar 14, 20:00`.
+ * With `today`, a full date next to it reads `Yesterday` · `Today, 20:00` · `Tomorrow`.
+ */
+export function formatDate(date: PartialDate, today?: IsoDate): string {
   const { year, month } = parts(date)
   switch (precisionOf(date)) {
     case 'day':
-      return withTime(formatDayMonth(date), date)
+      return withTime((today && relativeDayName(date, today)) || formatDayMonth(date), date)
     case 'month':
       return `${MONTHS_SHORT[month - 1]} ${year}`
     case 'year':
@@ -135,9 +146,9 @@ export function formatDate(date: PartialDate): string {
   }
 }
 
-/** Date or range: `Aug 8–10` · `Feb 3 – Apr 18` · `Sep 8 – Dec 2026`. */
-export function formatDateRange(start: PartialDate, end: PartialDate | null): string {
-  if (!end) return formatDate(start)
+/** Date or range: `Aug 8–10` · `Feb 3 – Apr 18` · `Sep 8 – Dec 2026`. `today` as in `formatDate`, for single dates only. */
+export function formatDateRange(start: PartialDate, end: PartialDate | null, today?: IsoDate): string {
+  if (!end) return formatDate(start, today)
   if (isFullDate(start) && isFullDate(end)) {
     if (start.slice(0, 7) === end.slice(0, 7)) {
       return `${formatDayMonth(start)}–${parts(end).day}`
@@ -218,13 +229,17 @@ export function dateOfTimestamp(timestamp: string): IsoDate {
   return timestamp.slice(0, 10)
 }
 
-function withYear(date: PartialDate): string {
+function withYear(date: PartialDate, today?: IsoDate): string {
+  if (today && relativeDayName(date, today)) return formatDate(date, today)
   return precisionOf(date) === 'day' ? withTime(`${formatDayMonth(date)}, ${yearOf(date)}`, date) : formatDate(date)
 }
 
-/** With year, for views without year dividers: `Oct 17–24, 2026` · `Dec 28, 2025 – Jan 3, 2026`. */
-export function formatDateRangeWithYear(start: PartialDate, end: PartialDate | null): string {
-  if (!end) return withYear(start)
+/**
+ * With year, for views without year dividers: `Oct 17–24, 2026` · `Dec 28, 2025 – Jan 3, 2026`.
+ * `today` as in `formatDate`, for single dates only.
+ */
+export function formatDateRangeWithYear(start: PartialDate, end: PartialDate | null, today?: IsoDate): string {
+  if (!end) return withYear(start, today)
   if (isFullDate(start) && isFullDate(end) && yearOf(start) === yearOf(end)) {
     return `${formatDateRange(start, end)}, ${yearOf(end)}`
   }
