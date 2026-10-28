@@ -3,6 +3,7 @@ import { type FormEvent, useRef, useState } from 'react'
 import { Button, Field, IconButton, inputStyles, RatingInput, Switch, TextButton, TextInput } from '../../components/ui'
 import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
 import { joinPartialDate, splitPartialDate } from '../../domain/dates'
+import { membersToAdd } from '../../domain/groups'
 import { useMoney } from '../../data/queries'
 import { type LedgerDraft, payerOf, signedCents } from '../../domain/ledger'
 import type {
@@ -10,8 +11,10 @@ import type {
   ActivityInput,
   ActivityParticipant,
   Group,
+  Id,
   Impact,
   LedgerEntry,
+  Membership,
   OpenPoint,
   Person,
 } from '../../domain/model'
@@ -31,6 +34,7 @@ interface Props {
   /** All people except yourself. */
   people: Person[]
   groups: Group[]
+  memberships: Membership[]
   /** The event's existing open points (when editing). */
   initialPoints?: OpenPoint[]
   /** The event's existing money entries (when editing). */
@@ -47,6 +51,7 @@ export function ActivityForm({
   self,
   people,
   groups,
+  memberships,
   initialPoints = [],
   initialLedger = [],
   submitLabel,
@@ -70,6 +75,8 @@ export function ActivityForm({
     ...initial.participants.filter((p) => p.personId !== self.id),
   ])
   const [groupLinks, setGroupLinks] = useState<ActivityGroup[]>(initial.groups)
+  // Only right after “Add all members”: any other change of the participants drops the undo
+  const [addedMembers, setAddedMembers] = useState<{ groupId: Id; personIds: Id[] } | null>(null)
   const [points, setPoints] = useState<OpenPointRow[]>(() =>
     [...initialPoints]
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id - b.id)
@@ -98,11 +105,38 @@ export function ActivityForm({
   })
 
   /** Removing a participant drops their new points and entries; existing ones stay with the person. */
-  function changeParticipants(next: ActivityParticipant[]) {
+  function applyParticipants(next: ActivityParticipant[]) {
     const ids = new Set(next.map((p) => p.personId))
     setParticipants(next)
     setPoints((rows) => rows.filter((r) => r.id !== null || r.personId === null || ids.has(r.personId)))
     setLedger((rows) => rows.filter((r) => r.id !== null || r.personId === null || ids.has(r.personId)))
+  }
+
+  function changeParticipants(next: ActivityParticipant[]) {
+    setAddedMembers(null)
+    applyParticipants(next)
+  }
+
+  const participantIds = new Set(participants.map((p) => p.personId))
+  const missingMembers = (groupId: Id) => membersToAdd(groupId, groups, memberships, people, participantIds)
+
+  function addMembers(groupId: Id) {
+    const added = missingMembers(groupId).map((p) => p.id)
+    applyParticipants([...participants, ...added.map((personId) => ({ personId, impact: null, note: null }))])
+    setAddedMembers({ groupId, personIds: added })
+  }
+
+  /** Takes out exactly who the click added – people who were there before stay. */
+  function undoAddMembers() {
+    if (!addedMembers) return
+    const added = new Set(addedMembers.personIds)
+    applyParticipants(participants.filter((p) => !added.has(p.personId)))
+    setAddedMembers(null)
+  }
+
+  function changeGroupLinks(next: ActivityGroup[]) {
+    if (addedMembers && !next.some((l) => l.groupId === addedMembers.groupId)) setAddedMembers(null)
+    setGroupLinks(next)
   }
 
   /** The sole other participant is the default for points without a person. */
@@ -252,7 +286,19 @@ export function ActivityForm({
         impact={impact}
       />
 
-      <GroupPicker groups={groups} links={groupLinks} onChange={setGroupLinks} impact={impact} />
+      <GroupPicker
+        groups={groups}
+        links={groupLinks}
+        onChange={changeGroupLinks}
+        impact={impact}
+        members={(groupId) => ({
+          missing: missingMembers(groupId).length,
+          all: membersToAdd(groupId, groups, memberships, people, new Set()).length,
+        })}
+        added={addedMembers && { groupId: addedMembers.groupId, count: addedMembers.personIds.length }}
+        onAddMembers={addMembers}
+        onUndoAddMembers={undoAddMembers}
+      />
 
       <OpenPointsEditor
         rows={points}

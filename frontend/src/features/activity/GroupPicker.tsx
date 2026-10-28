@@ -10,11 +10,13 @@ import {
   listRowStyles,
   MediaRow,
   RatingInput,
+  TextButton,
   TextInput,
   useAddSearch,
   useListNavigation,
 } from '../../components/ui'
 import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
+import { pluralize } from '../../domain/dates'
 import { groupPath, isGroupArchived } from '../../domain/groups'
 import type { ActivityGroup, Group, Id, Impact } from '../../domain/model'
 import { matchesSearch } from '../../domain/search'
@@ -28,13 +30,20 @@ interface Props {
   onChange: (links: ActivityGroup[]) => void
   /** Impact of the event – applies to every group without its own value. */
   impact: Impact
+  /** Members not yet taking part, and all of them (subgroups included, without archived or deceased). */
+  members: (groupId: Id) => { missing: number; all: number }
+  /** The last “Add all members” while it can still be undone. */
+  added: { groupId: Id; count: number } | null
+  onAddMembers: (groupId: Id) => void
+  onUndoAddMembers: () => void
 }
 
 /**
  * Groups the event belongs to, like the participants: the chevron expands a
  * per-group impact that overrides the event's and a note for this group only.
+ * Below each group, its missing members can be added at once.
  */
-export function GroupPicker({ groups, links, onChange, impact }: Props) {
+export function GroupPicker({ groups, links, onChange, impact, members, added, onAddMembers, onUndoAddMembers }: Props) {
   const [expanded, setExpanded] = useState<Id | null>(null)
   const { query, pick, inputProps } = useAddSearch((group: Group) =>
     onChange([...links, { groupId: group.id, impact: null, note: null }]),
@@ -76,6 +85,10 @@ export function GroupPicker({ groups, links, onChange, impact }: Props) {
               onImpactChange={(value) => update(link.groupId, { impact: value })}
               onNoteChange={(value) => update(link.groupId, { note: value })}
               onRemove={() => onChange(links.filter((l) => l.groupId !== link.groupId))}
+              members={members(link.groupId)}
+              added={added?.groupId === link.groupId ? added.count : null}
+              onAddMembers={() => onAddMembers(link.groupId)}
+              onUndoAddMembers={onUndoAddMembers}
             />
           ))}
         </ListCard>
@@ -127,9 +140,28 @@ interface RowProps {
   onImpactChange: (value: Impact | null) => void
   onNoteChange: (value: string) => void
   onRemove: () => void
+  members: { missing: number; all: number }
+  /** How many the last “Add all members” of this group added, while it can be undone. */
+  added: number | null
+  onAddMembers: () => void
+  onUndoAddMembers: () => void
 }
 
-function GroupRow({ name, override, impact, note, open, onToggle, onImpactChange, onNoteChange, onRemove }: RowProps) {
+function GroupRow({
+  name,
+  override,
+  impact,
+  note,
+  open,
+  onToggle,
+  onImpactChange,
+  onNoteChange,
+  onRemove,
+  members,
+  added,
+  onAddMembers,
+  onUndoAddMembers,
+}: RowProps) {
   const panelId = useId()
 
   return (
@@ -165,6 +197,25 @@ function GroupRow({ name, override, impact, note, open, onToggle, onImpactChange
           )}
         </MediaRow>
       </button>
+
+      {/* Lined up with the name, past the icon */}
+      {added !== null ? (
+        <div className="-mt-2 flex items-center gap-1 pr-4 pb-1.5 pl-18">
+          <span className="text-sm text-muted">Added {pluralize(added, 'member')}</span>
+          <TextButton onClick={onUndoAddMembers}>Undo</TextButton>
+        </div>
+      ) : (
+        members.missing > 0 && (
+          <div className="-mt-2 pr-4 pb-1.5 pl-16">
+            <TextButton onClick={onAddMembers} className="flex items-center gap-1">
+              <Plus aria-hidden="true" size={16} />
+              {members.missing === members.all && members.all > 1
+                ? `Add all ${members.all} members`
+                : `Add ${pluralize(members.missing, 'member')}`}
+            </TextButton>
+          </div>
+        )
+      )}
 
       {open && (
         <div id={panelId} className="flex flex-col gap-3 px-4 pb-4">

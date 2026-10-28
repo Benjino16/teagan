@@ -124,6 +124,17 @@ export function upcomingActivities(activities: Activity[], today: IsoDate, limit
     .slice(0, limit)
 }
 
+/**
+ * “Recently” on the person page: everything the person took part in, with or without you,
+ * that is over – today's and ongoing ones are shown above. Newest first.
+ */
+export function recentActivities(activities: Activity[], personId: Id, today: IsoDate, limit = 3): Activity[] {
+  return activities
+    .filter((a) => hasParticipant(a, personId) && !isFuture(a, today) && !isToday(a, today) && !isOngoing(a, today))
+    .sort(byStartDesc)
+    .slice(0, limit)
+}
+
 /** Activities with at least one person other than you, or a group – what Today shows. */
 function withOthers(activities: Activity[], selfId: Id): Activity[] {
   return activities.filter((a) => a.groups.length > 0 || a.participants.some((p) => p.personId !== selfId))

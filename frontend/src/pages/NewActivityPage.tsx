@@ -1,7 +1,7 @@
 import { useNavigate, useSearchParams } from 'react-router'
 import { PageHeader } from '../components/layout/PageHeader'
 import { PageError, PageLoading } from '../components/layout/PageStatus'
-import { useGroups, useCreateActivity, usePeople, useSelf } from '../data/queries'
+import { useGroups, useCreateActivity, useMemberships, usePeople, useSelf } from '../data/queries'
 import type { ActivityInput } from '../domain/model'
 import { getToday } from '../domain/today'
 import { ActivityForm } from '../features/activity/ActivityForm'
@@ -14,18 +14,21 @@ export function NewActivityPage() {
   const self = useSelf()
   const people = usePeople()
   const groups = useGroups()
+  const memberships = useMemberships()
   const createActivity = useCreateActivity()
 
   const personId = Number(params.get('person')) || null
   const groupId = Number(params.get('group')) || null
   const backTo = personId ? `/people/${personId}` : groupId ? `/groups/${groupId}/timeline` : '/'
 
-  if (self.isError || people.isError || groups.isError) return <PageError message="Couldn't load data." backTo={backTo} />
+  if (self.isError || people.isError || groups.isError || memberships.isError) {
+    return <PageError message="Couldn't load data." backTo={backTo} />
+  }
 
   return (
     <>
       <PageHeader title="New event" backTo={backTo} />
-      {!self.data || !people.data || !groups.data ? (
+      {!self.data || !people.data || !groups.data || !memberships.data ? (
         <PageLoading />
       ) : (
         <div className="px-5 pt-6">
@@ -38,6 +41,7 @@ export function NewActivityPage() {
             self={self.data}
             people={people.data.filter((p) => !p.isSelf)}
             groups={groups.data}
+            memberships={memberships.data}
             submitLabel="Create event"
             submitting={createActivity.isPending}
             error={createActivity.error?.message ?? null}

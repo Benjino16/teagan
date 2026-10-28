@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { createTestDatabase } from '../test/fixture'
+import type { Activity } from './model'
 import {
   contacts,
+  coveringActivity,
   daysSinceContact,
   dueReconnects,
   lastContactDate,
@@ -90,6 +92,58 @@ describe('dueReconnects', () => {
     const due = dueReconnects(people, db.activities, SELF, today)
     expect(due.map((r) => r.person.name)).toEqual(['Lena Hoffmann'])
   })
+})
+
+describe('covered reconnects', () => {
+  const LENA = 2
+  const MIRA = 4
+  const planned = (id: number, startDate: string, personIds: number[] = [SELF, LENA]): Activity => ({
+    ...db.activities[0]!,
+    id,
+    name: 'Dinner',
+    startDate,
+    endDate: null,
+    participants: personIds.map((personId) => ({ personId, impact: null, note: null })),
+  })
+  const covered = (list: Activity[]) => coveringActivity([...db.activities, ...list], LENA, SELF, 28, 21, today)?.id ?? null
+
+  it('covers a due reconnect with a planned activity before it or within a third of the rhythm', () => {
+    // Lena: due in 7 days, rhythm 28 → covered up to 7 + 9⅓ days ahead
+    expect(covered([planned(401, '2026-10-16')])).toBe(401)
+    expect(covered([planned(402, '2026-10-29')])).toBe(402)
+    expect(covered([planned(403, '2026-10-30')])).toBeNull()
+  })
+
+  it('only takes the next one, and only with you, the person and a full date', () => {
+    expect(covered([planned(404, '2027-02-01'), planned(405, '2026-10-20')])).toBe(405)
+    expect(covered([planned(406, '2026-10-16', [LENA])])).toBeNull()
+    expect(covered([planned(407, '2026-10-16', [SELF])])).toBeNull()
+    expect(covered([planned(408, '2026-10')])).toBeNull()
+    expect(covered([planned(409, '2026-10-12')])).toBeNull()
+  })
+
+  it('counts already overdue as due today', () => {
+    // 6 weeks since, rhythm 4 weeks: a dinner tomorrow covers it, one in 10 days doesn't
+    const overdue = (startDate: string) => coveringActivity([planned(415, startDate)], LENA, SELF, 28, 42, today)?.id ?? null
+    expect(overdue('2026-10-14')).toBe(415)
+    expect(overdue('2026-10-22')).toBe(415)
+    expect(overdue('2026-10-23')).toBeNull()
+  })
+
+  it('counts never contacted as due today', () => {
+    const list = [planned(410, '2026-10-22'), planned(411, '2026-10-23')]
+    expect(coveringActivity(list.slice(0, 1), LENA, SELF, 28, null, today)?.id).toBe(410)
+    expect(coveringActivity(list.slice(1), LENA, SELF, 28, null, today)).toBeNull()
+  })
+
+  it('hides covered reconnects on Today only when asked', () => {
+    // Mira is overdue with a 14-day rhythm: covered within 4⅔ days from today
+    const list = [...db.activities, planned(412, '2026-10-16'), planned(413, '2026-10-18', [SELF, MIRA])]
+    const names = (hideCovered: boolean) => dueReconnects(db.people, list, SELF, today, { hideCovered }).map((r) => r.person.name)
+    expect(names(false)).toEqual(['Mira Schulz', 'Lena Hoffmann'])
+    expect(names(true)).toEqual(['Mira Schulz'])
+  })
+
 })
 
 describe('reconnectRowText', () => {
