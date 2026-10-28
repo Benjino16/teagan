@@ -1,4 +1,4 @@
-import { byStartDesc, hasParticipant } from './activities'
+import { byStartAsc, byStartDesc, hasParticipant, isFuture } from './activities'
 import { dayOf, daysBetween, formatRelativePast, formatRhythm, isFullDate, pluralize } from './dates'
 import type { Activity, Id, IsoDate, Person } from './model'
 import { isContactPaused } from './people'
@@ -94,10 +94,44 @@ export function daysSinceContact(lastContact: IsoDate | null, today: IsoDate): n
 /** Reconnects on “Today”: overdue or at most this many days left. */
 export const RECONNECT_WINDOW_DAYS = 7
 
+/** A planned activity covers a reconnect if it is overdue by at most this share of the rhythm by then. */
+const COVER_TOLERANCE = 1 / 3
+
+/**
+ * The next planned activity with you and the person that makes the reconnect unnecessary:
+ * full date, and on that day overdue by at most a third of the rhythm. Already overdue or never
+ * contacted counts as due today – meeting soon is all you can still do. `null` if there is none:
+ * a vacation in four months doesn't cover a reconnect now.
+ */
+export function coveringActivity(
+  activities: Activity[],
+  personId: Id,
+  selfId: Id,
+  rhythmDays: number,
+  daysSince: number | null,
+  today: IsoDate,
+): Activity | null {
+  const remaining = daysSince === null ? 0 : Math.max(rhythmDays - daysSince, 0)
+  const next = activities
+    .filter(
+      (a) =>
+        isFullDate(dayOf(a.startDate)) && isFuture(a, today) && hasParticipant(a, personId) && hasParticipant(a, selfId),
+    )
+    .sort(byStartAsc)[0]
+  if (!next) return null
+  return daysBetween(today, dayOf(next.startDate)) <= remaining + rhythmDays * COVER_TOLERANCE ? next : null
+}
+
 export interface DueReconnect {
   person: Person
   status: ReconnectStatus
   daysSince: number | null
+}
+
+export interface DueReconnectOptions {
+  /** Leave out reconnects a planned activity covers (`coveringActivity`). */
+  hideCovered?: boolean
+  withinDays?: number
 }
 
 /**
@@ -109,14 +143,16 @@ export function dueReconnects(
   activities: Activity[],
   selfId: Id,
   today: IsoDate,
-  withinDays: number = RECONNECT_WINDOW_DAYS,
+  { hideCovered = false, withinDays = RECONNECT_WINDOW_DAYS }: DueReconnectOptions = {},
 ): DueReconnect[] {
   const result: DueReconnect[] = []
   for (const person of people) {
     if (person.isSelf || isContactPaused(person) || person.reconnectDays === null) continue
     const daysSince = daysSinceContact(lastContactDate(activities, person.id, selfId, today), today)
     const status = reconnectStatus(person.reconnectDays, daysSince)
-    if (status.remaining === null || status.remaining <= withinDays) result.push({ person, status, daysSince })
+    if (status.remaining !== null && status.remaining > withinDays) continue
+    if (hideCovered && coveringActivity(activities, person.id, selfId, person.reconnectDays, daysSince, today)) continue
+    result.push({ person, status, daysSince })
   }
   const rank = (r: DueReconnect) => r.status.remaining ?? -Infinity
   return result.sort((a, b) => rank(a) - rank(b) || a.person.name.localeCompare(b.person.name))

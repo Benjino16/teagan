@@ -47,6 +47,7 @@ export function PersonPage() {
               person={data.person}
               activities={data.activities}
               ledger={data.ledger}
+              selfId={data.self.id}
               daysSinceContact={since}
               today={data.today}
             />

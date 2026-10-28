@@ -136,6 +136,14 @@ export function useMoney(): Money {
   return moneyIn(settings.data?.currency ?? 'EUR')
 }
 
+/**
+ * Whether a planned activity with the person hides a due reconnect (`coveringActivity`).
+ * Not stored yet – once the backend has it, read `settings.data?.hideCoveredReconnects` here.
+ */
+export function useHideCoveredReconnects(): boolean {
+  return true
+}
+
 /** The answer holds every setting, so it replaces the cached ones without a refetch. */
 export function useUpdateSettings() {
   const repo = useRepository()
