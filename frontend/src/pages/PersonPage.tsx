@@ -43,10 +43,23 @@ export function PersonPage() {
               nameRef={nameRef}
             />
             <PersonArchivedNotice person={data.person} />
-            <SummaryCards person={data.person} activities={data.activities} daysSinceContact={since} today={data.today} />
+            <SummaryCards
+              person={data.person}
+              activities={data.activities}
+              ledger={data.ledger}
+              daysSinceContact={since}
+              today={data.today}
+            />
             <div className="flex flex-col gap-6 px-5 pt-6">
               <PersonOverview data={data} />
-              {wide ? <PersonKnowledge data={data} /> : <PersonSections data={data} />}
+              {wide ? (
+                <>
+                  <PersonKnowledge data={data} />
+                  <PersonSections data={data} onlyMoney />
+                </>
+              ) : (
+                <PersonSections data={data} />
+              )}
             </div>
           </>
         )

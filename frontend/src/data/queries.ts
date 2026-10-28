@@ -9,6 +9,7 @@ import type {
   Fact,
   FactInput,
   Id,
+  LedgerEntryInput,
   LoginInput,
   NewOpenPointInput,
   OpenPoint,
@@ -18,10 +19,13 @@ import type {
   PersonInput,
   PhotoChange,
   SetupInput,
+  SettingsPatch,
 } from '../domain/model'
 import { type MembershipChange, membershipEffects } from '../domain/groups'
+import { entryDateFor, type LedgerDraft, ledgerChanges, type Money, moneyIn } from '../domain/ledger'
 import { openPointChanges, type OpenPointDraft } from '../domain/openPoints'
 import { isSearchQuery } from '../domain/search'
+import { getToday } from '../domain/today'
 import { type Repository, RepositoryError } from './repository'
 import { useRepository } from './RepositoryContext'
 
@@ -31,6 +35,7 @@ export const queryKeys = {
   demoLogin: ['demoLogin'] as const,
   about: ['about'] as const,
   account: ['account'] as const,
+  settings: ['settings'] as const,
   people: ['people'] as const,
   person: (id: Id) => ['people', id] as const,
   self: ['self'] as const,
@@ -43,6 +48,10 @@ export const queryKeys = {
   activity: (id: Id) => ['activities', 'detail', id] as const,
   openPoints: (personId: Id) => ['openPoints', personId] as const,
   openPointsForActivity: (activityId: Id) => ['openPoints', 'activity', activityId] as const,
+  // Under `ledger`, so every change to an entry refreshes them too
+  balances: ['ledger', 'balances'] as const,
+  ledger: (personId: Id) => ['ledger', personId] as const,
+  ledgerForActivity: (activityId: Id) => ['ledger', 'activity', activityId] as const,
   facts: (personId: Id) => ['facts', personId] as const,
   factLabels: ['facts', 'labels'] as const,
   search: (query: string, limit: number) => ['search', query, limit] as const,
@@ -113,6 +122,28 @@ export function useAbout() {
 export function useAccount() {
   const repo = useRepository()
   return useQuery({ queryKey: queryKeys.account, queryFn: () => repo.getAccount() })
+}
+
+export function useSettings() {
+  const repo = useRepository()
+  return useQuery({ queryKey: queryKeys.settings, queryFn: () => repo.getSettings() })
+}
+
+/** Amounts in the user's currency. Below `AuthGate`, which waits for the settings. */
+export function useMoney(): Money {
+  const settings = useSettings()
+  // Only before the settings are loaded – same default as the backend
+  return moneyIn(settings.data?.currency ?? 'EUR')
+}
+
+/** The answer holds every setting, so it replaces the cached ones without a refetch. */
+export function useUpdateSettings() {
+  const repo = useRepository()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (patch: SettingsPatch) => repo.updateSettings(patch),
+    onSuccess: (settings) => queryClient.setQueryData(queryKeys.settings, settings),
+  })
 }
 
 export function useChangePassword() {
@@ -236,6 +267,24 @@ export function useOpenPoints(personId: Id) {
   return useQuery({ queryKey: queryKeys.openPoints(personId), queryFn: () => repo.listOpenPoints(personId) })
 }
 
+export function useBalances() {
+  const repo = useRepository()
+  return useQuery({ queryKey: queryKeys.balances, queryFn: () => repo.listBalances() })
+}
+
+export function useLedgerEntries(personId: Id) {
+  const repo = useRepository()
+  return useQuery({ queryKey: queryKeys.ledger(personId), queryFn: () => repo.listLedgerEntries(personId) })
+}
+
+export function useLedgerEntriesForActivity(activityId: Id) {
+  const repo = useRepository()
+  return useQuery({
+    queryKey: queryKeys.ledgerForActivity(activityId),
+    queryFn: () => repo.listLedgerEntriesForActivity(activityId),
+  })
+}
+
 export function useFacts(personId: Id) {
   const repo = useRepository()
   return useQuery({ queryKey: queryKeys.facts(personId), queryFn: () => repo.listFacts(personId) })
@@ -331,11 +380,12 @@ export function useDeletePerson(id: Id) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: () => repo.deletePerson(id),
-    // Facts, open points and photo go with them; events and groups stay, just without them.
+    // Facts, open points, money entries and photo go with them; events and groups stay, just without them.
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.people })
       queryClient.invalidateQueries({ queryKey: queryKeys.activities })
       queryClient.invalidateQueries({ queryKey: queryKeys.memberships })
+      queryClient.invalidateQueries({ queryKey: ['ledger'] })
     },
   })
 }
@@ -428,6 +478,7 @@ export function useSetGroupArchived(id: Id) {
 export interface ActivityWithPoints {
   activity: ActivityInput
   points: OpenPointDraft[]
+  ledger: LedgerDraft[]
 }
 
 /**
@@ -441,18 +492,33 @@ async function saveActivityPoints(repo: Repository, activityId: Id, drafts: Open
   for (const { personId, text } of changes.create) await repo.createOpenPoint(personId, { text, activityId })
 }
 
+/** Like `saveActivityPoints`. New entries get the event's day; existing ones keep date and note. */
+async function saveActivityLedger(repo: Repository, activity: ActivityInput, activityId: Id, drafts: LedgerDraft[]) {
+  const changes = ledgerChanges(await repo.listLedgerEntriesForActivity(activityId), drafts)
+  const date = entryDateFor(activity.startDate, getToday())
+  for (const id of changes.remove) await repo.deleteLedgerEntry(id)
+  for (const { entry, amountCents } of changes.update) {
+    await repo.updateLedgerEntry(entry.id, { amountCents, date: entry.date, note: entry.note, activityId })
+  }
+  for (const { personId, amountCents } of changes.create) {
+    await repo.createLedgerEntry(personId, { amountCents, date, note: null, activityId })
+  }
+}
+
 export function useCreateActivity() {
   const repo = useRepository()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ activity, points }: ActivityWithPoints) => {
+    mutationFn: async ({ activity, points, ledger }: ActivityWithPoints) => {
       const created = await repo.createActivity(activity)
       await saveActivityPoints(repo, created.id, points)
+      await saveActivityLedger(repo, activity, created.id, ledger)
       return created
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.activities })
       queryClient.invalidateQueries({ queryKey: ['openPoints'] })
+      queryClient.invalidateQueries({ queryKey: ['ledger'] })
     },
   })
 }
@@ -461,15 +527,17 @@ export function useUpdateActivity(id: Id) {
   const repo = useRepository()
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ activity, points }: ActivityWithPoints) => {
+    mutationFn: async ({ activity, points, ledger }: ActivityWithPoints) => {
       const updated = await repo.updateActivity(id, activity)
       await saveActivityPoints(repo, id, points)
+      await saveActivityLedger(repo, activity, id, ledger)
       return updated
     },
     // Prefix: lists, person timelines and the detail view.
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.activities })
       queryClient.invalidateQueries({ queryKey: ['openPoints'] })
+      queryClient.invalidateQueries({ queryKey: ['ledger'] })
     },
   })
 }
@@ -479,10 +547,11 @@ export function useDeleteActivity(id: Id) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: () => repo.deleteActivity(id),
-    // Its open points stay, just without the event.
+    // Its open points and money entries stay, just without the event.
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.activities })
       queryClient.invalidateQueries({ queryKey: ['openPoints'] })
+      queryClient.invalidateQueries({ queryKey: ['ledger'] })
     },
   })
 }
@@ -536,6 +605,34 @@ export function useDeleteOpenPoint(id: Id) {
   return useMutation({
     mutationFn: () => repo.deleteOpenPoint(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['openPoints'] }),
+  })
+}
+
+// Prefix: person and activity lists of entries.
+export function useCreateLedgerEntry(personId: Id) {
+  const repo = useRepository()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: LedgerEntryInput) => repo.createLedgerEntry(personId, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ledger'] }),
+  })
+}
+
+export function useUpdateLedgerEntry(id: Id) {
+  const repo = useRepository()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: LedgerEntryInput) => repo.updateLedgerEntry(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ledger'] }),
+  })
+}
+
+export function useDeleteLedgerEntry(id: Id) {
+  const repo = useRepository()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => repo.deleteLedgerEntry(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ledger'] }),
   })
 }
 

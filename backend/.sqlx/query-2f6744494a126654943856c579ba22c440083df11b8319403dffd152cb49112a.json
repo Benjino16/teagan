@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        UPDATE users\n           SET settings = json_patch(settings, ?), updated_at = CURRENT_TIMESTAMP\n         WHERE id = ?\n        RETURNING settings\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "settings",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "settings"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "2f6744494a126654943856c579ba22c440083df11b8319403dffd152cb49112a"
+}

@@ -1,16 +1,19 @@
-import { ChevronRight, Code, ExternalLink, KeyRound, ShieldCheck, UserRound } from 'lucide-react'
+import { ChevronRight, Code, Coins, ExternalLink, KeyRound, ShieldCheck, UserRound } from 'lucide-react'
 import { Link } from 'react-router'
 import { readThemePreference, THEME_CHOICES } from '../app/theme'
 import { PageHeader } from '../components/layout/PageHeader'
 import { PageError, PageLoading } from '../components/layout/PageStatus'
 import { Button, IconBadge, ListCard, listRowStyles, MediaRow, SectionHeader } from '../components/ui'
-import { useAbout, useAccount, useLogout } from '../data/queries'
+import { useAbout, useAccount, useLogout, useMoney, useSettings } from '../data/queries'
+import { currencyName } from '../domain/currencies'
 
-/** Fourth tab: own account, appearance, logout and which version runs. */
+/** Fourth tab: own account, preferences, appearance, logout and which version runs. */
 export function SettingsPage() {
   const account = useAccount()
   const about = useAbout()
   const logout = useLogout()
+  const settings = useSettings()
+  const money = useMoney()
   const theme = THEME_CHOICES.find((choice) => choice.value === readThemePreference())!
 
   if (account.isPending) return <PageLoading />
@@ -56,6 +59,24 @@ export function SettingsPage() {
             </li>
           </ListCard>
         </section>
+
+        {settings.data && (
+          <section aria-labelledby="settings-preferences" className="flex flex-col gap-3">
+            <SectionHeader id="settings-preferences" title="Preferences" />
+            <ListCard>
+              <li>
+                <Link to="/settings/currency" className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
+                  <MediaRow
+                    leading={<IconBadge icon={Coins} size={36} />}
+                    title="Currency"
+                    subtitle={`${currencyName(settings.data.currency)} · ${money.symbol}`}
+                    trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}
+                  />
+                </Link>
+              </li>
+            </ListCard>
+          </section>
+        )}
 
         <section aria-labelledby="settings-device" className="flex flex-col gap-3">
           <SectionHeader id="settings-device" title="This device" />

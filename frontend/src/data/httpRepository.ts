@@ -4,6 +4,7 @@ import type {
   Activity,
   ActivityInput,
   AuthStatus,
+  Balance,
   ChangePasswordInput,
   Group,
   GroupInput,
@@ -11,6 +12,8 @@ import type {
   FactInput,
   FactLabel,
   Id,
+  LedgerEntry,
+  LedgerEntryInput,
   LoginInput,
   LoginResult,
   NewOpenPointInput,
@@ -22,6 +25,8 @@ import type {
   PersonInput,
   SearchResult,
   SetupInput,
+  Settings,
+  SettingsPatch,
   TotpSetup,
 } from '../domain/model'
 import { type Repository, RepositoryError, type RepositoryErrorCode } from './repository'
@@ -83,6 +88,16 @@ export class HttpRepository implements Repository {
 
   changePassword(input: ChangePasswordInput) {
     return this.request<void>('PUT', '/account/password', input)
+  }
+
+  // ── Settings ────────────────────────────────────────────────────────────
+
+  getSettings() {
+    return this.request<Settings>('GET', '/account/settings')
+  }
+
+  updateSettings(patch: SettingsPatch) {
+    return this.request<Settings>('PATCH', '/account/settings', patch)
   }
 
   // ── Two-factor login ────────────────────────────────────────────────────
@@ -237,6 +252,32 @@ export class HttpRepository implements Repository {
 
   deleteOpenPoint(id: Id) {
     return this.request<void>('DELETE', `/open-points/${id}`)
+  }
+
+  // ── Money ───────────────────────────────────────────────────────────────
+
+  listBalances() {
+    return this.request<Balance[]>('GET', '/balances')
+  }
+
+  listLedgerEntries(personId: Id) {
+    return this.request<LedgerEntry[]>('GET', `/people/${personId}/ledger-entries`)
+  }
+
+  listLedgerEntriesForActivity(activityId: Id) {
+    return this.request<LedgerEntry[]>('GET', `/activities/${activityId}/ledger-entries`)
+  }
+
+  createLedgerEntry(personId: Id, input: LedgerEntryInput) {
+    return this.request<LedgerEntry>('POST', `/people/${personId}/ledger-entries`, input)
+  }
+
+  updateLedgerEntry(id: Id, input: LedgerEntryInput) {
+    return this.request<LedgerEntry>('PUT', `/ledger-entries/${id}`, input)
+  }
+
+  deleteLedgerEntry(id: Id) {
+    return this.request<void>('DELETE', `/ledger-entries/${id}`)
   }
 
   // ── Knowledge ───────────────────────────────────────────────────────────

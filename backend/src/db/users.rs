@@ -99,6 +99,44 @@ pub async fn get(pool: &SqlitePool, user_id: i64) -> sqlx::Result<AccountRow> {
     .await
 }
 
+/// The stored settings JSON – only what the user changed, see `Settings`.
+pub async fn settings(pool: &SqlitePool, user_id: i64) -> sqlx::Result<String> {
+    sqlx::query_scalar!("SELECT settings FROM users WHERE id = ?", user_id)
+        .fetch_one(pool)
+        .await
+}
+
+/// Merges `patch` into the stored settings (`json_patch`, RFC 7396) and keeps
+/// the result only if `check` accepts it. The update comes first, so the
+/// transaction holds the write lock throughout and two changes at the same
+/// time can't overwrite each other.
+pub async fn patch_settings<T, E: From<sqlx::Error>>(
+    pool: &SqlitePool,
+    user_id: i64,
+    patch: &str,
+    check: impl FnOnce(&str) -> Result<T, E>,
+) -> Result<T, E> {
+    let mut tx = pool.begin().await?;
+
+    let merged = sqlx::query_scalar!(
+        r#"
+        UPDATE users
+           SET settings = json_patch(settings, ?), updated_at = CURRENT_TIMESTAMP
+         WHERE id = ?
+        RETURNING settings
+        "#,
+        patch,
+        user_id
+    )
+    .fetch_one(&mut *tx)
+    .await?;
+    // On `Err` the transaction is dropped and rolls back
+    let checked = check(&merged)?;
+
+    tx.commit().await?;
+    Ok(checked)
+}
+
 /// A new password from inside the app: ends all *other* sessions and
 /// half-finished logins, the one making the change stays logged in.
 pub async fn change_password(

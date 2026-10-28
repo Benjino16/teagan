@@ -1,10 +1,13 @@
-import { Flower2, RefreshCw } from 'lucide-react'
-import { Card, IconBadge, MediaRow, ProgressBar } from '../../components/ui'
+import { ChevronRight, Flower2, HandCoins, RefreshCw } from 'lucide-react'
+import { Link } from 'react-router'
+import { Card, cardStyles, IconBadge, MediaRow, ProgressBar } from '../../components/ui'
 import { ongoingActivities, upcomingActivities } from '../../domain/activities'
 import { birthdayCardText, nextBirthday } from '../../domain/birthday'
 import { reconnectStatus } from '../../domain/contact'
-import type { Activity, IsoDate, Person } from '../../domain/model'
-import { isContactPaused } from '../../domain/people'
+import { useMoney } from '../../data/queries'
+import { balanceOf, balanceText } from '../../domain/ledger'
+import type { Activity, IsoDate, LedgerEntry, Person } from '../../domain/model'
+import { displayName, isContactPaused } from '../../domain/people'
 import { deathAnniversaryCardText, nextDeathAnniversary } from '../../domain/remembrance'
 import { UpcomingActivityCard } from '../activity/UpcomingActivityCard'
 import { BirthdayCard } from './BirthdayCard'
@@ -12,12 +15,14 @@ import { BirthdayCard } from './BirthdayCard'
 interface Props {
   person: Person
   activities: Activity[]
+  ledger: LedgerEntry[]
   daysSinceContact: number | null
   today: IsoDate
 }
 
-/** Cards below the header: reconnect, birthday, death anniversary, currently, coming up. */
-export function SummaryCards({ person, activities, daysSinceContact, today }: Props) {
+/** Cards below the header: reconnect, birthday, balance, death anniversary, currently, coming up. */
+export function SummaryCards({ person, activities, ledger, daysSinceContact, today }: Props) {
+  const money = useMoney()
   const nextBday = person.birthday ? nextBirthday(person.birthday, today) : null
   const birthday = nextBday && birthdayCardText(nextBday, person.deceased)
   const nextAnniversary = person.diedOn ? nextDeathAnniversary(person.diedOn, today) : null
@@ -26,14 +31,27 @@ export function SummaryCards({ person, activities, daysSinceContact, today }: Pr
   const upcoming = upcomingActivities(activities, today)
   // The rhythm pauses while archived or deceased – kept, but not shown as due
   const rhythm = isContactPaused(person) ? null : person.reconnectDays
+  // Only while something is open
+  const balance = balanceOf(ledger)
 
-  if (rhythm === null && !birthday && !anniversary && ongoing.length === 0 && upcoming.length === 0) return null
+  if (rhythm === null && !birthday && balance === 0 && !anniversary && ongoing.length === 0 && upcoming.length === 0) return null
 
   return (
     <div className="flex flex-col gap-2.5 px-5 pt-4.5">
       {rhythm !== null && <ReconnectCard rhythmDays={rhythm} daysSinceContact={daysSinceContact} />}
 
       {birthday && <BirthdayCard person={person} title={birthday.title} subtitle={birthday.subtitle} />}
+
+      {balance !== 0 && (
+        <Link to={`/people/${person.id}/money`} className={`${cardStyles()} block no-underline hover:bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`}>
+          <MediaRow
+            leading={<IconBadge icon={HandCoins} />}
+            title={balanceText(balance, displayName(person), money)}
+            subtitle={`${ledger.length} ${ledger.length === 1 ? 'entry' : 'entries'}`}
+            trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}
+          />
+        </Link>
+      )}
 
       {anniversary && (
         <Card>

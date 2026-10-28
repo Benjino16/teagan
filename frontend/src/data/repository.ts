@@ -4,6 +4,7 @@ import type {
   Activity,
   ActivityInput,
   AuthStatus,
+  Balance,
   ChangePasswordInput,
   Group,
   GroupInput,
@@ -11,6 +12,8 @@ import type {
   FactInput,
   FactLabel,
   Id,
+  LedgerEntry,
+  LedgerEntryInput,
   LoginInput,
   LoginResult,
   NewOpenPointInput,
@@ -22,6 +25,8 @@ import type {
   PersonInput,
   SearchResult,
   SetupInput,
+  Settings,
+  SettingsPatch,
   TotpSetup,
 } from '../domain/model'
 
@@ -53,6 +58,11 @@ export interface Repository {
   getAccount(): Promise<Account>
   /** Ends all other logins; a wrong current password throws `invalid`.  /account/password */
   changePassword(input: ChangePasswordInput): Promise<void>
+
+  // Settings                                       /account/settings
+  getSettings(): Promise<Settings>
+  /** Only the keys in `patch` change; returns all settings. Unknown key or bad value: `invalid`. */
+  updateSettings(patch: SettingsPatch): Promise<Settings>
 
   // Two-factor login                               /account/totp, /account/recovery-codes
   /** A new secret; two-factor login is only on after `confirmTotp`. */
@@ -112,6 +122,18 @@ export interface Repository {
   updateOpenPoint(id: Id, input: OpenPointInput): Promise<OpenPoint>
   setOpenPointDone(id: Id, done: boolean): Promise<OpenPoint>
   deleteOpenPoint(id: Id): Promise<void>
+
+  // Money                                          /people/:id/ledger-entries, /ledger-entries/:id
+  /** Everyone with something open, archived people included; largest amounts first.  /balances */
+  listBalances(): Promise<Balance[]>
+  /** Newest first; their sum is the balance. */
+  listLedgerEntries(personId: Id): Promise<LedgerEntry[]>
+  /** Entries from an activity, for every person.  /activities/:id/ledger-entries */
+  listLedgerEntriesForActivity(activityId: Id): Promise<LedgerEntry[]>
+  /** Not with yourself: `invalid`. */
+  createLedgerEntry(personId: Id, input: LedgerEntryInput): Promise<LedgerEntry>
+  updateLedgerEntry(id: Id, input: LedgerEntryInput): Promise<LedgerEntry>
+  deleteLedgerEntry(id: Id): Promise<void>
 
   // Knowledge                                      /people/:id/facts, /facts/:id
   listFacts(personId: Id): Promise<Fact[]>

@@ -8,6 +8,7 @@ mod facts;
 mod frontend;
 mod groups;
 mod health;
+mod ledger;
 mod login_limit;
 mod memberships;
 mod open_points;
@@ -77,6 +78,10 @@ fn api(state: AppState) -> Router {
         .route("/account", get(account::get_account))
         .route("/account/password", put(account::change_password))
         .route(
+            "/account/settings",
+            get(account::get_settings).patch(account::update_settings),
+        )
+        .route(
             "/account/totp",
             post(account::start_totp).delete(account::disable_totp),
         )
@@ -121,6 +126,10 @@ fn api(state: AppState) -> Router {
             get(open_points::list_for_person).post(open_points::create_open_point),
         )
         .route(
+            "/people/{person_id}/ledger-entries",
+            get(ledger::list_for_person).post(ledger::create_entry),
+        )
+        .route(
             "/people/{person_id}/facts",
             get(facts::list_for_person).post(facts::create_fact),
         )
@@ -145,12 +154,23 @@ fn api(state: AppState) -> Router {
             get(open_points::list_for_activity),
         )
         .route(
+            "/activities/{activity_id}/ledger-entries",
+            get(ledger::list_for_activity),
+        )
+        .route(
             "/open-points/{point_id}",
             get(open_points::get_open_point)
                 .put(open_points::update_open_point)
                 .delete(open_points::delete_open_point),
         )
         .route("/open-points/{point_id}/done", put(open_points::set_done))
+        .route("/balances", get(ledger::list_balances))
+        .route(
+            "/ledger-entries/{entry_id}",
+            get(ledger::get_entry)
+                .put(ledger::update_entry)
+                .delete(ledger::delete_entry),
+        )
         .route("/memberships", get(memberships::list_memberships))
         .route(
             "/groups",

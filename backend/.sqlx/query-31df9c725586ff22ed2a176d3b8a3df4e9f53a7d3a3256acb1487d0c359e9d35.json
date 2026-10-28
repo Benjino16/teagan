@@ -1,0 +1,26 @@
+{
+  "db_name": "SQLite",
+  "query": "SELECT settings FROM users WHERE id = ?",
+  "describe": {
+    "columns": [
+      {
+        "name": "settings",
+        "ordinal": 0,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "users",
+            "name": "settings"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "31df9c725586ff22ed2a176d3b8a3df4e9f53a7d3a3256acb1487d0c359e9d35"
+}

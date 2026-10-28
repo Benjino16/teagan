@@ -138,6 +138,28 @@ export interface OpenPoint extends Timestamps {
   doneAt: Timestamp | null
 }
 
+/**
+ * Money between you and the person. The sign is your own perspective:
+ * negative = you paid (for them, or back to them), positive = they paid.
+ * The sum of a person's entries is the balance; below zero they owe you.
+ */
+export interface LedgerEntry extends Timestamps {
+  id: Id
+  personId: Id
+  /** Hundredths of the display currency, never `0`. */
+  amountCents: number
+  date: IsoDate
+  note: string | null
+  /** The event it came from, optional. */
+  activityId: Id | null
+}
+
+/** What is open with one person, never `0`; sign as in `LedgerEntry`. */
+export interface Balance {
+  personId: Id
+  balanceCents: number
+}
+
 export interface Fact extends Timestamps {
   id: Id
   personId: Id
@@ -194,6 +216,15 @@ export interface Account {
   recoveryCodesLeft: number
 }
 
+/** Account-wide settings, the same on every device; the backend fills in defaults. */
+export interface Settings {
+  /** ISO 4217 code the money amounts are shown in, e.g. `EUR`. */
+  currency: string
+}
+
+/** Only the keys sent change; `null` resets one to its default. */
+export type SettingsPatch = { [K in keyof Settings]?: Settings[K] | null }
+
 /** Which version runs and where its source code is. */
 export interface About {
   version: string
@@ -232,5 +263,7 @@ export type ActivityInput = Editable<Activity>
 export type NewOpenPointInput = Pick<OpenPoint, 'text' | 'activityId'>
 /** Editing a point: only the text. */
 export type OpenPointInput = Pick<OpenPoint, 'text'>
+/** The person comes from the path and can't change later; the event can. */
+export type LedgerEntryInput = Pick<LedgerEntry, 'amountCents' | 'date' | 'note' | 'activityId'>
 /** The person comes from the path; new facts go to the bottom, `sort` changes via reordering only. */
 export type FactInput = Pick<Fact, 'label' | 'value'>

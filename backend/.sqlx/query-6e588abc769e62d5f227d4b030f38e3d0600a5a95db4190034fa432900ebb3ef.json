@@ -1,0 +1,33 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT person_id, SUM(amount_cents) AS \"balance_cents!: i64\"\n          FROM ledger_entries\n         WHERE owner_id = ?\n         GROUP BY person_id\n        HAVING SUM(amount_cents) <> 0\n         ORDER BY abs(SUM(amount_cents)) DESC, person_id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "person_id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "ledger_entries",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "name": "balance_cents!: i64",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Right": 1
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "6e588abc769e62d5f227d4b030f38e3d0600a5a95db4190034fa432900ebb3ef"
+}

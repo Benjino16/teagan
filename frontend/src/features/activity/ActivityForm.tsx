@@ -3,11 +3,23 @@ import { type FormEvent, useRef, useState } from 'react'
 import { Button, Field, IconButton, inputStyles, RatingInput, Switch, TextButton, TextInput } from '../../components/ui'
 import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
 import { joinPartialDate, splitPartialDate } from '../../domain/dates'
-import type { ActivityGroup, ActivityInput, ActivityParticipant, Group, Impact, OpenPoint, Person } from '../../domain/model'
+import { useMoney } from '../../data/queries'
+import { type LedgerDraft, payerOf, signedCents } from '../../domain/ledger'
+import type {
+  ActivityGroup,
+  ActivityInput,
+  ActivityParticipant,
+  Group,
+  Impact,
+  LedgerEntry,
+  OpenPoint,
+  Person,
+} from '../../domain/model'
 import type { OpenPointDraft } from '../../domain/openPoints'
 import { DateInput } from './DateInput'
 import { GroupPicker } from './GroupPicker'
 import { IconPicker } from './IconPicker'
+import { LedgerEditor, type LedgerRow } from './LedgerEditor'
 import { type OpenPointRow, OpenPointsEditor } from './OpenPointsEditor'
 import { ParticipantPicker } from './ParticipantPicker'
 
@@ -21,10 +33,12 @@ interface Props {
   groups: Group[]
   /** The event's existing open points (when editing). */
   initialPoints?: OpenPoint[]
+  /** The event's existing money entries (when editing). */
+  initialLedger?: LedgerEntry[]
   submitLabel: string
   submitting: boolean
   error: string | null
-  onSubmit: (input: ActivityInput, points: OpenPointDraft[]) => void
+  onSubmit: (input: ActivityInput, points: OpenPointDraft[], ledger: LedgerDraft[]) => void
 }
 
 /** Create or edit an event. */
@@ -34,11 +48,13 @@ export function ActivityForm({
   people,
   groups,
   initialPoints = [],
+  initialLedger = [],
   submitLabel,
   submitting,
   error,
   onSubmit,
 }: Props) {
+  const money = useMoney()
   const [name, setName] = useState(initial.name)
   const [icon, setIcon] = useState(initial.icon)
   const [start, setStart] = useState(() => splitPartialDate(initial.startDate))
@@ -59,6 +75,17 @@ export function ActivityForm({
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id - b.id)
       .map((p) => ({ key: `point-${p.id}`, id: p.id, personId: p.personId, text: p.text })),
   )
+  const [ledger, setLedger] = useState<LedgerRow[]>(() =>
+    [...initialLedger]
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id - b.id)
+      .map((e) => ({
+        key: `entry-${e.id}`,
+        id: e.id,
+        personId: e.personId,
+        payer: payerOf(e.amountCents),
+        amount: money.inputText(e.amountCents),
+      })),
+  )
   const nextKey = useRef(0)
   const [reminder, setReminder] = useState(initial.reminder)
   const [problem, setProblem] = useState<string | null>(null)
@@ -70,11 +97,12 @@ export function ActivityForm({
     return person ? [person] : []
   })
 
-  /** Removing a participant drops their new points; existing ones stay with the person. */
+  /** Removing a participant drops their new points and entries; existing ones stay with the person. */
   function changeParticipants(next: ActivityParticipant[]) {
     const ids = new Set(next.map((p) => p.personId))
     setParticipants(next)
     setPoints((rows) => rows.filter((r) => r.id !== null || r.personId === null || ids.has(r.personId)))
+    setLedger((rows) => rows.filter((r) => r.id !== null || r.personId === null || ids.has(r.personId)))
   }
 
   /** The sole other participant is the default for points without a person. */
@@ -88,6 +116,23 @@ export function ActivityForm({
         continue
       }
       result.push({ id: row.id, personId, text: row.text })
+    }
+    return result
+  }
+
+  /**
+   * Like `drafts`. An empty amount drops a new row and deletes an existing entry.
+   * `null` if a row has no person or an amount that isn't one.
+   */
+  function ledgerDrafts(): LedgerDraft[] | null {
+    const fallback = candidates.length === 1 ? candidates[0]!.id : null
+    const result: LedgerDraft[] = []
+    for (const row of ledger) {
+      if (!row.amount.trim()) continue
+      const cents = money.parse(row.amount)
+      const personId = row.personId ?? fallback
+      if (cents === null || personId === null) return null
+      result.push({ id: row.id, personId, amountCents: signedCents(cents, row.payer) })
     }
     return result
   }
@@ -108,10 +153,13 @@ export function ActivityForm({
             ? 'Choose at least one participant or group.'
             : drafts() === null
               ? 'Choose who each open point is for.'
-              : null
+              : ledgerDrafts() === null
+                ? 'Check the money: each entry needs a person and an amount like 12.50.'
+                : null
     setProblem(missing)
     const pointDrafts = drafts()
-    if (missing || startDate === null || pointDrafts === null) return
+    const entryDrafts = ledgerDrafts()
+    if (missing || startDate === null || pointDrafts === null || entryDrafts === null) return
 
     onSubmit({
       name: name.trim(),
@@ -124,7 +172,7 @@ export function ActivityForm({
       reminder: reminderPossible && reminder,
       participants: participants.map((p) => ({ ...p, note: p.note?.trim() || null })),
       groups: groupLinks.map((g) => ({ ...g, note: g.note?.trim() || null })),
-    }, pointDrafts)
+    }, pointDrafts, entryDrafts)
   }
 
   const message = problem ?? error
@@ -209,6 +257,14 @@ export function ActivityForm({
       <OpenPointsEditor
         rows={points}
         onChange={setPoints}
+        candidates={candidates}
+        personById={personById}
+        newKey={() => `new-${nextKey.current++}`}
+      />
+
+      <LedgerEditor
+        rows={ledger}
+        onChange={setLedger}
         candidates={candidates}
         personById={personById}
         newKey={() => `new-${nextKey.current++}`}

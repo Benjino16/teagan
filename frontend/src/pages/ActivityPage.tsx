@@ -22,9 +22,11 @@ import {
   useActivities,
   useActivity,
   useGroups,
+  useLedgerEntriesForActivity,
   useOpenPointsForActivity,
   usePeople,
   useSetOpenPointDone,
+  useMoney,
 } from '../data/queries'
 import { ACTIVITY_IMPACT_LEVELS, activitiesDuring, activityStatus, enclosingActivity, maxImpact } from '../domain/activities'
 import {
@@ -40,7 +42,8 @@ import {
   yearOf,
 } from '../domain/dates'
 import { groupPath } from '../domain/groups'
-import type { Activity, Group, Id, Impact, IsoDate, OpenPoint, Person } from '../domain/model'
+import { entryText } from '../domain/ledger'
+import type { Activity, Group, Id, Impact, IsoDate, LedgerEntry, OpenPoint, Person } from '../domain/model'
 import { displayName } from '../domain/people'
 import { getToday } from '../domain/today'
 import { activityIcon, LocationIcon, ReminderIcon } from '../icons/activityIcons'
@@ -57,13 +60,14 @@ export function ActivityPage() {
   const people = usePeople()
   const groups = useGroups()
   const points = useOpenPointsForActivity(id)
+  const ledger = useLedgerEntriesForActivity(id)
   const [titleRef, titleInView] = useInView<HTMLHeadingElement>()
 
   const trailing = (
     <IconButton icon={Pencil} iconSize={18} aria-label="Edit event" onClick={() => navigate(`/activities/${id}/edit`)} />
   )
 
-  if (activity.isError || all.isError || people.isError || groups.isError || points.isError) {
+  if (activity.isError || all.isError || people.isError || groups.isError || points.isError || ledger.isError) {
     return (
       <>
         <TopBar backTo="/" />
@@ -79,7 +83,7 @@ export function ActivityPage() {
       </>
     )
   }
-  if (!activity.data || !all.data || !people.data || !groups.data || !points.data) {
+  if (!activity.data || !all.data || !people.data || !groups.data || !points.data || !ledger.data) {
     return (
       <>
         <TopBar backTo="/" />
@@ -133,6 +137,7 @@ export function ActivityPage() {
         )}
 
         {points.data.length > 0 && <SourcePoints points={points.data} personById={personById} />}
+        {ledger.data.length > 0 && <SourceLedger entries={ledger.data} personById={personById} />}
       </div>
     </>
   )
@@ -344,5 +349,35 @@ function SourcePoint({ point, person }: { point: OpenPoint; person: Person | und
       meta={person ? `for ${displayName(person)}` : undefined}
       editTo={`/people/${point.personId}/open-points/${point.id}/edit`}
     />
+  )
+}
+
+function SourceLedger({ entries, personById }: { entries: LedgerEntry[]; personById: Map<Id, Person> }) {
+  const money = useMoney()
+  return (
+    <section aria-labelledby="source-ledger" className="flex flex-col gap-2.5">
+      <SectionHeader id="source-ledger" title="Money" />
+      <ListCard>
+        {entries.map((entry) => {
+          const person = personById.get(entry.personId)
+          const name = person ? displayName(person) : 'Unknown'
+          return (
+            <li key={entry.id}>
+              <Link
+                to={`/people/${entry.personId}/money/${entry.id}/edit`}
+                className={`${listRowStyles} text-ink no-underline hover:bg-hover`}
+              >
+                <MediaRow
+                  leading={<Avatar name={person?.name ?? name} photo={person?.photo ?? null} size="md" />}
+                  title={name}
+                  subtitle={[entryText(entry.amountCents, name, money), entry.note].filter(Boolean).join(' · ')}
+                  trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}
+                />
+              </Link>
+            </li>
+          )
+        })}
+      </ListCard>
+    </section>
   )
 }
