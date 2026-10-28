@@ -300,6 +300,7 @@ fn activities(rng: &mut Rng, circle: &Circle, people: &[String]) -> Vec<Activity
                 people: links,
                 groups: group.map(Link::from).into_iter().collect(),
                 open_points: Vec::new(),
+                money: Vec::new(),
             });
         };
 

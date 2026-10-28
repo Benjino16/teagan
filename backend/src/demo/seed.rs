@@ -1,6 +1,7 @@
 //! Turns a `Dataset` into API calls, in the order the app needs them:
-//! you → groups → people → activities, and archiving last, so nothing is
-//! archived before everything that refers to it exists.
+//! you → groups → people → activities (each with its open points and money),
+//! and archiving last, so nothing is archived before everything that refers
+//! to it exists.
 
 use std::{collections::HashMap, fmt};
 
@@ -21,14 +22,15 @@ pub struct Summary {
     activities: usize,
     facts: usize,
     open_points: usize,
+    money: usize,
 }
 
 impl fmt::Display for Summary {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{} people, {} groups, {} activities, {} facts, {} open points",
-            self.people, self.groups, self.activities, self.facts, self.open_points
+            "{} people, {} groups, {} activities, {} facts, {} open points, {} money entries",
+            self.people, self.groups, self.activities, self.facts, self.open_points, self.money
         )
     }
 }
@@ -195,6 +197,11 @@ async fn seed_person(
     for point in &person.open_points {
         seed_open_point(api, id, point, None, summary).await?;
     }
+    for money in &person.money {
+        let date = resolve_date(&money.date, today)?;
+        let entry = json!({ "amountCents": money.cents, "date": date, "note": money.note });
+        seed_money(api, id, entry, summary).await?;
+    }
     Ok(id)
 }
 
@@ -240,6 +247,18 @@ async fn seed_open_point(
     Ok(())
 }
 
+async fn seed_money(
+    api: &Api,
+    person_id: i64,
+    entry: Value,
+    summary: &mut Summary,
+) -> anyhow::Result<()> {
+    api.post(&format!("/people/{person_id}/ledger-entries"), entry)
+        .await?;
+    summary.money += 1;
+    Ok(())
+}
+
 async fn seed_activity(
     api: &Api,
     activity: &data::Activity,
@@ -249,6 +268,7 @@ async fn seed_activity(
 ) -> anyhow::Result<()> {
     let participants = links(&activity.people, |key| ids.person(key), "personId")?;
     let groups = links(&activity.groups, |key| ids.group(key), "groupId")?;
+    let start_date = resolve_date(&activity.start, today)?;
     let end_date = activity
         .end
         .as_deref()
@@ -257,7 +277,7 @@ async fn seed_activity(
 
     let mut body = json!({
         "name": activity.name,
-        "startDate": resolve_date(&activity.start, today)?,
+        "startDate": start_date,
         "endDate": end_date,
         "description": activity.description,
         "location": activity.location,
@@ -293,6 +313,22 @@ async fn seed_activity(
             summary,
         )
         .await?;
+    }
+
+    for money in &activity.money {
+        if !activity
+            .people
+            .iter()
+            .any(|link| link.key() == money.person)
+        {
+            bail!("money with \"{}\", who did not take part", money.person);
+        }
+        // The day of `YYYY-MM-DDTHH:MM`; an activity without one has no day for its money
+        let day = start_date.get(..10).with_context(|| {
+            format!("money needs an activity with a full day, not \"{start_date}\"")
+        })?;
+        let entry = json!({ "amountCents": money.cents, "date": day, "activityId": activity_id });
+        seed_money(api, ids.person(&money.person)?, entry, summary).await?;
     }
     Ok(())
 }
