@@ -25,6 +25,8 @@ import type {
   PersonInput,
   SearchResult,
   SetupInput,
+  Settings,
+  SettingsPatch,
   TotpSetup,
 } from '../domain/model'
 
@@ -56,6 +58,11 @@ export interface Repository {
   getAccount(): Promise<Account>
   /** Ends all other logins; a wrong current password throws `invalid`.  /account/password */
   changePassword(input: ChangePasswordInput): Promise<void>
+
+  // Settings                                       /account/settings
+  getSettings(): Promise<Settings>
+  /** Only the keys in `patch` change; returns all settings. Unknown key or bad value: `invalid`. */
+  updateSettings(patch: SettingsPatch): Promise<Settings>
 
   // Two-factor login                               /account/totp, /account/recovery-codes
   /** A new secret; two-factor login is only on after `confirmTotp`. */

@@ -78,6 +78,10 @@ fn api(state: AppState) -> Router {
         .route("/account", get(account::get_account))
         .route("/account/password", put(account::change_password))
         .route(
+            "/account/settings",
+            get(account::get_settings).patch(account::update_settings),
+        )
+        .route(
             "/account/totp",
             post(account::start_totp).delete(account::disable_totp),
         )

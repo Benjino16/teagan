@@ -18,8 +18,8 @@ use super::{
 use crate::{
     db,
     domain::{
-        ChangePasswordInput, hash_password, hash_recovery_code, hash_token, new_recovery_codes,
-        new_totp_secret, totp_setup, totp_step, verify_password,
+        ChangePasswordInput, Settings, SettingsPatch, hash_password, hash_recovery_code,
+        hash_token, new_recovery_codes, new_totp_secret, totp_setup, totp_step, verify_password,
     },
     error::{AppError, AppResult},
 };
@@ -46,6 +46,29 @@ pub async fn get_account(
         totp_enabled,
         recovery_codes_left,
     }))
+}
+
+/// Every setting, defaults filled in.
+pub async fn get_settings(
+    State(state): State<AppState>,
+    user: CurrentUser,
+) -> AppResult<Json<Settings>> {
+    let stored = db::users::settings(&state.pool, user.id).await?;
+    let settings = Settings::from_stored(&stored).map_err(|err| AppError::Internal(err.into()))?;
+    Ok(Json(settings))
+}
+
+/// Only the keys sent change, `null` resets one to its default; answers
+/// with every setting, like `get_settings`.
+pub async fn update_settings(
+    State(state): State<AppState>,
+    user: CurrentUser,
+    Json(patch): Json<SettingsPatch>,
+) -> AppResult<Json<Settings>> {
+    let patch = patch.checked_json()?;
+    let settings =
+        db::users::patch_settings(&state.pool, user.id, &patch, Settings::from_patched).await?;
+    Ok(Json(settings))
 }
 
 /// Ends all other sessions; this one stays.

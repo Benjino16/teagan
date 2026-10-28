@@ -216,6 +216,15 @@ export interface Account {
   recoveryCodesLeft: number
 }
 
+/** Account-wide settings, the same on every device; the backend fills in defaults. */
+export interface Settings {
+  /** ISO 4217 code the money amounts are shown in, e.g. `EUR`. */
+  currency: string
+}
+
+/** Only the keys sent change; `null` resets one to its default. */
+export type SettingsPatch = { [K in keyof Settings]?: Settings[K] | null }
+
 /** Which version runs and where its source code is. */
 export interface About {
   version: string

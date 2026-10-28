@@ -14,6 +14,7 @@ mod people;
 mod photos;
 mod search;
 mod sessions;
+mod settings;
 
 use std::{collections::BTreeMap, net::SocketAddr, sync::Mutex};
 
@@ -110,6 +111,10 @@ impl TestApp {
 
     async fn put(&self, uri: &str, body: Value) -> (StatusCode, Value) {
         self.send(Method::PUT, uri, Some(body)).await
+    }
+
+    async fn patch(&self, uri: &str, body: Value) -> (StatusCode, Value) {
+        self.send(Method::PATCH, uri, Some(body)).await
     }
 
     async fn delete(&self, uri: &str) -> (StatusCode, Value) {

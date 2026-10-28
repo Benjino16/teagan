@@ -25,6 +25,8 @@ import type {
   PersonInput,
   SearchResult,
   SetupInput,
+  Settings,
+  SettingsPatch,
   TotpSetup,
 } from '../domain/model'
 import { type Repository, RepositoryError, type RepositoryErrorCode } from './repository'
@@ -86,6 +88,16 @@ export class HttpRepository implements Repository {
 
   changePassword(input: ChangePasswordInput) {
     return this.request<void>('PUT', '/account/password', input)
+  }
+
+  // ── Settings ────────────────────────────────────────────────────────────
+
+  getSettings() {
+    return this.request<Settings>('GET', '/account/settings')
+  }
+
+  updateSettings(patch: SettingsPatch) {
+    return this.request<Settings>('PATCH', '/account/settings', patch)
   }
 
   // ── Two-factor login ────────────────────────────────────────────────────

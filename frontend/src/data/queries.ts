@@ -19,6 +19,7 @@ import type {
   PersonInput,
   PhotoChange,
   SetupInput,
+  SettingsPatch,
 } from '../domain/model'
 import { type MembershipChange, membershipEffects } from '../domain/groups'
 import { entryDateFor, type LedgerDraft, ledgerChanges } from '../domain/ledger'
@@ -34,6 +35,7 @@ export const queryKeys = {
   demoLogin: ['demoLogin'] as const,
   about: ['about'] as const,
   account: ['account'] as const,
+  settings: ['settings'] as const,
   people: ['people'] as const,
   person: (id: Id) => ['people', id] as const,
   self: ['self'] as const,
@@ -120,6 +122,21 @@ export function useAbout() {
 export function useAccount() {
   const repo = useRepository()
   return useQuery({ queryKey: queryKeys.account, queryFn: () => repo.getAccount() })
+}
+
+export function useSettings() {
+  const repo = useRepository()
+  return useQuery({ queryKey: queryKeys.settings, queryFn: () => repo.getSettings() })
+}
+
+/** The answer holds every setting, so it replaces the cached ones without a refetch. */
+export function useUpdateSettings() {
+  const repo = useRepository()
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (patch: SettingsPatch) => repo.updateSettings(patch),
+    onSuccess: (settings) => queryClient.setQueryData(queryKeys.settings, settings),
+  })
 }
 
 export function useChangePassword() {
