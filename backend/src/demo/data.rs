@@ -99,6 +99,9 @@ pub struct Person {
     pub facts: Vec<(String, String)>,
     #[serde(default)]
     pub open_points: Vec<OpenPoint>,
+    /// Money outside of any activity.
+    #[serde(default)]
+    pub money: Vec<Money>,
 }
 
 #[derive(Deserialize)]
@@ -145,6 +148,9 @@ pub struct Activity {
     /// Open points that came up here; `person` must be one of `people`.
     #[serde(default)]
     pub open_points: Vec<ActivityPoint>,
+    /// Who paid what here; dated on the activity's day, like in the app.
+    #[serde(default)]
+    pub money: Vec<ActivityMoney>,
 }
 
 /// `"lena"`, or `{ key = "lena", impact = 5, note = "…" }` for an own impact
@@ -195,6 +201,25 @@ pub struct ActivityPoint {
     pub text: String,
     #[serde(default)]
     pub done: bool,
+}
+
+/// A ledger entry. `cents` from your perspective, like the API:
+/// negative = you paid, positive = they paid.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Money {
+    /// A relative or absolute full day, see the module docs.
+    pub date: String,
+    pub cents: i64,
+    pub note: Option<String>,
+}
+
+/// Like `Money`, at an activity: `person` must be one of its `people`.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct ActivityMoney {
+    pub person: String,
+    pub cents: i64,
 }
 
 // Same defaults as the DB schema

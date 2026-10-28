@@ -6,10 +6,12 @@
 #   "-14m" → that month · "-6y" → that year
 # Birthdays: { in_days = 9, age = 32 } · { in_days = 40 } (year unknown) · { age = 24 } (year only)
 # People and groups get a `key` to refer to them; `me` is the demo user.
+# Money in cents from your side, like the API: -8_80 = you paid 8.80, 14_00 = they paid 14.
 #
 # Every case the app knows should appear somewhere: overdue and upcoming
 # reconnects, focus, deceased, archived, subgroups, ranges, partial dates,
-# reminders, open points with and without an activity.
+# reminders, open points with and without an activity, money owed either way,
+# settled and from an activity.
 
 [me]
 name = "Alex Weber"
@@ -97,6 +99,8 @@ open_points = [
   { text = "Give back his tent" },
   { text = "Lend him the Interrail guide", done = true },
 ]
+# Evens out the Interrail trip
+money = [{ date = "-820d", cents = 85_00, note = "Settled up for Interrail" }]
 
 [[people]]
 key = "mama"
@@ -183,6 +187,8 @@ icon = "dumbbell"
 start = "-23d"
 people = ["me", "jonas"]
 groups = ["climbing"]
+# He paid my day pass
+money = [{ person = "jonas", cents = 14_00 }]
 
 [[activities]]
 name = "Phone call"
@@ -203,6 +209,11 @@ Milan → Florence → Rome → Naples, with a detour to Cinque Terre.
 - Best pizza: *Da Michele*
 """
 people = ["me", "jonas"]
+# I booked the hostels, he the trains
+money = [
+  { person = "jonas", cents = -180_00 },
+  { person = "jonas", cents = 95_00 },
+]
 
 # "On this day" on Today: exactly 1 and 4 years ago
 [[activities]]
@@ -284,6 +295,17 @@ start = "-30d 15:00"
 location = "Café Pfeffer"
 people = ["me", "mira"]
 open_points = [{ person = "mira", text = "Recommend »Tomorrow, and Tomorrow, and Tomorrow«" }]
+money = [{ person = "mira", cents = -8_80 }]
+
+# Upcoming and already paid for: money at an event that is still ahead
+[[activities]]
+name = "Ceramics course"
+icon = "palette"
+start = "+2d 18:00"
+reminder = true
+location = "Töpferei Ottensen"
+people = ["me", "mira"]
+money = [{ person = "mira", cents = -45_00 }]
 
 [[activities]]
 name = "Illustration exhibition"

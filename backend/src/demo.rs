@@ -124,6 +124,10 @@ mod tests {
             .unwrap();
         let people = count(&pool, "SELECT COUNT(*) FROM people").await;
         assert!(people > 30, "only {people} people");
+        assert!(
+            count(&pool, "SELECT COUNT(*) FROM ledger_entries").await > 0,
+            "no money"
+        );
         assert_eq!(
             count(&pool, "SELECT COUNT(*) FROM sessions").await,
             0,
