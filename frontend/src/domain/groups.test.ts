@@ -8,6 +8,7 @@ import {
   groupMembers,
   memberPickerOrder,
   membershipEffects,
+  membersToAdd,
   mostSpecificGroups,
   parentOptions,
   splitByArchived,
@@ -46,6 +47,29 @@ describe('groupMembers', () => {
   it('skips people that are not passed in (yourself)', () => {
     const memberships = [{ personId: 1, groupId: 6, createdAt: '' }]
     expect(groupMembers(6, db.groups, memberships, others)).toEqual([])
+  })
+})
+
+describe('membersToAdd', () => {
+  const none = new Set<Id>()
+
+  it('takes members of subgroups too, alphabetical', () => {
+    // University: Lena, Mira, Tim – plus Jonas, who is only in Freshers 2021
+    const subgroupOnly = [...db.memberships, { personId: 3, groupId: 3, createdAt: '' }]
+    expect(names(membersToAdd(1, db.groups, subgroupOnly, others, none))).toEqual([
+      'Jonas Weber',
+      'Lena Hoffmann',
+      'Mira Schulz',
+      'Tim Krause',
+    ])
+  })
+
+  it('leaves out participants and archived or deceased people', () => {
+    const people = others.map((p) =>
+      p.name === 'Mira Schulz' ? { ...p, deceased: true } : p.name === 'Tim Krause' ? { ...p, archivedAt: '2026-10-01T12:00:00Z' } : p,
+    )
+    expect(names(membersToAdd(1, db.groups, db.memberships, people, none))).toEqual(['Lena Hoffmann'])
+    expect(names(membersToAdd(1, db.groups, db.memberships, others, new Set([2, 5])))).toEqual(['Mira Schulz'])
   })
 })
 

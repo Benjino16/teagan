@@ -1,4 +1,5 @@
 import type { Group, Id, Person, Membership } from './model'
+import { isContactPaused } from './people'
 
 /** Path from the main group to the group: `University › Freshers 2021`. */
 export function groupPath(groupId: Id, groups: Group[]): string {
@@ -136,6 +137,22 @@ export function groupMembers(
   }
 
   return [...members.values()].sort((a, b) => a.person.name.localeCompare(b.person.name))
+}
+
+/**
+ * “Add all members” on an event: everyone in the group or its subgroups who isn't a participant yet,
+ * alphabetical. Archived and deceased people are left out – add them one by one if they were there.
+ */
+export function membersToAdd(
+  groupId: Id,
+  groups: Group[],
+  memberships: Membership[],
+  people: Person[],
+  participantIds: ReadonlySet<Id>,
+): Person[] {
+  return groupMembers(groupId, groups, memberships, people)
+    .map((m) => m.person)
+    .filter((p) => !participantIds.has(p.id) && !isContactPaused(p))
 }
 
 export interface MembershipChange {

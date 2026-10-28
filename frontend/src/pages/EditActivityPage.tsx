@@ -8,6 +8,7 @@ import {
   useDeleteActivity,
   useGroups,
   useLedgerEntriesForActivity,
+  useMemberships,
   useOpenPointsForActivity,
   usePeople,
   useSelf,
@@ -24,6 +25,7 @@ export function EditActivityPage() {
   const self = useSelf()
   const people = usePeople()
   const groups = useGroups()
+  const memberships = useMemberships()
   const points = useOpenPointsForActivity(id)
   const ledger = useLedgerEntriesForActivity(id)
   const updateActivity = useUpdateActivity(id)
@@ -31,7 +33,8 @@ export function EditActivityPage() {
   const detail = `/activities/${id}`
   const back = useBack(detail)
 
-  if (activity.isError || self.isError || people.isError || groups.isError || points.isError || ledger.isError) {
+  const queries = [activity, self, people, groups, memberships, points, ledger]
+  if (queries.some((q) => q.isError)) {
     return <PageError message="Couldn't load data." backTo={detail} />
   }
   // Not after deleting: the event refreshes before the page has navigated away.
@@ -53,7 +56,13 @@ export function EditActivityPage() {
   return (
     <>
       <PageHeader title="Edit event" backTo={detail} />
-      {!activity.data || !self.data || !people.data || !groups.data || !points.data || !ledger.data ? (
+      {!activity.data ||
+      !self.data ||
+      !people.data ||
+      !groups.data ||
+      !memberships.data ||
+      !points.data ||
+      !ledger.data ? (
         <PageLoading />
       ) : (
         <div className="flex flex-col gap-8 px-5 pt-6">
@@ -62,6 +71,7 @@ export function EditActivityPage() {
             self={self.data}
             people={people.data.filter((p) => !p.isSelf)}
             groups={groups.data}
+            memberships={memberships.data}
             initialPoints={points.data}
             initialLedger={ledger.data}
             submitLabel="Save"
