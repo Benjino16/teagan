@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { Button, CheckRow, EmptyState, IconBadge, ListCard, MediaRow, SectionHeader, cardStyles } from '../../components/ui'
 import { useSetOpenPointDone } from '../../data/queries'
+import { isOngoing, isToday } from '../../domain/activities'
 import { contacts } from '../../domain/contact'
-import { daysBetween, formatDayMonth, formatRelativePast } from '../../domain/dates'
+import { daysBetween, formatDayMonth, formatRelativePast, relativeDayName } from '../../domain/dates'
 import { countOpen, OPEN_POINTS_PREVIEW, openPointSource, visibleOpenPoints } from '../../domain/openPoints'
 import { participantsText } from '../../domain/people'
 import type { Id, OpenPoint, Timestamp } from '../../domain/model'
@@ -99,7 +100,10 @@ function useSettling() {
 
 function RecentSection({ data }: { data: PersonViewData }) {
   const { person, self, activities, nameOf, today } = data
-  const recent = contacts(activities, person.id, self.id, today).slice(0, 3)
+  // What happens today or is still running is shown in the cards above
+  const recent = contacts(activities, person.id, self.id, today)
+    .filter((a) => !isToday(a, today) && !isOngoing(a, today))
+    .slice(0, 3)
 
   return (
     <section aria-labelledby="recent" className="flex flex-col gap-2.5">
@@ -110,9 +114,9 @@ function RecentSection({ data }: { data: PersonViewData }) {
         <ul className="flex flex-col gap-2.5">
           {recent.map((activity) => {
             const others = participantsText(activity, { viewedPersonId: person.id, selfId: self.id, nameOf })
+            const day = relativeDayName(activity.startDate, today)
             const meta = [
-              formatRelativePast(daysBetween(activity.startDate, today)),
-              formatDayMonth(activity.startDate),
+              ...(day ? [day] : [formatRelativePast(daysBetween(activity.startDate, today)), formatDayMonth(activity.startDate)]),
               others && `with ${others}`,
             ]
             return (

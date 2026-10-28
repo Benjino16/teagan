@@ -115,7 +115,7 @@ export function ActivityPage() {
         {partOf && (
           <section aria-labelledby="part-of" className="flex flex-col gap-2.5">
             <SectionHeader id="part-of" title="Part of" />
-            <ActivityLinkCard activity={partOf} />
+            <ActivityLinkCard activity={partOf} today={today} />
           </section>
         )}
 
@@ -129,6 +129,7 @@ export function ActivityPage() {
                     activity={d}
                     withYear={yearOf(a.startDate) !== yearOf(a.endDate ?? a.startDate)}
                     nested={activitiesDuring(d, all.data).length}
+                    today={today}
                   />
                 </li>
               ))}
@@ -294,8 +295,18 @@ function Groups({ activity, groups }: { activity: Activity; groups: Group[] }) {
 }
 
 /** Row in lists: icon, title, date – leads to the activity. */
-function ActivityRow({ activity, withYear, nested }: { activity: Activity; withYear: boolean; nested: number }) {
-  const date = (withYear ? formatDateRangeWithYear : formatDateRange)(activity.startDate, activity.endDate)
+function ActivityRow({
+  activity,
+  withYear,
+  nested,
+  today,
+}: {
+  activity: Activity
+  withYear: boolean
+  nested: number
+  today: IsoDate
+}) {
+  const date = (withYear ? formatDateRangeWithYear : formatDateRange)(activity.startDate, activity.endDate, today)
   return (
     <Link to={`/activities/${activity.id}`} className={`${listRowStyles} text-ink no-underline hover:bg-hover`}>
       <MediaRow
@@ -308,7 +319,7 @@ function ActivityRow({ activity, withYear, nested }: { activity: Activity; withY
   )
 }
 
-function ActivityLinkCard({ activity }: { activity: Activity }) {
+function ActivityLinkCard({ activity, today }: { activity: Activity; today: IsoDate }) {
   return (
     <Link
       to={`/activities/${activity.id}`}
@@ -317,7 +328,7 @@ function ActivityLinkCard({ activity }: { activity: Activity }) {
       <MediaRow
         leading={<IconBadge icon={activityIcon(activity.icon).Icon} size={36} shape="circle" tone="accent-soft" />}
         title={activity.name}
-        subtitle={formatDateRangeWithYear(activity.startDate, activity.endDate)}
+        subtitle={formatDateRangeWithYear(activity.startDate, activity.endDate, today)}
         trailing={<ChevronRight aria-hidden="true" size={18} className="flex-none text-muted" />}
       />
     </Link>

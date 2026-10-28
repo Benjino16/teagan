@@ -148,6 +148,18 @@ describe('ongoingWithOthers', () => {
     ]
     expect(ongoingWithOthers(list, SELF, today)).toEqual([])
   })
+
+  it("puts today's single dates first, earliest time first, and skips other days and month-only dates", () => {
+    const single = (id: number, startDate: string) => ({ ...ongoing(id, startDate, [LENA]), endDate: null })
+    const list = [
+      ongoing(206, '2026-10-01', [LENA]),
+      single(207, '2026-10-13T19:00'),
+      single(208, '2026-10-13'),
+      single(209, '2026-10-12'),
+      single(210, '2026-10'),
+    ]
+    expect(ongoingWithOthers(list, SELF, today).map((a) => a.id)).toEqual([208, 207, 206])
+  })
 })
 
 describe('upcomingWithOthers', () => {

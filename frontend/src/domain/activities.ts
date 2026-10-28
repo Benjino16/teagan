@@ -102,9 +102,18 @@ export function byStartAsc(a: Activity, b: Activity): number {
   return a.startDate.localeCompare(b.startDate) || a.id - b.id
 }
 
-/** Ongoing ranges, most recently started first. */
+/** A single date on today, with or without a time. */
+export function isToday(activity: Activity, today: IsoDate): boolean {
+  return activity.endDate === null && dayOf(activity.startDate) === today
+}
+
+/**
+ * Happening now: today's single dates (earliest time first), then ongoing ranges (most recently started first).
+ */
 export function ongoingActivities(activities: Activity[], today: IsoDate): Activity[] {
-  return activities.filter((a) => isOngoing(a, today)).sort(byStartDesc)
+  const todays = activities.filter((a) => isToday(a, today)).sort(byStartAsc)
+  const ranges = activities.filter((a) => isOngoing(a, today)).sort(byStartDesc)
+  return [...todays, ...ranges]
 }
 
 /** “Coming up”: future activities, ascending. */
@@ -125,7 +134,7 @@ export function upcomingWithOthers(activities: Activity[], selfId: Id, today: Is
   return upcomingActivities(withOthers(activities, selfId), today, limit)
 }
 
-/** “Ongoing” on Today: ranges with others or a group that include today, most recently started first. */
+/** “Ongoing” on Today: today's single dates and running ranges with others or a group (order as in `ongoingActivities`). */
 export function ongoingWithOthers(activities: Activity[], selfId: Id, today: IsoDate): Activity[] {
   return ongoingActivities(withOthers(activities, selfId), today)
 }

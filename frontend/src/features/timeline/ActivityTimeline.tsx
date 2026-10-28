@@ -3,7 +3,16 @@ import type { ReactNode } from 'react'
 import { EmptyState, IconBadge, cardStyles } from '../../components/ui'
 import type { IconBadgeSize, IconBadgeTone } from '../../components/ui/IconBadge'
 import { activityStatus } from '../../domain/activities'
-import { daysBetween, formatDate, formatDateRange, formatDayMonth, formatRelativeFuture, normalizeEnd, timeOf } from '../../domain/dates'
+import {
+  daysBetween,
+  formatDate,
+  formatDateRange,
+  formatDayMonth,
+  formatRelativeFuture,
+  normalizeEnd,
+  relativeDayName,
+  timeOf,
+} from '../../domain/dates'
 import type { Activity, Impact, IsoDate } from '../../domain/model'
 import { buildTimeline, type ImpactOf, type Lanes, type SameDay, type TimelineEntry } from '../../domain/timeline'
 import { Link } from 'react-router'
@@ -96,7 +105,15 @@ export function ActivityTimeline({ activities, impactOf, details, today }: Props
           )
         }
         if (row.entry.impact === 1 && activityStatus(row.entry.activity, today) !== 'planned') {
-          return <CompactItem key={row.entry.activity.id} activity={row.entry.activity} lanes={row.lanes} sameDay={row.sameDay} />
+          return (
+            <CompactItem
+              key={row.entry.activity.id}
+              activity={row.entry.activity}
+              lanes={row.lanes}
+              sameDay={row.sameDay}
+              today={today}
+            />
+          )
         }
         return (
           <TimelineItem
@@ -124,9 +141,9 @@ function Rail({ children, sameDay = false }: { children: ReactNode; sameDay?: bo
 }
 
 /** Below another event of the same day only the time is shown. */
-function entryDate(activity: Activity, sameDay: SameDay): string {
+function entryDate(activity: Activity, sameDay: SameDay, today: IsoDate): string {
   if (sameDay.above) return timeOf(activity.startDate) ?? 'Same day'
-  return formatDateRange(activity.startDate, activity.endDate)
+  return formatDateRange(activity.startDate, activity.endDate, today)
 }
 
 /** Tighter gap towards the next event of the same day. */
@@ -179,7 +196,10 @@ function LaneColumns({ lanes, anchor = 0, bubble = 0 }: { lanes: Lanes; anchor?:
 function EndItem({ activity, impact, lanes, today }: { activity: Activity; impact: Impact; lanes: Lanes; today: IsoDate }) {
   const end = normalizeEnd(activity.endDate!)
   const remaining = daysBetween(today, end)
-  const label = formatDate(activity.endDate!) + (remaining >= 0 ? ` · ends ${formatRelativeFuture(remaining)}` : '')
+  const day = relativeDayName(activity.endDate!, today)
+  const label = day
+    ? `${remaining < 0 ? 'Ended' : 'Ends'} ${day.toLowerCase()}`
+    : formatDate(activity.endDate!) + (remaining >= 0 ? ` · ends ${formatRelativeFuture(remaining)}` : '')
   const emphasis = impact >= 4
 
   return (
@@ -210,7 +230,17 @@ function EndItem({ activity, impact, lanes, today }: { activity: Activity; impac
 }
 
 /** Side note (impact 1): one line with title and date, without description. */
-function CompactItem({ activity, lanes, sameDay }: { activity: Activity; lanes: Lanes; sameDay: SameDay }) {
+function CompactItem({
+  activity,
+  lanes,
+  sameDay,
+  today,
+}: {
+  activity: Activity
+  lanes: Lanes
+  sameDay: SameDay
+  today: IsoDate
+}) {
   return (
     <li className="flex items-stretch">
       <LaneColumns lanes={lanes} anchor={14} bubble={28} />
@@ -229,7 +259,7 @@ function CompactItem({ activity, lanes, sameDay }: { activity: Activity; lanes: 
               {activity.name}
             </Link>
           </h4>
-          <span className="text-xs whitespace-nowrap text-muted">{entryDate(activity, sameDay)}</span>
+          <span className="text-xs whitespace-nowrap text-muted">{entryDate(activity, sameDay, today)}</span>
         </div>
       </div>
     </li>
@@ -256,7 +286,7 @@ function TimelineItem({
   const look = looks[impact]
   const inverted = impact === 5 && !planned
   const date =
-    entryDate(activity, sameDay) +
+    entryDate(activity, sameDay, today) +
     (status === 'planned' ? ' · planned' : status === 'ongoing' ? ' · ongoing' : '')
   const metaColor = planned ? 'text-accent-ink' : look.meta
 
@@ -306,7 +336,7 @@ function TimelineItem({
                 Reminder on the day
               </p>
             )}
-            {during.length > 0 && <During activities={during} inverted={inverted} />}
+            {during.length > 0 && <During activities={during} inverted={inverted} today={today} />}
           </article>
         </div>
       </div>
@@ -315,7 +345,7 @@ function TimelineItem({
 }
 
 /** Nested events within a range. */
-function During({ activities, inverted }: { activities: Activity[]; inverted: boolean }) {
+function During({ activities, inverted, today }: { activities: Activity[]; inverted: boolean; today: IsoDate }) {
   return (
     <div className={clsx('mt-2 flex flex-col gap-1 border-t pt-2.5', inverted ? 'border-on-accent-muted' : 'border-line')}>
       <p
@@ -338,7 +368,7 @@ function During({ activities, inverted }: { activities: Activity[]; inverted: bo
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-md font-semibold">{activity.name}</span>
                   <span className={clsx('text-xs whitespace-nowrap', inverted ? 'text-on-accent-muted' : 'text-muted')}>
-                    {formatDayMonth(activity.startDate)}
+                    {relativeDayName(activity.startDate, today) ?? formatDayMonth(activity.startDate)}
                   </span>
                 </div>
                 {activity.description && (

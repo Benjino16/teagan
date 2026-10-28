@@ -12,7 +12,7 @@ interface Props {
   today: IsoDate
 }
 
-/** “Ongoing” on Today: ranges with others or a group that are running right now. */
+/** “Ongoing” on Today: activities with others or a group that take place today or are running right now. */
 export function OngoingFeed({ activities, selfId, nameOf, groupNameOf, today }: Props) {
   const preview = usePreview(activities, TODAY_PREVIEW)
   if (activities.length === 0) return null

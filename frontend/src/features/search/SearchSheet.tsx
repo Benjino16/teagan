@@ -16,6 +16,7 @@ import {
 } from '../../components/ui'
 import { usePeople, useGroups, useSearch } from '../../data/queries'
 import { formatDateRangeWithYear } from '../../domain/dates'
+import { getToday } from '../../domain/today'
 import { groupPath, isGroupArchived } from '../../domain/groups'
 import type { Id, SearchHits } from '../../domain/model'
 import { isArchived } from '../../domain/people'
@@ -146,7 +147,7 @@ export function SearchSheet({ onClose }: { onClose: () => void }) {
                     onClose={onClose}
                     leading={<Badge icon={activityIcon(activity.icon).Icon} />}
                     title={activity.name}
-                    subtitle={join(formatDateRangeWithYear(activity.startDate, activity.endDate), activity.location)}
+                    subtitle={join(formatDateRangeWithYear(activity.startDate, activity.endDate, getToday()), activity.location)}
                   />
                 )}
               </Section>

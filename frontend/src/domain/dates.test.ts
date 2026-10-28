@@ -68,6 +68,18 @@ describe('formatting', () => {
     expect(formatDate('2026-03-14')).toBe('Mar 14')
   })
 
+  it('names the days next to today', () => {
+    const today = '2026-10-28'
+    expect(formatDate('2026-10-27', today)).toBe('Yesterday')
+    expect(formatDate('2026-10-28T20:00', today)).toBe('Today, 20:00')
+    expect(formatDate('2026-10-29', today)).toBe('Tomorrow')
+    expect(formatDate('2026-10-30', today)).toBe('Oct 30')
+    expect(formatDate('2026-10', today)).toBe('Oct 2026')
+    expect(formatDateRangeWithYear('2026-10-29', null, today)).toBe('Tomorrow')
+    // Ranges keep their dates
+    expect(formatDateRange('2026-10-27', '2026-10-29', today)).toBe('Oct 27–29')
+  })
+
   it('formats ranges', () => {
     expect(formatDateRange('2026-08-08', '2026-08-10')).toBe('Aug 8–10')
     expect(formatDateRange('2026-02-03', '2026-04-18')).toBe('Feb 3 – Apr 18')
