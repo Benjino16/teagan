@@ -41,8 +41,8 @@ export function NewActivityPage() {
             submitLabel="Create event"
             submitting={createActivity.isPending}
             error={createActivity.error?.message ?? null}
-            onSubmit={(input, points) =>
-              createActivity.mutate({ activity: input, points }, {
+            onSubmit={(input, points, ledger) =>
+              createActivity.mutate({ activity: input, points, ledger }, {
                 onSuccess: (activity) => navigate(`/activities/${activity.id}`, { replace: true }),
               })
             }

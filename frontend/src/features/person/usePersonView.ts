@@ -3,6 +3,7 @@ import {
   useActivitiesForPerson,
   useGroups,
   useFacts,
+  useLedgerEntries,
   useOpenPoints,
   usePeople,
   usePerson,
@@ -10,7 +11,7 @@ import {
   useSelf,
 } from '../../data/queries'
 import { groupPath, isGroupArchived, mostSpecificGroups } from '../../domain/groups'
-import type { Activity, Fact, Id, IsoDate, OpenPoint, Person } from '../../domain/model'
+import type { Activity, Fact, Id, IsoDate, LedgerEntry, OpenPoint, Person } from '../../domain/model'
 import { displayName } from '../../domain/people'
 
 export interface PersonViewData {
@@ -18,6 +19,8 @@ export interface PersonViewData {
   self: Person
   activities: Activity[]
   openPoints: OpenPoint[]
+  /** Money with the person, newest first. */
+  ledger: LedgerEntry[]
   facts: Fact[]
   /** The person's groups with their path, e.g. `University › Freshers 2021`; archived ones last. */
   groups: PersonGroup[]
@@ -46,10 +49,11 @@ export function usePersonView(personId: Id, today: IsoDate): PersonViewState {
   const activities = useActivitiesForPerson(personId)
   const openPoints = useOpenPoints(personId)
   const facts = useFacts(personId)
+  const ledger = useLedgerEntries(personId)
   const groups = useGroups()
   const memberships = useMemberships()
 
-  const queries = [person, self, people, activities, openPoints, facts, groups, memberships]
+  const queries = [person, self, people, activities, openPoints, ledger, facts, groups, memberships]
 
   const nameOf = useMemo(() => {
     const names = new Map((people.data ?? []).map((p) => [p.id, displayName(p)]))
@@ -63,6 +67,7 @@ export function usePersonView(personId: Id, today: IsoDate): PersonViewState {
     !self.data ||
     !activities.data ||
     !openPoints.data ||
+    !ledger.data ||
     !facts.data ||
     !groups.data ||
     !memberships.data ||
@@ -87,6 +92,7 @@ export function usePersonView(personId: Id, today: IsoDate): PersonViewState {
       self: self.data,
       activities: activities.data,
       openPoints: openPoints.data,
+      ledger: ledger.data,
       facts: facts.data,
       groups: personGroups,
       nameOf,

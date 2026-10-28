@@ -1,23 +1,38 @@
-import { BookOpen, ChevronRight, History } from 'lucide-react'
+import { BookOpen, ChevronRight, HandCoins, History } from 'lucide-react'
 import { Link } from 'react-router'
 import { IconBadge, ListCard, listRowStyles, MediaRow } from '../../components/ui'
 import { milestones } from '../../domain/activities'
+import { balanceOf, balanceText } from '../../domain/ledger'
+import { displayName } from '../../domain/people'
 import type { PersonViewData } from './usePersonView'
 
 function count(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`
 }
 
-/** Entry points to the Timeline and Knowledge subpages. */
-export function PersonSections({ data }: { data: PersonViewData }) {
-  const { person, activities, facts } = data
+interface Props {
+  data: PersonViewData
+  /** Wide screens show timeline and knowledge on the page itself – only the rest is linked. */
+  onlyMoney?: boolean
+}
+
+/** Entry points to the Timeline, Knowledge and Money subpages. */
+export function PersonSections({ data, onlyMoney = false }: Props) {
+  const { person, activities, facts, ledger } = data
   const firstYear = activities.reduce<string | null>(
     (min, a) => (min === null || a.startDate < min ? a.startDate : min),
     null,
   )
   const lifeEvents = milestones(activities, person.id).length
 
-  const sections = [
+  const money = {
+    to: `/people/${person.id}/money`,
+    icon: HandCoins,
+    title: 'Money',
+    subtitle: ledger.length === 0 ? 'No entries' : balanceText(balanceOf(ledger), displayName(person)),
+  }
+  // No money with yourself
+  const sections = onlyMoney ? (person.isSelf ? [] : [money]) : [
     {
       to: `/people/${person.id}/timeline`,
       icon: History,
@@ -33,7 +48,9 @@ export function PersonSections({ data }: { data: PersonViewData }) {
         count(facts.length, 'note', 'notes') +
         (lifeEvents > 0 ? ` · ${count(lifeEvents, 'milestone', 'milestones')}` : ''),
     },
+    ...(person.isSelf ? [] : [money]),
   ]
+  if (sections.length === 0) return null
 
   return (
     <nav aria-label="More about this person">

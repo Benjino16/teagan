@@ -11,6 +11,8 @@ import type {
   FactInput,
   FactLabel,
   Id,
+  LedgerEntry,
+  LedgerEntryInput,
   LoginInput,
   LoginResult,
   NewOpenPointInput,
@@ -237,6 +239,28 @@ export class HttpRepository implements Repository {
 
   deleteOpenPoint(id: Id) {
     return this.request<void>('DELETE', `/open-points/${id}`)
+  }
+
+  // ── Money ───────────────────────────────────────────────────────────────
+
+  listLedgerEntries(personId: Id) {
+    return this.request<LedgerEntry[]>('GET', `/people/${personId}/ledger-entries`)
+  }
+
+  listLedgerEntriesForActivity(activityId: Id) {
+    return this.request<LedgerEntry[]>('GET', `/activities/${activityId}/ledger-entries`)
+  }
+
+  createLedgerEntry(personId: Id, input: LedgerEntryInput) {
+    return this.request<LedgerEntry>('POST', `/people/${personId}/ledger-entries`, input)
+  }
+
+  updateLedgerEntry(id: Id, input: LedgerEntryInput) {
+    return this.request<LedgerEntry>('PUT', `/ledger-entries/${id}`, input)
+  }
+
+  deleteLedgerEntry(id: Id) {
+    return this.request<void>('DELETE', `/ledger-entries/${id}`)
   }
 
   // ── Knowledge ───────────────────────────────────────────────────────────

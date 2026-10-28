@@ -11,6 +11,8 @@ import type {
   FactInput,
   FactLabel,
   Id,
+  LedgerEntry,
+  LedgerEntryInput,
   LoginInput,
   LoginResult,
   NewOpenPointInput,
@@ -112,6 +114,16 @@ export interface Repository {
   updateOpenPoint(id: Id, input: OpenPointInput): Promise<OpenPoint>
   setOpenPointDone(id: Id, done: boolean): Promise<OpenPoint>
   deleteOpenPoint(id: Id): Promise<void>
+
+  // Money                                          /people/:id/ledger-entries, /ledger-entries/:id
+  /** Newest first; their sum is the balance. */
+  listLedgerEntries(personId: Id): Promise<LedgerEntry[]>
+  /** Entries from an activity, for every person.  /activities/:id/ledger-entries */
+  listLedgerEntriesForActivity(activityId: Id): Promise<LedgerEntry[]>
+  /** Not with yourself: `invalid`. */
+  createLedgerEntry(personId: Id, input: LedgerEntryInput): Promise<LedgerEntry>
+  updateLedgerEntry(id: Id, input: LedgerEntryInput): Promise<LedgerEntry>
+  deleteLedgerEntry(id: Id): Promise<void>
 
   // Knowledge                                      /people/:id/facts, /facts/:id
   listFacts(personId: Id): Promise<Fact[]>

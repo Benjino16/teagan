@@ -7,6 +7,7 @@ import {
   useActivity,
   useDeleteActivity,
   useGroups,
+  useLedgerEntriesForActivity,
   useOpenPointsForActivity,
   usePeople,
   useSelf,
@@ -24,12 +25,13 @@ export function EditActivityPage() {
   const people = usePeople()
   const groups = useGroups()
   const points = useOpenPointsForActivity(id)
+  const ledger = useLedgerEntriesForActivity(id)
   const updateActivity = useUpdateActivity(id)
   const deleteActivity = useDeleteActivity(id)
   const detail = `/activities/${id}`
   const back = useBack(detail)
 
-  if (activity.isError || self.isError || people.isError || groups.isError || points.isError) {
+  if (activity.isError || self.isError || people.isError || groups.isError || points.isError || ledger.isError) {
     return <PageError message="Couldn't load data." backTo={detail} />
   }
   // Not after deleting: the event refreshes before the page has navigated away.
@@ -38,15 +40,20 @@ export function EditActivityPage() {
   }
 
   const pointCount = points.data?.length ?? 0
+  const entryCount = ledger.data?.length ?? 0
+  const kept = [
+    pointCount > 0 && pluralize(pointCount, 'open point'),
+    entryCount > 0 && `${entryCount} money ${entryCount === 1 ? 'entry' : 'entries'}`,
+  ].filter(Boolean)
   const deleteQuestion =
-    pointCount > 0
-      ? `Delete this event for good? Its ${pluralize(pointCount, 'open point')} ${pointCount === 1 ? 'stays' : 'stay'}, just without the event.`
+    kept.length > 0
+      ? `Delete this event for good? Its ${kept.join(' and ')} ${pointCount + entryCount === 1 ? 'stays' : 'stay'}, just without the event.`
       : 'Delete this event for good?'
 
   return (
     <>
       <PageHeader title="Edit event" backTo={detail} />
-      {!activity.data || !self.data || !people.data || !groups.data || !points.data ? (
+      {!activity.data || !self.data || !people.data || !groups.data || !points.data || !ledger.data ? (
         <PageLoading />
       ) : (
         <div className="flex flex-col gap-8 px-5 pt-6">
@@ -56,12 +63,13 @@ export function EditActivityPage() {
             people={people.data.filter((p) => !p.isSelf)}
             groups={groups.data}
             initialPoints={points.data}
+            initialLedger={ledger.data}
             submitLabel="Save"
             submitting={updateActivity.isPending || deleteActivity.isPending}
             error={updateActivity.error?.message ?? null}
-            onSubmit={(input, drafts) =>
+            onSubmit={(input, points, ledger) =>
               // Back to the detail page, without a second history entry
-              updateActivity.mutate({ activity: input, points: drafts }, { onSuccess: back })
+              updateActivity.mutate({ activity: input, points, ledger }, { onSuccess: back })
             }
           />
           {/* Unsaved form changes are dropped – deleting is its own action */}

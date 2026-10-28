@@ -138,6 +138,22 @@ export interface OpenPoint extends Timestamps {
   doneAt: Timestamp | null
 }
 
+/**
+ * Money between you and the person. The sign is your own perspective:
+ * negative = you paid (for them, or back to them), positive = they paid.
+ * The sum of a person's entries is the balance; below zero they owe you.
+ */
+export interface LedgerEntry extends Timestamps {
+  id: Id
+  personId: Id
+  /** Hundredths of the display currency, never `0`. */
+  amountCents: number
+  date: IsoDate
+  note: string | null
+  /** The event it came from, optional. */
+  activityId: Id | null
+}
+
 export interface Fact extends Timestamps {
   id: Id
   personId: Id
@@ -232,5 +248,7 @@ export type ActivityInput = Editable<Activity>
 export type NewOpenPointInput = Pick<OpenPoint, 'text' | 'activityId'>
 /** Editing a point: only the text. */
 export type OpenPointInput = Pick<OpenPoint, 'text'>
+/** The person comes from the path and can't change later; the event can. */
+export type LedgerEntryInput = Pick<LedgerEntry, 'amountCents' | 'date' | 'note' | 'activityId'>
 /** The person comes from the path; new facts go to the bottom, `sort` changes via reordering only. */
 export type FactInput = Pick<Fact, 'label' | 'value'>
