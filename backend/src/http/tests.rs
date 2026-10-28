@@ -8,6 +8,7 @@ mod cookies;
 mod facts;
 mod frontend;
 mod groups;
+mod ledger;
 mod open_points;
 mod people;
 mod photos;

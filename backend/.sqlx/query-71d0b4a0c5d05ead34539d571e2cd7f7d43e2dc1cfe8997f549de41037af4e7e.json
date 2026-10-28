@@ -1,0 +1,12 @@
+{
+  "db_name": "SQLite",
+  "query": "DELETE FROM ledger_entries WHERE owner_id = ? AND id = ?",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "71d0b4a0c5d05ead34539d571e2cd7f7d43e2dc1cfe8997f549de41037af4e7e"
+}

@@ -1,0 +1,110 @@
+{
+  "db_name": "SQLite",
+  "query": "\n        SELECT id, person_id, amount_cents, date, note AS \"note?\",\n               activity_id AS \"activity_id?\",\n               created_at AS \"created_at: _\",\n               updated_at AS \"updated_at: _\"\n          FROM ledger_entries\n         WHERE owner_id = ? AND person_id = ?\n         ORDER BY date DESC, id DESC\n        ",
+  "describe": {
+    "columns": [
+      {
+        "name": "id",
+        "ordinal": 0,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "ledger_entries",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "name": "person_id",
+        "ordinal": 1,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "ledger_entries",
+            "name": "person_id"
+          }
+        }
+      },
+      {
+        "name": "amount_cents",
+        "ordinal": 2,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "ledger_entries",
+            "name": "amount_cents"
+          }
+        }
+      },
+      {
+        "name": "date",
+        "ordinal": 3,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "ledger_entries",
+            "name": "date"
+          }
+        }
+      },
+      {
+        "name": "note?",
+        "ordinal": 4,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "ledger_entries",
+            "name": "note"
+          }
+        }
+      },
+      {
+        "name": "activity_id?",
+        "ordinal": 5,
+        "type_info": "Integer",
+        "origin": {
+          "Table": {
+            "table": "ledger_entries",
+            "name": "activity_id"
+          }
+        }
+      },
+      {
+        "name": "created_at: _",
+        "ordinal": 6,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "ledger_entries",
+            "name": "created_at"
+          }
+        }
+      },
+      {
+        "name": "updated_at: _",
+        "ordinal": 7,
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "ledger_entries",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "3f353e4238e772f7fa6f6b8d34b820c169c30725df085cbb27949887d9c3a426"
+}

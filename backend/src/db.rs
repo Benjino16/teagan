@@ -2,6 +2,7 @@ pub mod activities;
 pub mod challenges;
 pub mod facts;
 pub mod groups;
+pub mod ledger;
 pub mod memberships;
 pub mod open_points;
 pub mod people;

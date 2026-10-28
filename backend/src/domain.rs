@@ -2,6 +2,7 @@ mod activity;
 mod date;
 mod fact;
 mod group;
+mod ledger;
 mod open_point;
 mod person;
 mod photo;
@@ -16,6 +17,7 @@ pub use activity::{
 };
 pub use fact::{FactInput, FactLabelResponse, FactOrderInput, FactResponse, count_fact_labels};
 pub use group::{GroupArchivedInput, GroupInput, GroupResponse, MembershipResponse};
+pub use ledger::{LedgerEntryInput, LedgerEntryResponse};
 pub use open_point::{NewOpenPointInput, OpenPointDoneInput, OpenPointInput, OpenPointResponse};
 pub use person::{PersonArchivedInput, PersonInput, PersonResponse};
 pub use photo::{
