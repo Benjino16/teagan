@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { Button, CheckRow, EmptyState, IconBadge, ListCard, MediaRow, SectionHeader, cardStyles } from '../../components/ui'
 import { useSetOpenPointDone } from '../../data/queries'
-import { isOngoing, isToday } from '../../domain/activities'
-import { contacts } from '../../domain/contact'
-import { daysBetween, formatDayMonth, formatRelativePast, relativeDayName } from '../../domain/dates'
+import { hasParticipant, recentActivities } from '../../domain/activities'
+import { dayOf, daysBetween, formatDate, formatDayMonth, formatRelativePast, isFullDate, relativeDayName } from '../../domain/dates'
 import { countOpen, OPEN_POINTS_PREVIEW, openPointSource, visibleOpenPoints } from '../../domain/openPoints'
 import { participantsText } from '../../domain/people'
 import type { Id, OpenPoint, Timestamp } from '../../domain/model'
@@ -100,23 +99,28 @@ function useSettling() {
 
 function RecentSection({ data }: { data: PersonViewData }) {
   const { person, self, activities, nameOf, today } = data
-  // What happens today or is still running is shown in the cards above
-  const recent = contacts(activities, person.id, self.id, today)
-    .filter((a) => !isToday(a, today) && !isOngoing(a, today))
-    .slice(0, 3)
+  const recent = recentActivities(activities, person.id, today)
 
   return (
     <section aria-labelledby="recent" className="flex flex-col gap-2.5">
       <SectionHeader id="recent" title="Recently" />
       {recent.length === 0 ? (
-        <EmptyState>No shared experiences yet.</EmptyState>
+        <EmptyState>Nothing logged yet.</EmptyState>
       ) : (
         <ul className="flex flex-col gap-2.5">
           {recent.map((activity) => {
-            const others = participantsText(activity, { viewedPersonId: person.id, selfId: self.id, nameOf })
-            const day = relativeDayName(activity.startDate, today)
+            // Not every activity includes you, so “just the two of you” needs saying
+            const others =
+              participantsText(activity, { viewedPersonId: person.id, selfId: self.id, nameOf }) ??
+              (hasParticipant(activity, self.id) ? 'you' : null)
+            const start = dayOf(activity.startDate)
+            const day = relativeDayName(start, today)
             const meta = [
-              ...(day ? [day] : [formatRelativePast(daysBetween(activity.startDate, today)), formatDayMonth(activity.startDate)]),
+              ...(day
+                ? [day]
+                : isFullDate(start)
+                  ? [formatRelativePast(daysBetween(start, today)), formatDayMonth(start)]
+                  : [formatDate(start)]),
               others && `with ${others}`,
             ]
             return (

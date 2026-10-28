@@ -16,6 +16,7 @@ import {
   participantNote,
   ongoingActivities,
   ongoingWithOthers,
+  recentActivities,
   upcomingActivities,
   upcomingWithOthers,
 } from './activities'
@@ -159,6 +160,45 @@ describe('ongoingWithOthers', () => {
       single(210, '2026-10'),
     ]
     expect(ongoingWithOthers(list, SELF, today).map((a) => a.id)).toEqual([208, 207, 206])
+  })
+})
+
+describe('recentActivities', () => {
+  const SELF = 1
+  const past = (id: number, startDate: string, personIds: number[], endDate: string | null = null): Activity => ({
+    ...byId(1),
+    id,
+    startDate,
+    endDate,
+    participants: personIds.map((personId) => ({ personId, impact: null, note: null })),
+  })
+
+  it("shows the person's past activities, with or without you, newest first", () => {
+    const list = [
+      past(301, '2026-09-20', [SELF, LENA]),
+      past(302, '2026-10-01', [LENA], '2026-10-08'),
+      past(303, '2026-10-10', [LENA, TIM]),
+    ]
+    expect(recentActivities(list, LENA, today).map((a) => a.id)).toEqual([303, 302, 301])
+  })
+
+  it('includes month-only dates', () => {
+    expect(recentActivities([past(304, '2026-08', [LENA])], LENA, today).map((a) => a.id)).toEqual([304])
+  })
+
+  it("leaves out other people's, future, today's and ongoing activities", () => {
+    const list = [
+      past(305, '2026-10-01', [TIM]),
+      past(306, '2026-11-01', [LENA]),
+      past(307, '2026-10-13T09:00', [LENA]),
+      past(308, '2026-10-01', [LENA], '2026-10-20'),
+    ]
+    expect(recentActivities(list, LENA, today)).toEqual([])
+  })
+
+  it('limits to the last 3', () => {
+    const list = [1, 2, 3, 4].map((day) => past(310 + day, `2026-10-0${day}`, [LENA]))
+    expect(recentActivities(list, LENA, today).map((a) => a.id)).toEqual([314, 313, 312])
   })
 })
 
