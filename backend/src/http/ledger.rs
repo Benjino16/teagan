@@ -1,7 +1,7 @@
 use super::{AppState, CurrentUser};
 use crate::{
     db,
-    domain::{LedgerEntryInput, LedgerEntryResponse},
+    domain::{BalanceResponse, LedgerEntryInput, LedgerEntryResponse},
     error::{AppError, AppResult},
 };
 use axum::{
@@ -19,6 +19,14 @@ pub async fn list_for_person(
     db::people::ensure_exists(&state.pool, user.id, person_id).await?;
     let entries = db::ledger::list_for_person(&state.pool, user.id, person_id).await?;
     Ok(Json(entries))
+}
+
+pub async fn list_balances(
+    State(state): State<AppState>,
+    user: CurrentUser,
+) -> AppResult<Json<Vec<BalanceResponse>>> {
+    let balances = db::ledger::balances(&state.pool, user.id).await?;
+    Ok(Json(balances))
 }
 
 pub async fn list_for_activity(

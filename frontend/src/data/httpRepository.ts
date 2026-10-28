@@ -4,6 +4,7 @@ import type {
   Activity,
   ActivityInput,
   AuthStatus,
+  Balance,
   ChangePasswordInput,
   Group,
   GroupInput,
@@ -242,6 +243,10 @@ export class HttpRepository implements Repository {
   }
 
   // ── Money ───────────────────────────────────────────────────────────────
+
+  listBalances() {
+    return this.request<Balance[]>('GET', '/balances')
+  }
 
   listLedgerEntries(personId: Id) {
     return this.request<LedgerEntry[]>('GET', `/people/${personId}/ledger-entries`)

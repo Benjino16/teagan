@@ -160,6 +160,7 @@ fn api(state: AppState) -> Router {
                 .delete(open_points::delete_open_point),
         )
         .route("/open-points/{point_id}/done", put(open_points::set_done))
+        .route("/balances", get(ledger::list_balances))
         .route(
             "/ledger-entries/{entry_id}",
             get(ledger::get_entry)

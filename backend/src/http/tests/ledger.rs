@@ -79,6 +79,50 @@ async fn entries_of_a_person_newest_first(pool: SqlitePool) {
 }
 
 #[sqlx::test]
+async fn balances_of_everyone_with_something_open(pool: SqlitePool) {
+    let app = TestApp::new(pool.clone()).await;
+    let other = app.other_user(&pool).await;
+    let lena = app.create_person("Lena").await;
+    let tom = app.create_person("Tom").await;
+    let jo = app.create_person("Jo").await;
+    let mia = app.create_person("Mia").await;
+
+    for (person, amount) in [
+        (lena, -2500),
+        (lena, 1200),
+        (tom, 3000),
+        (jo, -500),
+        (jo, 500),
+        (mia, -100),
+    ] {
+        app.post(
+            &format!("/api/people/{person}/ledger-entries"),
+            json!({ "amountCents": amount, "date": "2026-10-28" }),
+        )
+        .await;
+    }
+    // Archiving doesn't settle anything
+    app.put(
+        &format!("/api/people/{mia}/archived"),
+        json!({ "archived": true }),
+    )
+    .await;
+
+    let (status, balances) = app.get("/api/balances").await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(
+        balances,
+        json!([
+            { "personId": tom, "balanceCents": 3000 },
+            { "personId": lena, "balanceCents": -1300 },
+            { "personId": mia, "balanceCents": -100 },
+        ])
+    );
+
+    assert_eq!(other.get("/api/balances").await.1, json!([]));
+}
+
+#[sqlx::test]
 async fn invalid_entry_is_400(pool: SqlitePool) {
     let app = TestApp::new(pool).await;
     let lena = app.create_person("Lena").await;

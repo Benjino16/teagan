@@ -2,10 +2,12 @@ import { describe, expect, it } from 'vitest'
 import {
   amountInputText,
   balanceOf,
+  balanceRowText,
   balanceText,
   entryDateFor,
   entryText,
   ledgerChanges,
+  overallText,
   parseAmount,
   settlingCents,
   signedCents,
@@ -43,6 +45,21 @@ describe('balance', () => {
     expect(entryText(5, 'Lena')).toBe('Lena paid 0.05 €')
     expect(signedCents(2500, 'you')).toBe(-2500)
     expect(signedCents(2500, 'them')).toBe(2500)
+  })
+})
+
+describe('overallText', () => {
+  const of = (...cents: number[]) => cents.map((balanceCents, i) => ({ personId: i + 1, balanceCents }))
+
+  it('nets everyone into one direction', () => {
+    expect(overallText(of(-7000, 3000))).toBe("Overall you're owed 40 €")
+    expect(overallText(of(-2000, 3000))).toBe('Overall you owe 10 €')
+    expect(overallText(of(-3000, 3000))).toBe('Even overall')
+  })
+
+  it('words a row', () => {
+    expect(balanceRowText(-700)).toBe('owes you 7 €')
+    expect(balanceRowText(550)).toBe('you owe 5.50 €')
   })
 })
 

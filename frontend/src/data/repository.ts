@@ -4,6 +4,7 @@ import type {
   Activity,
   ActivityInput,
   AuthStatus,
+  Balance,
   ChangePasswordInput,
   Group,
   GroupInput,
@@ -116,6 +117,8 @@ export interface Repository {
   deleteOpenPoint(id: Id): Promise<void>
 
   // Money                                          /people/:id/ledger-entries, /ledger-entries/:id
+  /** Everyone with something open, archived people included; largest amounts first.  /balances */
+  listBalances(): Promise<Balance[]>
   /** Newest first; their sum is the balance. */
   listLedgerEntries(personId: Id): Promise<LedgerEntry[]>
   /** Entries from an activity, for every person.  /activities/:id/ledger-entries */

@@ -17,7 +17,7 @@ pub use activity::{
 };
 pub use fact::{FactInput, FactLabelResponse, FactOrderInput, FactResponse, count_fact_labels};
 pub use group::{GroupArchivedInput, GroupInput, GroupResponse, MembershipResponse};
-pub use ledger::{LedgerEntryInput, LedgerEntryResponse};
+pub use ledger::{BalanceResponse, LedgerEntryInput, LedgerEntryResponse};
 pub use open_point::{NewOpenPointInput, OpenPointDoneInput, OpenPointInput, OpenPointResponse};
 pub use person::{PersonArchivedInput, PersonInput, PersonResponse};
 pub use photo::{

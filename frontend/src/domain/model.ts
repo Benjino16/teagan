@@ -154,6 +154,12 @@ export interface LedgerEntry extends Timestamps {
   activityId: Id | null
 }
 
+/** What is open with one person, never `0`; sign as in `LedgerEntry`. */
+export interface Balance {
+  personId: Id
+  balanceCents: number
+}
+
 export interface Fact extends Timestamps {
   id: Id
   personId: Id

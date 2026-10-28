@@ -1,5 +1,5 @@
 import { dayOf, isFullDate } from './dates'
-import type { Id, IsoDate, LedgerEntry, PartialDate } from './model'
+import type { Balance, Id, IsoDate, LedgerEntry, PartialDate } from './model'
 
 /**
  * Display only, for now – a setting later. Amounts are stored in hundredths of
@@ -34,6 +34,23 @@ export function balanceText(balance: number, name: string): string {
   if (balance < 0) return `${name} owes you ${formatMoney(balance)}`
   if (balance > 0) return `You owe ${name} ${formatMoney(balance)}`
   return 'All settled'
+}
+
+/**
+ * Which way it goes across everyone, the single balances listed below it:
+ * `Overall you're owed 40 €` · `Overall you owe 10 €` · `Even overall` – the
+ * last isn't “settled”, there is still money open with each of them.
+ */
+export function overallText(balances: Balance[]): string {
+  const net = balances.reduce((sum, b) => sum + b.balanceCents, 0)
+  if (net < 0) return `Overall you're owed ${formatMoney(net)}`
+  if (net > 0) return `Overall you owe ${formatMoney(net)}`
+  return 'Even overall'
+}
+
+/** For a row that already names the person: `owes you 7 €` · `you owe 5.50 €`. */
+export function balanceRowText(balance: number): string {
+  return balance < 0 ? `owes you ${formatMoney(balance)}` : `you owe ${formatMoney(balance)}`
 }
 
 /** Who paid: you (negative amount) or the other person (positive). */

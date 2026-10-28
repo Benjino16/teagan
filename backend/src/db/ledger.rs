@@ -1,6 +1,6 @@
 use sqlx::SqlitePool;
 
-use crate::domain::{LedgerEntryInput, LedgerEntryResponse};
+use crate::domain::{BalanceResponse, LedgerEntryInput, LedgerEntryResponse};
 
 /// All entries with a person, newest first. Their sum is the balance.
 pub async fn list_for_person(
@@ -21,6 +21,25 @@ pub async fn list_for_person(
         "#,
         owner_id,
         person_id
+    )
+    .fetch_all(pool)
+    .await
+}
+
+/// Every person with something open, archived ones included – archiving
+/// doesn't settle a debt. Largest amounts first, either way.
+pub async fn balances(pool: &SqlitePool, owner_id: i64) -> sqlx::Result<Vec<BalanceResponse>> {
+    sqlx::query_as!(
+        BalanceResponse,
+        r#"
+        SELECT person_id, SUM(amount_cents) AS "balance_cents!: i64"
+          FROM ledger_entries
+         WHERE owner_id = ?
+         GROUP BY person_id
+        HAVING SUM(amount_cents) <> 0
+         ORDER BY abs(SUM(amount_cents)) DESC, person_id
+        "#,
+        owner_id
     )
     .fetch_all(pool)
     .await

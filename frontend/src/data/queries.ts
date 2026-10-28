@@ -46,6 +46,8 @@ export const queryKeys = {
   activity: (id: Id) => ['activities', 'detail', id] as const,
   openPoints: (personId: Id) => ['openPoints', personId] as const,
   openPointsForActivity: (activityId: Id) => ['openPoints', 'activity', activityId] as const,
+  // Under `ledger`, so every change to an entry refreshes them too
+  balances: ['ledger', 'balances'] as const,
   ledger: (personId: Id) => ['ledger', personId] as const,
   ledgerForActivity: (activityId: Id) => ['ledger', 'activity', activityId] as const,
   facts: (personId: Id) => ['facts', personId] as const,
@@ -239,6 +241,11 @@ export function useOpenPointsForActivity(activityId: Id) {
 export function useOpenPoints(personId: Id) {
   const repo = useRepository()
   return useQuery({ queryKey: queryKeys.openPoints(personId), queryFn: () => repo.listOpenPoints(personId) })
+}
+
+export function useBalances() {
+  const repo = useRepository()
+  return useQuery({ queryKey: queryKeys.balances, queryFn: () => repo.listBalances() })
 }
 
 export function useLedgerEntries(personId: Id) {

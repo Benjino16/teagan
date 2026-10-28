@@ -44,6 +44,15 @@ pub struct LedgerEntryResponse {
     pub updated_at: DateTime<Utc>,
 }
 
+/// What is open with one person: the sum of their entries, never `0`.
+/// Below zero they owe the user, above zero the user owes them.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BalanceResponse {
+    pub person_id: i64,
+    pub balance_cents: i64,
+}
+
 fn validate_amount(value: i64) -> Result<(), ValidationError> {
     // Not `abs()`: it overflows on `i64::MIN`
     if value != 0 && (-MAX_AMOUNT_CENTS..=MAX_AMOUNT_CENTS).contains(&value) {
@@ -152,6 +161,18 @@ mod tests {
             serde_json::from_value(json!({ "amountCents": 500, "date": "2026-10-28" })).unwrap();
         assert_eq!(input.note, None);
         assert_eq!(input.activity_id, None);
+    }
+
+    #[test]
+    fn balance_is_written_in_camel_case() {
+        let balance = BalanceResponse {
+            person_id: 2,
+            balance_cents: -700,
+        };
+        assert_eq!(
+            serde_json::to_value(&balance).unwrap(),
+            json!({ "personId": 2, "balanceCents": -700 })
+        );
     }
 
     #[test]
