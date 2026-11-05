@@ -3,7 +3,7 @@ import type { Ref } from 'react'
 import { Link } from 'react-router'
 import { Avatar, Chip } from '../../components/ui'
 import { ageOf, formatAge, parseBirthday } from '../../domain/birthday'
-import { lastSeenText } from '../../domain/contact'
+import { lastActivityText, lastSeenText } from '../../domain/contact'
 import type { IsoDate, Person } from '../../domain/model'
 import { isContactPaused } from '../../domain/people'
 import { deathText } from '../../domain/remembrance'
@@ -37,7 +37,7 @@ export function PersonHero({ person, groups, daysSinceContact, today, nameRef }:
           </h1>
           {person.nickname && <p className="text-md text-muted">Goes by {person.nickname}</p>}
           <p className="text-md text-muted">
-            {lastSeenText(daysSinceContact)}
+            {(person.isSelf ? lastActivityText : lastSeenText)(daysSinceContact)}
             {approximateAge && ` · ${formatAge(approximateAge)}`}
           </p>
           {person.deceased && <p className="text-md text-muted">{deathText(person)}</p>}

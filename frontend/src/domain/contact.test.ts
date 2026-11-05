@@ -6,6 +6,7 @@ import {
   coveringActivity,
   daysSinceContact,
   dueReconnects,
+  lastActivityText,
   lastContactDate,
   lastSeenText,
   reconnectRowText,
@@ -39,6 +40,11 @@ describe('last contact', () => {
   it('phrases “last seen”', () => {
     expect(lastSeenText(daysSinceContact('2026-09-22', today))).toBe('Last seen 3 weeks ago')
     expect(lastSeenText(null)).toBe('No contact logged yet')
+  })
+
+  it('phrases “last activity” for your own person', () => {
+    expect(lastActivityText(daysSinceContact('2026-09-22', today))).toBe('Last activity 3 weeks ago')
+    expect(lastActivityText(null)).toBe('No activity logged yet')
   })
 })
 
