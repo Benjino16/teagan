@@ -314,15 +314,16 @@ function TimelineItem({
               </p>
             )}
             {activity.description && (
-              <p className={clsx('text-md leading-normal', planned ? 'text-ink-2' : look.description)}>
+              // Only a preview – the activity page has all of it
+              <p className={clsx('line-clamp-3 text-md leading-normal wrap-anywhere', planned ? 'text-ink-2' : look.description)}>
                 {activity.description}
               </p>
             )}
             {note && (
-              // Only for this person or group
+              // Only for this person or group; a preview like the description
               <p
                 className={clsx(
-                  'border-l-2 pl-2.5 text-md leading-normal whitespace-pre-line wrap-anywhere',
+                  'line-clamp-2 border-l-2 pl-2.5 text-md leading-normal wrap-anywhere',
                   inverted ? 'border-on-accent-muted text-on-accent-2' : 'border-accent text-ink-2',
                 )}
               >
@@ -366,7 +367,7 @@ function During({ activities, inverted, today }: { activities: Activity[]; inver
                   </span>
                 </div>
                 {activity.description && (
-                  <p className={clsx('text-sm leading-snug', inverted ? 'text-on-accent-2' : 'text-ink-2')}>
+                  <p className={clsx('line-clamp-2 text-sm leading-snug wrap-anywhere', inverted ? 'text-on-accent-2' : 'text-ink-2')}>
                     {activity.description}
                   </p>
                 )}
