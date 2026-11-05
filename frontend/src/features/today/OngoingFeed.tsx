@@ -1,5 +1,5 @@
 import { SectionHeader, ShowMore, usePreview } from '../../components/ui'
-import type { Activity, Id, IsoDate } from '../../domain/model'
+import type { Activity, Id, IsoDate, Person } from '../../domain/model'
 import { companyText } from '../../domain/people'
 import { UpcomingActivityCard } from '../activity/UpcomingActivityCard'
 import { TODAY_PREVIEW } from './preview'
@@ -7,13 +7,13 @@ import { TODAY_PREVIEW } from './preview'
 interface Props {
   activities: Activity[]
   selfId: Id
-  nameOf: (id: Id) => string
+  personOf: (id: Id) => Person | undefined
   groupNameOf: (groupId: Id) => string
   today: IsoDate
 }
 
 /** “Ongoing” on Today: activities with others or a group that take place today or are running right now. */
-export function OngoingFeed({ activities, selfId, nameOf, groupNameOf, today }: Props) {
+export function OngoingFeed({ activities, selfId, personOf, groupNameOf, today }: Props) {
   const preview = usePreview(activities, TODAY_PREVIEW)
   if (activities.length === 0) return null
 
@@ -25,7 +25,7 @@ export function OngoingFeed({ activities, selfId, nameOf, groupNameOf, today }: 
           key={activity.id}
           activity={activity}
           today={today}
-          company={companyText(activity, { selfId, nameOf, groupNameOf })}
+          company={companyText(activity, { selfId, personOf, groupNameOf })}
         />
       ))}
       <ShowMore hidden={preview.hidden} expanded={preview.expanded} onToggle={preview.toggle} className="px-1" />

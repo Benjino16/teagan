@@ -5,13 +5,13 @@ import type { PersonViewData } from './usePersonView'
 
 /** The person's timeline, with the impact and notes for this person. */
 export function PersonTimeline({ data }: { data: PersonViewData }) {
-  const { person, self, nameOf, today } = data
+  const { person, self, personOf, today } = data
   return (
     <ActivityTimeline
       activities={data.activities}
       impactOf={(activity) => effectiveImpact(activity, person.id)}
       details={(activity) => ({
-        others: participantsText(activity, { viewedPersonId: person.id, selfId: self.id, nameOf }),
+        others: participantsText(activity, { viewedPersonId: person.id, selfId: self.id, personOf }),
         note: participantNote(activity, person.id),
       })}
       today={today}

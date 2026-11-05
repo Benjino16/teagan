@@ -12,7 +12,6 @@ import {
 } from '../../data/queries'
 import { groupPath, isGroupArchived, mostSpecificGroups } from '../../domain/groups'
 import type { Activity, Fact, Id, IsoDate, LedgerEntry, OpenPoint, Person } from '../../domain/model'
-import { displayName } from '../../domain/people'
 
 export interface PersonViewData {
   person: Person
@@ -24,7 +23,7 @@ export interface PersonViewData {
   facts: Fact[]
   /** The person's groups with their path, e.g. `University › Freshers 2021`; archived ones last. */
   groups: PersonGroup[]
-  nameOf: (id: Id) => string
+  personOf: (id: Id) => Person | undefined
   today: IsoDate
 }
 
@@ -55,9 +54,9 @@ export function usePersonView(personId: Id, today: IsoDate): PersonViewState {
 
   const queries = [person, self, people, activities, openPoints, ledger, facts, groups, memberships]
 
-  const nameOf = useMemo(() => {
-    const names = new Map((people.data ?? []).map((p) => [p.id, displayName(p)]))
-    return (id: Id) => names.get(id) ?? 'Unknown'
+  const personOf = useMemo(() => {
+    const byId = new Map((people.data ?? []).map((p) => [p.id, p]))
+    return (id: Id) => byId.get(id)
   }, [people.data])
 
   if (queries.some((q) => q.isError)) return { status: 'error' }
@@ -95,7 +94,7 @@ export function usePersonView(personId: Id, today: IsoDate): PersonViewState {
       ledger: ledger.data,
       facts: facts.data,
       groups: personGroups,
-      nameOf,
+      personOf,
       today,
     },
   }

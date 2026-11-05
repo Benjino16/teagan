@@ -44,7 +44,7 @@ import {
 import { groupPath } from '../domain/groups'
 import { entryText } from '../domain/ledger'
 import type { Activity, Group, Id, Impact, IsoDate, LedgerEntry, OpenPoint, Person } from '../domain/model'
-import { displayName } from '../domain/people'
+import { byParticipantRank, displayName } from '../domain/people'
 import { getToday } from '../domain/today'
 import { activityIcon, LocationIcon, ReminderIcon } from '../icons/activityIcons'
 
@@ -197,16 +197,12 @@ function ActivityHero({
 }
 
 function Participants({ activity, personById }: { activity: Activity; personById: Map<Id, Person> }) {
-  // You first, then by closeness and name.
+  // You first, then by impact for them, closeness and name.
+  const rank = byParticipantRank(activity)
   const participants = activity.participants
     .map((p) => ({ ...p, person: personById.get(p.personId) }))
     .filter((p): p is typeof p & { person: Person } => p.person !== undefined)
-    .sort(
-      (a, b) =>
-        Number(b.person.isSelf) - Number(a.person.isSelf) ||
-        b.person.impact - a.person.impact ||
-        a.person.name.localeCompare(b.person.name),
-    )
+    .sort((a, b) => Number(b.person.isSelf) - Number(a.person.isSelf) || rank(a.person, b.person))
 
   if (participants.length === 0) return null
 

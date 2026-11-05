@@ -1,3 +1,4 @@
+import { effectiveImpact } from './activities'
 import type { Activity, Id, Impact, ImpactLevel, Person, PersonInput } from './model'
 
 /** Impact levels for people (closeness), with an explanation for the form. */
@@ -48,7 +49,8 @@ export interface ParticipantsOptions {
   /** The person whose view is currently open – not mentioned. */
   viewedPersonId?: Id
   selfId: Id
-  nameOf: (id: Id) => string
+  /** `undefined` = not loaded, named “Unknown” and listed last. */
+  personOf: (id: Id) => Person | undefined
 }
 
 /**
@@ -57,26 +59,32 @@ export interface ParticipantsOptions {
  * `null` if nobody else besides you took part.
  */
 export function participantsText(activity: Activity, options: ParticipantsOptions): string | null {
-  const { viewedPersonId, selfId, nameOf } = options
-  const ids = activity.participants.map((p) => p.personId)
-  const withSelf = ids.includes(selfId)
-  const others = ids.filter((id) => id !== selfId && id !== viewedPersonId)
+  const { viewedPersonId, selfId, personOf } = options
+  const withSelf = activity.participants.some((p) => p.personId === selfId)
+  const others = otherNames(activity, [selfId, viewedPersonId], personOf)
 
   if (others.length === 0) return null
 
-  if (others.length <= MAX_NAMED) {
-    const names = others.map(nameOf)
-    return joinWithAnd(withSelf ? [...names, 'you'] : names)
-  }
+  if (others.length <= MAX_NAMED) return joinWithAnd(withSelf ? [...others, 'you'] : others)
 
   if (withSelf) return `you and ${others.length} others`
-  const named = others.slice(0, 2).map(nameOf)
-  return `${named.join(', ')} and ${others.length - 2} others`
+  return `${others.slice(0, 2).join(', ')} and ${others.length - 2} others`
+}
+
+/** Names of the participants except `excluded`, in `byParticipantRank` order; people not loaded are “Unknown”, last. */
+function otherNames(activity: Activity, excluded: (Id | undefined)[], personOf: (id: Id) => Person | undefined): string[] {
+  const rank = byParticipantRank(activity)
+  return activity.participants
+    .filter((p) => !excluded.includes(p.personId))
+    .map((p) => personOf(p.personId))
+    .sort((a, b) => (a && b ? rank(a, b) : Number(!a) - Number(!b)))
+    .map((person) => (person ? displayName(person) : 'Unknown'))
 }
 
 export interface CompanyOptions {
   selfId: Id
-  nameOf: (id: Id) => string
+  /** `undefined` = not loaded, named “Unknown” and listed last. */
+  personOf: (id: Id) => Person | undefined
   groupNameOf: (id: Id) => string
 }
 
@@ -86,16 +94,14 @@ export interface CompanyOptions {
  * put you there. Without other people, the groups say it. `null` if it's only you.
  */
 export function companyText(activity: Activity, options: CompanyOptions): string | null {
-  const { selfId, nameOf, groupNameOf } = options
+  const { selfId, personOf, groupNameOf } = options
   const withSelf = activity.participants.some((p) => p.personId === selfId)
-  const others = activity.participants.map((p) => p.personId).filter((id) => id !== selfId)
+  const others = otherNames(activity, [selfId], personOf)
 
   let company: string | null = null
-  if (others.length > 0 && others.length <= MAX_NAMED) company = joinWithAnd(others.map(nameOf))
+  if (others.length > 0 && others.length <= MAX_NAMED) company = joinWithAnd(others)
   else if (others.length > 0)
-    company = withSelf
-      ? `${others.length} others`
-      : `${others.slice(0, 2).map(nameOf).join(', ')} and ${others.length - 2} others`
+    company = withSelf ? `${others.length} others` : `${others.slice(0, 2).join(', ')} and ${others.length - 2} others`
   else if (activity.groups.length > 0) company = activity.groups.map((g) => groupNameOf(g.groupId)).join(', ')
 
   if (company === null) return null
@@ -118,6 +124,15 @@ export function groupByImpact(people: Person[]): ImpactGroup[] {
 /** Closest first (impact 5 → 1), then alphabetical – e.g. for avatar stacks. */
 export function byImpactThenName(a: Person, b: Person): number {
   return b.impact - a.impact || a.name.localeCompare(b.name)
+}
+
+/**
+ * Participants of an activity in display order: highest impact for them first – so whoever has an
+ * own impact above the activity's comes before everyone at it, and below it after – then closest
+ * first, then alphabetical.
+ */
+export function byParticipantRank(activity: Activity): (a: Person, b: Person) => number {
+  return (a, b) => effectiveImpact(activity, b.id) - effectiveImpact(activity, a.id) || byImpactThenName(a, b)
 }
 
 /** The editable fields of a person – the base for an update that changes only some of them. */
