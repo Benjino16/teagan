@@ -16,7 +16,7 @@ import {
 import type { Activity, Impact, IsoDate } from '../../domain/model'
 import { buildTimeline, type ImpactOf, type Lanes, type SameDay, type TimelineEntry } from '../../domain/timeline'
 import { Link } from 'react-router'
-import { activityIcon, LocationIcon, ReminderIcon } from '../../icons/activityIcons'
+import { activityIcon, LocationIcon } from '../../icons/activityIcons'
 
 /** Look per impact 2–5, for impact 1 see `CompactItem`. Planned entries override the card. */
 interface EntryLook {
@@ -330,12 +330,6 @@ function TimelineItem({
               </p>
             )}
             {others && <p className={clsx('text-xs', metaColor)}>with {others}</p>}
-            {planned && activity.reminder && (
-              <p className="flex items-center gap-1.5 text-xs font-medium text-accent-ink">
-                <ReminderIcon aria-hidden="true" size={14} />
-                Reminder on the day
-              </p>
-            )}
             {during.length > 0 && <During activities={during} inverted={inverted} today={today} />}
           </article>
         </div>

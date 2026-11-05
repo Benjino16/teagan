@@ -3,7 +3,6 @@ import {
   Apple,
   Baby,
   Beer,
-  Bell,
   Bike,
   Bird,
   BookOpen,
@@ -217,5 +216,4 @@ export function activityIcon(key: string): { key: string; Icon: LucideIcon } {
 }
 
 /** UI icons outside the catalog that are used in several places. */
-export const ReminderIcon = Bell
 export const LocationIcon = MapPin

@@ -46,7 +46,7 @@ import { entryText } from '../domain/ledger'
 import type { Activity, Group, Id, Impact, IsoDate, LedgerEntry, OpenPoint, Person } from '../domain/model'
 import { byParticipantRank, displayName } from '../domain/people'
 import { getToday } from '../domain/today'
-import { activityIcon, LocationIcon, ReminderIcon } from '../icons/activityIcons'
+import { activityIcon, LocationIcon } from '../icons/activityIcons'
 
 const bubbleTone: Record<Impact, IconBadgeTone> = { 1: 'subtle', 2: 'subtle', 3: 'surface', 4: 'accent-soft', 5: 'accent' }
 
@@ -185,12 +185,6 @@ function ActivityHero({
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <ImpactDots value={activity.impact} />
-        {activity.reminder && status === 'planned' && (
-          <span className="flex items-center gap-1.5 text-sm font-medium text-accent-ink">
-            <ReminderIcon aria-hidden="true" size={14} />
-            Reminder on the day
-          </span>
-        )}
       </div>
     </section>
   )

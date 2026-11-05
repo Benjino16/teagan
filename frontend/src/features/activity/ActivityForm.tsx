@@ -1,6 +1,6 @@
 import { Plus, X } from 'lucide-react'
 import { type FormEvent, useRef, useState } from 'react'
-import { Button, Field, IconButton, inputStyles, RatingInput, Switch, TextButton, TextInput } from '../../components/ui'
+import { Button, Field, IconButton, inputStyles, RatingInput, TextButton, TextInput } from '../../components/ui'
 import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
 import { joinPartialDate, splitPartialDate } from '../../domain/dates'
 import { membersToAdd } from '../../domain/groups'
@@ -94,10 +94,8 @@ export function ActivityForm({
       })),
   )
   const nextKey = useRef(0)
-  const [reminder, setReminder] = useState(initial.reminder)
   const [problem, setProblem] = useState<string | null>(null)
 
-  const reminderPossible = start.precision === 'day'
   const personById = new Map([self, ...people].map((p) => [p.id, p]))
   const candidates = participants.flatMap((p) => {
     const person = p.personId === self.id ? undefined : personById.get(p.personId)
@@ -203,7 +201,8 @@ export function ActivityForm({
       description: description.trim() || null,
       location: location?.trim() || null,
       impact,
-      reminder: reminderPossible && reminder,
+      // Not editable until reminders exist; keep what is stored, as far as the date still allows it
+      reminder: initial.reminder && start.precision === 'day',
       participants: participants.map((p) => ({ ...p, note: p.note?.trim() || null })),
       groups: groupLinks.map((g) => ({ ...g, note: g.note?.trim() || null })),
     }, pointDrafts, entryDrafts)
@@ -314,14 +313,6 @@ export function ActivityForm({
         candidates={candidates}
         personById={personById}
         newKey={() => `new-${nextKey.current++}`}
-      />
-
-      <Switch
-        label="Reminder on the day"
-        hint={reminderPossible ? undefined : 'Only possible with an exact date (day).'}
-        checked={reminderPossible && reminder}
-        disabled={!reminderPossible}
-        onChange={setReminder}
       />
 
       {message && (
