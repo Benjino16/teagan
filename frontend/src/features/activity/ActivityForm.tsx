@@ -1,6 +1,6 @@
 import { Plus, X } from 'lucide-react'
 import { type FormEvent, useRef, useState } from 'react'
-import { Button, Field, IconButton, inputStyles, RatingInput, Switch, TextButton, TextInput } from '../../components/ui'
+import { Button, Field, IconButton, inputStyles, RatingInput, TextButton, TextInput } from '../../components/ui'
 import { ACTIVITY_IMPACT_LEVELS } from '../../domain/activities'
 import { joinPartialDate, splitPartialDate } from '../../domain/dates'
 import { membersToAdd } from '../../domain/groups'
@@ -94,10 +94,8 @@ export function ActivityForm({
       })),
   )
   const nextKey = useRef(0)
-  const [reminder, setReminder] = useState(initial.reminder)
   const [problem, setProblem] = useState<string | null>(null)
 
-  const reminderPossible = start.precision === 'day'
   const personById = new Map([self, ...people].map((p) => [p.id, p]))
   const candidates = participants.flatMap((p) => {
     const person = p.personId === self.id ? undefined : personById.get(p.personId)
@@ -203,7 +201,8 @@ export function ActivityForm({
       description: description.trim() || null,
       location: location?.trim() || null,
       impact,
-      reminder: reminderPossible && reminder,
+      // Not editable until reminders exist; keep what is stored, as far as the date still allows it
+      reminder: initial.reminder && start.precision === 'day',
       participants: participants.map((p) => ({ ...p, note: p.note?.trim() || null })),
       groups: groupLinks.map((g) => ({ ...g, note: g.note?.trim() || null })),
     }, pointDrafts, entryDrafts)
@@ -249,19 +248,19 @@ export function ActivityForm({
       </div>
 
       <div className="flex flex-col gap-3">
-        <DateInput label={isRange ? 'Start' : 'Date'} value={start} onChange={setStart} withTime={!isRange} />
+        <DateInput label={isRange ? 'Start' : 'Date'} value={start} onChange={setStart} withTime={!isRange}>
+          {/* Next to the start's switches, so it stays the same element when the end appears and keeps focus */}
+          <TextButton
+            onClick={() => {
+              // The end starts at the start, with the same precision
+              if (!isRange) setEnd({ ...start, time: '' })
+              setIsRange(!isRange)
+            }}
+          >
+            {isRange ? 'Only a point in time?' : 'Is it a time span?'}
+          </TextButton>
+        </DateInput>
         {isRange && <DateInput label="End" value={end} onChange={setEnd} />}
-        {/* Stays the same element when the end appears, so focus stays on it */}
-        <TextButton
-          className="-mt-3 -ml-2 self-start"
-          onClick={() => {
-            // The end starts at the start, with the same precision
-            if (!isRange) setEnd({ ...start, time: '' })
-            setIsRange(!isRange)
-          }}
-        >
-          {isRange ? 'Only a point in time?' : 'Is it a time span?'}
-        </TextButton>
       </div>
 
       <Field label="Description">
@@ -300,29 +299,27 @@ export function ActivityForm({
         onUndoAddMembers={undoAddMembers}
       />
 
-      <OpenPointsEditor
-        rows={points}
-        onChange={setPoints}
-        candidates={candidates}
-        personById={personById}
-        newKey={() => `new-${nextKey.current++}`}
-      />
-
-      <LedgerEditor
-        rows={ledger}
-        onChange={setLedger}
-        candidates={candidates}
-        personById={personById}
-        newKey={() => `new-${nextKey.current++}`}
-      />
-
-      <Switch
-        label="Reminder on the day"
-        hint={reminderPossible ? undefined : 'Only possible with an exact date (day).'}
-        checked={reminderPossible && reminder}
-        disabled={!reminderPossible}
-        onChange={setReminder}
-      />
+      {/* Side by side while they are only their add buttons and there's room; one with rows takes the full width */}
+      <div className="flex flex-wrap gap-7">
+        <div className={points.length > 0 ? 'basis-full' : 'min-w-40 flex-1'}>
+          <OpenPointsEditor
+            rows={points}
+            onChange={setPoints}
+            candidates={candidates}
+            personById={personById}
+            newKey={() => `new-${nextKey.current++}`}
+          />
+        </div>
+        <div className={ledger.length > 0 ? 'basis-full' : 'min-w-40 flex-1'}>
+          <LedgerEditor
+            rows={ledger}
+            onChange={setLedger}
+            candidates={candidates}
+            personById={personById}
+            newKey={() => `new-${nextKey.current++}`}
+          />
+        </div>
+      </div>
 
       {message && (
         <p role="alert" className="rounded-tile bg-danger-soft px-4 py-3 text-md text-danger">

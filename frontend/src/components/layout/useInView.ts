@@ -6,6 +6,11 @@ import { type RefCallback, useCallback, useState } from 'react'
  */
 export const TOP_BAR_HEIGHT = 56
 
+/** `top` for anything that sticks right below the top bar (+ 1 px for its divider), `below` px further down. */
+export function stickyTop(below = 0): string {
+  return `calc(env(safe-area-inset-top) + ${TOP_BAR_HEIGHT + 1 + below}px)`
+}
+
 /**
  * Observes whether an element is (still) visible below the top bar.
  * Used to show the page title in the top bar once the large heading has

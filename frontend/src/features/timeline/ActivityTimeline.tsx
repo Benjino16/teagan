@@ -1,5 +1,6 @@
 import { clsx } from 'clsx'
 import type { ReactNode } from 'react'
+import { stickyTop } from '../../components/layout/useInView'
 import { EmptyState, IconBadge, cardStyles } from '../../components/ui'
 import type { IconBadgeSize, IconBadgeTone } from '../../components/ui/IconBadge'
 import { activityStatus } from '../../domain/activities'
@@ -14,9 +15,16 @@ import {
   timeOf,
 } from '../../domain/dates'
 import type { Activity, Impact, IsoDate } from '../../domain/model'
-import { buildTimeline, type ImpactOf, type Lanes, type SameDay, type TimelineEntry } from '../../domain/timeline'
+import {
+  buildTimeline,
+  type ImpactOf,
+  type Lanes,
+  type SameDay,
+  type TimelineEntry,
+  type TimelineRow,
+} from '../../domain/timeline'
 import { Link } from 'react-router'
-import { activityIcon, LocationIcon, ReminderIcon } from '../../icons/activityIcons'
+import { activityIcon, LocationIcon } from '../../icons/activityIcons'
 
 /** Look per impact 2–5, for impact 1 see `CompactItem`. Planned entries override the card. */
 interface EntryLook {
@@ -90,43 +98,71 @@ export function ActivityTimeline({ activities, impactOf, details, today }: Props
 
   return (
     <ol aria-label="Timeline">
-      {rows.map((row) => {
-        if (row.kind === 'year') {
-          return (
-            <li key={`year-${row.year}`} className="flex items-stretch">
-              <LaneColumns lanes={row.lanes} />
-              <h3 className="pt-3.5 pb-2.5 font-display text-base font-bold tracking-wide text-muted">{row.year}</h3>
-            </li>
-          )
-        }
-        if (row.kind === 'end') {
-          return (
-            <EndItem key={`end-${row.activity.id}`} activity={row.activity} impact={row.impact} lanes={row.lanes} today={today} />
-          )
-        }
-        if (row.entry.impact === 1 && activityStatus(row.entry.activity, today) !== 'planned') {
-          return (
-            <CompactItem
-              key={row.entry.activity.id}
-              activity={row.entry.activity}
-              lanes={row.lanes}
-              sameDay={row.sameDay}
-              today={today}
-            />
-          )
-        }
-        return (
-          <TimelineItem
-            key={row.entry.activity.id}
-            entry={row.entry}
-            lanes={row.lanes}
-            sameDay={row.sameDay}
-            details={details(row.entry.activity)}
-            today={today}
-          />
-        )
-      })}
+      {byYear(rows).map(({ year, lanes, rows }) => (
+        // Each year is a section, so its heading sticks only until the next year's pushes it out
+        <li key={year} className="relative">
+          <div style={{ top: stickyTop() }} className="sticky z-15 flex">
+            {/* See-through over the lanes, so they keep running beneath the stuck heading */}
+            <span aria-hidden="true" className="flex-none" style={{ width: lanes.length * LANE_WIDTH }} />
+            <h3 className="flex h-12 flex-auto items-end bg-canvas pb-2.5 font-display text-base font-bold tracking-wide text-muted">
+              {year}
+            </h3>
+          </div>
+          {/* The lanes beside the heading, scrolling with the page */}
+          <div className="absolute top-0 left-0 flex h-12">
+            <LaneColumns lanes={lanes} />
+          </div>
+          <ol>
+            {rows.map((row) => (
+              <Row
+                key={row.kind === 'end' ? `end-${row.activity.id}` : row.entry.activity.id}
+                row={row}
+                details={details}
+                today={today}
+              />
+            ))}
+          </ol>
+        </li>
+      ))}
     </ol>
+  )
+}
+
+type YearSection = { year: number; lanes: Lanes; rows: Exclude<TimelineRow, { kind: 'year' }>[] }
+
+/** Splits the rows at the year dividers; the timeline always starts with one. */
+function byYear(rows: TimelineRow[]): YearSection[] {
+  const sections: YearSection[] = []
+  for (const row of rows) {
+    if (row.kind === 'year') sections.push({ year: row.year, lanes: row.lanes, rows: [] })
+    else sections.at(-1)?.rows.push(row)
+  }
+  return sections
+}
+
+function Row({
+  row,
+  details,
+  today,
+}: {
+  row: YearSection['rows'][number]
+  details: (activity: Activity) => EntryDetails
+  today: IsoDate
+}) {
+  if (row.kind === 'end') {
+    return <EndItem activity={row.activity} impact={row.impact} lanes={row.lanes} today={today} />
+  }
+  if (row.entry.impact === 1 && activityStatus(row.entry.activity, today) !== 'planned') {
+    return <CompactItem activity={row.entry.activity} lanes={row.lanes} sameDay={row.sameDay} today={today} />
+  }
+  return (
+    <TimelineItem
+      entry={row.entry}
+      lanes={row.lanes}
+      sameDay={row.sameDay}
+      details={details(row.entry.activity)}
+      today={today}
+    />
   )
 }
 
@@ -314,15 +350,16 @@ function TimelineItem({
               </p>
             )}
             {activity.description && (
-              <p className={clsx('text-md leading-normal', planned ? 'text-ink-2' : look.description)}>
+              // Only a preview – the activity page has all of it
+              <p className={clsx('line-clamp-3 text-md leading-normal wrap-anywhere', planned ? 'text-ink-2' : look.description)}>
                 {activity.description}
               </p>
             )}
             {note && (
-              // Only for this person or group
+              // Only for this person or group; a preview like the description
               <p
                 className={clsx(
-                  'border-l-2 pl-2.5 text-md leading-normal whitespace-pre-line wrap-anywhere',
+                  'line-clamp-2 border-l-2 pl-2.5 text-md leading-normal wrap-anywhere',
                   inverted ? 'border-on-accent-muted text-on-accent-2' : 'border-accent text-ink-2',
                 )}
               >
@@ -330,12 +367,6 @@ function TimelineItem({
               </p>
             )}
             {others && <p className={clsx('text-xs', metaColor)}>with {others}</p>}
-            {planned && activity.reminder && (
-              <p className="flex items-center gap-1.5 text-xs font-medium text-accent-ink">
-                <ReminderIcon aria-hidden="true" size={14} />
-                Reminder on the day
-              </p>
-            )}
             {during.length > 0 && <During activities={during} inverted={inverted} today={today} />}
           </article>
         </div>
@@ -372,7 +403,7 @@ function During({ activities, inverted, today }: { activities: Activity[]; inver
                   </span>
                 </div>
                 {activity.description && (
-                  <p className={clsx('text-sm leading-snug', inverted ? 'text-on-accent-2' : 'text-ink-2')}>
+                  <p className={clsx('line-clamp-2 text-sm leading-snug wrap-anywhere', inverted ? 'text-on-accent-2' : 'text-ink-2')}>
                     {activity.description}
                   </p>
                 )}

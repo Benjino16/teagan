@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 import { cardStyles, IconBadge, listRowStyles, MediaRow, ShowMore, usePreview } from '../../components/ui'
 import type { Memory } from '../../domain/activities'
 import { pluralize } from '../../domain/dates'
-import type { Id } from '../../domain/model'
+import type { Id, Person } from '../../domain/model'
 import { companyText } from '../../domain/people'
 import { activityIcon } from '../../icons/activityIcons'
 import { TODAY_PREVIEW } from './preview'
@@ -12,12 +12,12 @@ import { TODAY_PREVIEW } from './preview'
 interface Props {
   memories: Memory[]
   selfId: Id
-  nameOf: (id: Id) => string
+  personOf: (id: Id) => Person | undefined
   groupNameOf: (groupId: Id) => string
 }
 
 /** “On this day” on Today: what happened on this date in earlier years. */
-export function OnThisDayBox({ memories, selfId, nameOf, groupNameOf }: Props) {
+export function OnThisDayBox({ memories, selfId, personOf, groupNameOf }: Props) {
   const preview = usePreview(memories, TODAY_PREVIEW)
   if (memories.length === 0) return null
 
@@ -31,7 +31,7 @@ export function OnThisDayBox({ memories, selfId, nameOf, groupNameOf }: Props) {
       </div>
       <ul className="divide-y divide-divider">
         {preview.shown.map(({ activity, yearsAgo }) => {
-          const company = companyText(activity, { selfId, nameOf, groupNameOf })
+          const company = companyText(activity, { selfId, personOf, groupNameOf })
           return (
             <li key={activity.id}>
               <Link

@@ -34,6 +34,11 @@ export function lastSeenText(daysSince: number | null): string {
   return daysSince === null ? 'No contact logged yet' : `Last seen ${formatRelativePast(daysSince)}`
 }
 
+/** For your own person, whose “contacts” are simply all your activities: “Last activity 3 weeks ago” */
+export function lastActivityText(daysSince: number | null): string {
+  return daysSince === null ? 'No activity logged yet' : `Last activity ${formatRelativePast(daysSince)}`
+}
+
 export interface ReconnectStatus {
   overdue: boolean
   /** Days left until the reconnect (negative = overdue), `null` = never in contact. */

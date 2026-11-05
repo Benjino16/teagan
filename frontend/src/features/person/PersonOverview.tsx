@@ -98,7 +98,7 @@ function useSettling() {
 }
 
 function RecentSection({ data }: { data: PersonViewData }) {
-  const { person, self, activities, nameOf, today } = data
+  const { person, self, activities, personOf, today } = data
   const recent = recentActivities(activities, person.id, today)
 
   return (
@@ -111,7 +111,7 @@ function RecentSection({ data }: { data: PersonViewData }) {
           {recent.map((activity) => {
             // Not every activity includes you, so “just the two of you” needs saying
             const others =
-              participantsText(activity, { viewedPersonId: person.id, selfId: self.id, nameOf }) ??
+              participantsText(activity, { viewedPersonId: person.id, selfId: self.id, personOf }) ??
               (hasParticipant(activity, self.id) ? 'you' : null)
             const start = dayOf(activity.startDate)
             const day = relativeDayName(start, today)

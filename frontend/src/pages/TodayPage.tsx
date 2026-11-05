@@ -9,7 +9,6 @@ import { upcomingBirthdays } from '../domain/birthday'
 import { dueReconnects } from '../domain/contact'
 import { formatWeekdayLong } from '../domain/dates'
 import type { Id } from '../domain/model'
-import { displayName } from '../domain/people'
 import { upcomingRemembrances } from '../domain/remembrance'
 import { getToday } from '../domain/today'
 import { BalancesBox } from '../features/today/BalancesBox'
@@ -41,9 +40,8 @@ export function TodayPage() {
     return <PageError message="Couldn't load today's overview." />
   }
 
-  const names = new Map(people.data.map((p) => [p.id, displayName(p)]))
-  const nameOf = (id: Id) => names.get(id) ?? 'Unknown'
   const personById = new Map(people.data.map((p) => [p.id, p]))
+  const personOf = (id: Id) => personById.get(id)
   const groupNames = new Map(groups.data.map((c) => [c.id, c.name]))
   const groupNameOf = (id: Id) => groupNames.get(id) ?? 'Unknown'
 
@@ -65,21 +63,21 @@ export function TodayPage() {
             <OngoingFeed
               activities={ongoingWithOthers(activities.data, self.data.id, today)}
               selfId={self.data.id}
-              nameOf={nameOf}
+              personOf={personOf}
               groupNameOf={groupNameOf}
               today={today}
             />
             <UpcomingFeed
               activities={upcomingWithOthers(activities.data, self.data.id, today)}
               selfId={self.data.id}
-              nameOf={nameOf}
+              personOf={personOf}
               groupNameOf={groupNameOf}
               today={today}
             />
             <OnThisDayBox
               memories={onThisDay(activities.data, today)}
               selfId={self.data.id}
-              nameOf={nameOf}
+              personOf={personOf}
               groupNameOf={groupNameOf}
             />
           </div>

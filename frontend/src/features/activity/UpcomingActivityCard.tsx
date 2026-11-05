@@ -3,7 +3,7 @@ import { cardStyles, IconBadge, MediaRow } from '../../components/ui'
 import { isOngoing } from '../../domain/activities'
 import { daysBetween, formatDateRange, formatRelativeFuture, formatSince, normalizeStart, relativeDayName } from '../../domain/dates'
 import type { Activity, IsoDate } from '../../domain/model'
-import { activityIcon, LocationIcon, ReminderIcon } from '../../icons/activityIcons'
+import { activityIcon, LocationIcon } from '../../icons/activityIcons'
 
 interface Props {
   activity: Activity
@@ -13,7 +13,7 @@ interface Props {
 }
 
 /**
- * Card for a future or today's activity (“Oct 17–24 · in 4 days”, “Today, 20:00”, bell when a reminder is set)
+ * Card for a future or today's activity (“Oct 17–24 · in 4 days”, “Today, 20:00”)
  * or an ongoing range (“Sep 8 – Dec 15 · ongoing for 5 weeks”).
  */
 export function UpcomingActivityCard({ activity, today, company }: Props) {
@@ -30,13 +30,6 @@ export function UpcomingActivityCard({ activity, today, company }: Props) {
         leading={<IconBadge icon={activityIcon(activity.icon).Icon} />}
         title={activity.name}
         subtitle={dayNamed ? date : `${date} · ${relative}`}
-        trailing={
-          activity.reminder && (
-            <span role="img" aria-label="Reminder on" className="flex flex-none text-accent-ink">
-              <ReminderIcon aria-hidden="true" size={18} />
-            </span>
-          )
-        }
       >
         {activity.location && (
           <span className="flex items-center gap-1 text-sm text-muted">

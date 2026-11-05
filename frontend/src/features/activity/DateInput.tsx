@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react'
+import { type ReactNode, useEffect, useId, useRef } from 'react'
 import { inputStyles, TextButton, TextInput } from '../../components/ui'
 import { changePrecision, type DateParts, type DatePrecision, MONTH_NAMES } from '../../domain/dates'
 
@@ -18,13 +18,15 @@ interface Props {
   onChange: (value: DateParts) => void
   /** Offers the optional time next to the day (point events only). */
   withTime?: boolean
+  /** Further switches, in the same row after the precision ones. */
+  children?: ReactNode
 }
 
 /**
  * Partial date: the exact day by default, small buttons below
  * switch to a coarser or finer precision.
  */
-export function DateInput({ label, value, onChange, withTime = false }: Props) {
+export function DateInput({ label, value, onChange, withTime = false, children }: Props) {
   const labelId = useId()
   const fields = useRef<HTMLDivElement>(null)
   // The pressed button disappears, so focus moves to the new fields
@@ -110,6 +112,7 @@ export function DateInput({ label, value, onChange, withTime = false }: Props) {
             {text}
           </TextButton>
         ))}
+        {children}
       </div>
     </div>
   )

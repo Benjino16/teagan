@@ -2,12 +2,16 @@ import { describe, expect, it } from 'vitest'
 import { createTestDatabase } from '../test/fixture'
 import type { Activity } from './model'
 import { countOpen, openPointSource, sortOpenPoints } from './openPoints'
-import { byImpactThenName, companyText, displayName, groupByImpact, initials, participantsText } from './people'
+import { byImpactThenName, byParticipantRank, companyText, displayName, groupByImpact, initials, participantsText } from './people'
 
 const db = createTestDatabase()
 const nameOf = (id: number) => displayName(db.people.find((p) => p.id === id)!)
 const activity = (id: number) => db.activities.find((a) => a.id === id)!
-const opts = { viewedPersonId: 2, selfId: 1, nameOf }
+const personOf = (id: number) => db.people.find((p) => p.id === id)
+/** Someone not in the fixture, further from you than everyone in it. */
+const sam = { ...db.people[1]!, id: 6, name: 'Sam', nickname: null, impact: 1 as const }
+const withSam = (id: number) => (id === 6 ? sam : personOf(id))
+const opts = { viewedPersonId: 2, selfId: 1, personOf }
 
 describe('names', () => {
   it('prefers the nickname and builds initials', () => {
@@ -32,7 +36,17 @@ describe('names', () => {
 describe('participantsText', () => {
   it('names up to three others, you last', () => {
     expect(participantsText(activity(5), opts)).toBe('Jonas and you')
-    expect(participantsText(activity(7), opts)).toBe('Jonas, Mira, Tim and you')
+    expect(participantsText(activity(7), opts)).toBe('Jonas, Tim, Mira and you')
+  })
+
+  it('names the others in participant order, unknown people last', () => {
+    const lowered: Activity = {
+      ...activity(7),
+      participants: activity(7).participants.map((p) => (p.personId === 3 ? { ...p, impact: 1 } : p)),
+    }
+    expect(participantsText(lowered, opts)).toBe('Tim, Mira, Jonas and you')
+    const withUnknown = { ...activity(5), participants: [{ personId: 99, impact: null, note: null }, ...activity(5).participants] }
+    expect(participantsText(withUnknown, opts)).toBe('Jonas, Unknown and you')
   })
 
   it('mentions nothing if only you were there', () => {
@@ -48,16 +62,37 @@ describe('participantsText', () => {
       ...activity(7),
       participants: [1, 2, 3, 4, 5, 6].map((personId) => ({ personId, impact: null, note: null })),
     }
-    const names = (id: number) => (id === 6 ? 'Sam' : nameOf(id))
-    expect(participantsText(many, { ...opts, nameOf: names })).toBe('you and 4 others')
+    expect(participantsText(many, { ...opts, personOf: withSam })).toBe('you and 4 others')
     const withoutSelf = { ...many, participants: many.participants.filter((p) => p.personId !== 1) }
-    expect(participantsText(withoutSelf, { ...opts, nameOf: names })).toBe('Jonas, Mira and 2 others')
+    expect(participantsText(withoutSelf, { ...opts, personOf: withSam })).toBe('Jonas, Tim and 2 others')
+  })
+})
+
+describe('byParticipantRank', () => {
+  // Game night (impact 2): Lena 5, Jonas 4, Mira 3, Tim 4
+  const night = activity(7)
+  const order = (a: Activity) => [2, 3, 4, 5].map((id) => personOf(id)!).sort(byParticipantRank(a)).map((p) => p.name)
+  const withImpact = (impacts: Record<number, 1 | 2 | 3 | 4 | 5>): Activity => ({
+    ...night,
+    participants: night.participants.map((p) => ({ ...p, impact: impacts[p.personId] ?? null })),
+  })
+
+  it('sorts by closeness, then name, without own impacts', () => {
+    expect(order(night)).toEqual(['Lena Hoffmann', 'Jonas Weber', 'Tim Krause', 'Mira Schulz'])
+  })
+
+  it('puts an impact above the activity first and one below it last', () => {
+    expect(order(withImpact({ 4: 4, 2: 1 }))).toEqual(['Mira Schulz', 'Jonas Weber', 'Tim Krause', 'Lena Hoffmann'])
+  })
+
+  it('orders several raised impacts by their value, then closeness', () => {
+    expect(order(withImpact({ 4: 5, 3: 3, 5: 3 }))).toEqual(['Mira Schulz', 'Jonas Weber', 'Tim Krause', 'Lena Hoffmann'])
   })
 })
 
 describe('companyText', () => {
   const groupNameOf = (id: number) => db.groups.find((g) => g.id === id)!.name
-  const company = { selfId: 1, nameOf, groupNameOf }
+  const company = { selfId: 1, personOf, groupNameOf }
   const among = (people: number[], groups: number[] = []): Activity => ({
     ...activity(1),
     participants: people.map((personId) => ({ personId, impact: null, note: null })),
@@ -67,17 +102,13 @@ describe('companyText', () => {
   it('says “with” only when you take part', () => {
     expect(companyText(among([1, 3]), company)).toBe('with Jonas')
     expect(companyText(among([3]), company)).toBe('Jonas')
-    expect(companyText(among([1, 3, 4, 5]), company)).toBe('with Jonas, Mira and Tim')
+    expect(companyText(among([1, 3, 4, 5]), company)).toBe('with Jonas, Tim and Mira')
     expect(companyText(among([3, 4]), company)).toBe('Jonas and Mira')
   })
 
   it('counts from four others on', () => {
-    expect(companyText(among([1, 2, 3, 4, 5, 6]), { ...company, nameOf: (id) => (id === 6 ? 'Sam' : nameOf(id)) })).toBe(
-      'with 5 others',
-    )
-    expect(companyText(among([2, 3, 4, 5, 6]), { ...company, nameOf: (id) => (id === 6 ? 'Sam' : nameOf(id)) })).toBe(
-      'Lena, Jonas and 3 others',
-    )
+    expect(companyText(among([1, 2, 3, 4, 5, 6]), { ...company, personOf: withSam })).toBe('with 5 others')
+    expect(companyText(among([6, 5, 4, 3, 2]), { ...company, personOf: withSam })).toBe('Lena, Jonas and 3 others')
   })
 
   it('falls back to the groups, and to nothing if it is only you', () => {
