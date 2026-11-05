@@ -76,12 +76,17 @@ async fn main() -> anyhow::Result<()> {
     let pool = db::connect(&config.database_url).await?;
     sqlx::migrate!().run(&pool).await?;
 
-    match config.command {
+    let result = match config.command {
         Some(Command::User(command)) => cli::run(&pool, command).await,
         #[cfg(feature = "demo")]
         Some(Command::Demo(command)) => demo::run(&pool, command).await,
-        None => serve(pool, config).await,
-    }
+        None => serve(pool.clone(), config).await,
+    };
+
+    // Closing the last connection checkpoints the WAL into the database
+    // file and removes `-wal` and `-shm`, so a copy of the file alone is complete.
+    pool.close().await;
+    result
 }
 
 async fn serve(pool: SqlitePool, config: Config) -> anyhow::Result<()> {
@@ -106,9 +111,38 @@ async fn serve(pool: SqlitePool, config: Config) -> anyhow::Result<()> {
         listener,
         router.into_make_service_with_connect_info::<std::net::SocketAddr>(),
     )
+    .with_graceful_shutdown(shutdown_signal())
     .await?;
 
+    println!("shut down");
     Ok(())
+}
+
+/// Ctrl+C, or SIGTERM from `docker stop`. As PID 1 in the container the
+/// process gets no default handler for SIGTERM – without this it would be
+/// killed after the grace period, mid-write.
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("cannot listen for Ctrl+C");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("cannot listen for SIGTERM")
+            .recv()
+            .await;
+    };
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+    println!("shutting down – finishing open requests");
 }
 
 /// `INITIAL_USERNAME` + `INITIAL_PASSWORD`. Only while there is no
